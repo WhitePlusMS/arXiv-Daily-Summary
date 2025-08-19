@@ -24,8 +24,8 @@
 - [🏃‍♂️ 使用方法](#️-使用方法)
 - [🤝 贡献](#-贡献)
 - [📄 许可证](#-许可证)
-- [🌟 Star History](#-star-history)
 - [🙏 致谢](#-致谢)
+- [🌟 Star History](#-star-history)
 
 ---
 
@@ -145,11 +145,6 @@ python main.py
 
 本项目采用 MIT 许可证。详情请见 `LICENSE` 文件。
 
----
-
-## 🌟 Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=YOUR_USERNAME/YOUR_REPONAME&type=Date)](https://star-history.com/#YOUR_USERNAME/YOUR_REPONAME&Date)
 
 ---
 
@@ -160,3 +155,9 @@ python main.py
   - [TideDra/zotero-arxiv-daily](https://github.com/TideDra/zotero-arxiv-daily)
   - [Vincentqyw/cv-arxiv-daily](https://github.com/Vincentqyw/cv-arxiv-daily)
   - [AutoLLM/ArxivDigest](https://github.com/AutoLLM/ArxivDigest)
+  - 
+---
+
+## 🌟 Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=WhitePlusMS/arXiv-Daily-Summary&type=Date)](https://star-history.com/#WhitePlusMS/arXiv-Daily-Summary&Date)
