@@ -1,0 +1,9 @@
+tqdm
+loguru
+openai
+feedparser
+requests
+python-dotenv
+streamlit
+PyMuPDF
+tiktoken

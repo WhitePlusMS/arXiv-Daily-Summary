@@ -1,0 +1,31 @@
+# Python 常用忽略项
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.egg-info/
+.env
+.DS_Store
+
+# VSCode 配置
+.vscode/
+
+# 日志和缓存
+*.log
+
+# Jupyter Notebook 检查点
+.ipynb_checkpoints/
+
+# 虚拟环境
+.venv/
+venv/
+ENV/
+env/
+
+formatters/
+# 允许保留空目录（可选）
+!.gitkeep
+
+.trae
