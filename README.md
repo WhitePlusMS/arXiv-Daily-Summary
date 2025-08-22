@@ -1,6 +1,5 @@
 <h1 align="center">arXiv Daily Article Summary</h1>
 
-
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.10%2B-blue?logo=python" alt="Python Version">
   <img src="https://img.shields.io/badge/License-Apache--2.0-blue" alt="License">
@@ -155,21 +154,23 @@ python start.py
 - **环境配置**：查看和调整系统配置
 - **分类浏览器**：浏览所有可用的 arXiv 分类
 
-### 项目架构
+### 界面预览
 
-```
-ARXIV_daily_article_summary/
-├── core/                    # 核心功能模块
-│   ├── arxiv_fetcher.py    # arXiv 论文获取
-│   ├── llm_provider.py     # LLM 服务提供者
-│   ├── recommendation_engine.py # 推荐引擎
-│   └── output_manager.py   # 输出管理
-├── pages/                   # Streamlit 页面
-├── data/users/             # 用户配置数据
-├── arxiv_history/          # 历史推荐记录
-├── templates/              # 输出模板
-└── start.py               # 启动脚本
-```
+**主界面 - 论文推荐和摘要生成**
+
+<img src="assets/主界面.png" alt="主界面" width="800">
+
+**分类匹配界面 - 配置研究兴趣**
+
+<img src="assets/分类匹配界面.png" alt="分类匹配界面" width="800">
+
+**环境配置界面 - 系统设置**
+
+<img src="assets/环境配置界面.png" alt="环境配置界面" width="800">
+
+**附录界面 - 分类浏览器**
+
+<img src="assets/附录界面.png" alt="附录界面" width="800">
 
 ### 工作流程
 
