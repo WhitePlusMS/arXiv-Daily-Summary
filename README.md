@@ -214,10 +214,6 @@ git push origin feature/your-feature
 
 ---
 
-## 🌟 Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=WhitePlusMS/arXiv-Daily-Summary&type=Date)](https://star-history.com/#WhitePlusMS/arXiv-Daily-Summary&Date)
-
 <p align="center">
   <strong>让 AI 帮您从信息海洋中发现真正有价值的研究</strong>
 </p>
