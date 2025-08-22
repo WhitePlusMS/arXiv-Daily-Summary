@@ -1,4 +1,5 @@
-<h1 align="center">arXiv 每日论文推荐系统</h1>
+<h1 align="center">arXiv Daily Article Summary</h1>
+
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.10%2B-blue?logo=python" alt="Python Version">
@@ -34,8 +35,8 @@
 
 ```bash
 # 1. 克隆项目
-git clone <repository-url>
-cd ARXIV_daily_article_summary
+git clone https://github.com/WhitePlusMS/arXiv-Daily-Summary.git
+cd arXiv-Daily-Summary
 
 # 2. 配置环境变量
 cp .env.example .env
@@ -43,6 +44,8 @@ cp .env.example .env
 
 # 3. 启动系统
 python start.py
+# 第一次运行时根据提示进行环境配置，本项目环境管理依托于uv
+
 ```
 
 系统会自动处理环境配置、依赖安装和服务启动。
@@ -71,7 +74,7 @@ python start.py
 
 ### 系统要求
 
-- **Python**: 3.10+ (推荐使用 PyEnv 管理版本)
+- **Python**: 3.10+ (推荐使用 PyEnv + uv 管理版本)
 - **操作系统**: Windows/macOS/Linux
 - **网络**: 需要访问 arXiv API 和通义千问 API
 
