@@ -316,7 +316,7 @@ def main():
     # 示例多用户数据
     test_users = [
         {
-            "username": "BMS",
+            "username": "TEST",
             "user_input": """# 个人研究兴趣
 我正在从事RAG领域的研究。具体来说，我对以下领域感兴趣：
 1. RAG（检索增强生成）

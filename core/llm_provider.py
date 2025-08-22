@@ -6,6 +6,7 @@
 
 import time
 import json
+import traceback
 from openai import OpenAI
 from typing import Optional, Dict, Any, List
 from loguru import logger
@@ -15,7 +16,7 @@ class LLMProvider:
     """用于LLM交互的通用API提供商，支持通义千问、SiliconFlow等OpenAI兼容API。
     负责所有LLM提示词构建和交互逻辑。"""
     
-    def __init__(self, model: str, base_url: str, api_key: str, description: str = ""):
+    def __init__(self, model: str, base_url: str, api_key: str, description: str = "", username: str = "TEST"):
         """初始化LLM提供商。
         
         Args:
@@ -23,12 +24,14 @@ class LLMProvider:
             base_url: API基础URL
             api_key: API密钥
             description: 研究兴趣描述
+            username: 用户名，用于生成报告时的署名
         """
         logger.info(f"LLMProvider初始化开始")
         self._model_name = model
         self._client = OpenAI(base_url=base_url, api_key=api_key)
         self.description = description
-        logger.success(f"LLMProvider初始化完成 - 模型: {model}, URL: {base_url}")
+        self.username = username
+        logger.success(f"LLMProvider初始化完成 - 模型: {model}, URL: {base_url}, 用户: {username}")
     
     @property
     def model_name(self) -> str:
@@ -61,7 +64,7 @@ class LLMProvider:
         ]
     
     def _call_api_with_retry(
-        self, messages: list, temperature: float, max_retries: int = 10, wait_time: int = 1
+        self, messages: list, temperature: float, max_retries: int = 2, wait_time: int = 1
     ) -> str:
         """使用重试机制调用OpenAI API。
         
@@ -78,20 +81,55 @@ class LLMProvider:
             Exception: API调用失败时抛出异常
         """
         logger.debug(f"API调用开始 - 模型: {self._model_name}, 温度: {temperature}, 最大重试: {max_retries}")
+        logger.debug(f"API配置 - 客户端: {self._client}, 基础URL: {self._client.base_url}")
         
         for attempt in range(max_retries):
             try:
+                logger.debug(f"第 {attempt + 1} 次API调用尝试")
                 response = self._client.chat.completions.create(
                     model=self._model_name,
                     messages=messages,
-                    temperature=temperature
+                    temperature=temperature,
                 )
                 logger.debug(f"API调用成功 - 尝试次数: {attempt + 1}")
                 return response.choices[0].message.content
                 
             except Exception as error:
+                error_str = str(error).lower()
+                error_type = type(error).__name__
+                
+                # 详细记录错误信息
+                logger.error(f"API调用错误详情:")
+                logger.error(f"  - 错误类型: {error_type}")
+                logger.error(f"  - 错误消息: {error}")
+                logger.error(f"  - 模型名称: {self._model_name}")
+                logger.error(f"  - 基础URL: {self._client.base_url}")
+                logger.error(f"  - 尝试次数: {attempt + 1}/{max_retries}")
+                
+                # 根据错误类型决定重试策略
+                if any(keyword in error_str for keyword in ['rate_limit', '429', 'quota', 'limit']):
+                    # API限流错误，使用指数退避
+                    wait_time = (attempt + 1) * 3
+                    logger.warning(f"API限流 ({attempt + 1}/{max_retries}) - {error}")
+                elif any(keyword in error_str for keyword in ['timeout', 'connection', 'network']):
+                    # 网络错误，线性退避
+                    wait_time = (attempt + 1) * 2
+                    logger.warning(f"网络错误 ({attempt + 1}/{max_retries}) - {error}")
+                elif any(keyword in error_str for keyword in ['unauthorized', '401', 'api_key', 'authentication']):
+                    # 认证错误，不重试
+                    logger.error(f"API认证错误，请检查API密钥配置: {error}")
+                    raise
+                elif any(keyword in error_str for keyword in ['not found', '404', 'model']):
+                    # 模型不存在错误，不重试
+                    logger.error(f"模型不存在或不可用，请检查模型名称: {error}")
+                    raise
+                else:
+                    # 其他错误，记录详细信息后抛出
+                    logger.error(f"API调用不可恢复错误: {error}")
+                    logger.error(f"完整错误堆栈: {traceback.format_exc()}")
+                    raise
+                    
                 if attempt < max_retries - 1:
-                    logger.warning(f"API调用失败 ({attempt + 1}/{max_retries}) - {error}")
                     logger.debug(f"等待 {wait_time} 秒后重试")
                     time.sleep(wait_time)
                 else:
@@ -236,7 +274,7 @@ class LLMProvider:
 
 # ArXiv 研究洞察报告
 
-> BY:BMS
+> BY:{self.username}
 > ({current_time})
 
 ##  摘要

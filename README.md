@@ -184,14 +184,25 @@ ARXIV_daily_article_summary/
 **贡献代码**
 
 ```bash
-# 1. Fork 项目并克隆
-git clone <your-fork-url>
-# 2. 创建功能分支
+# 1. Fork 本项目
+在 GitHub 页面点击 "Fork" 按钮复制项目到您的账号
+
+# 2. 克隆到本地
+git clone https://github.com/YOUR_USERNAME/arXiv-Daily-Summary.git
+cd arXiv-Daily-Summary
+
+# 3. 创建功能分支
 git checkout -b feature/your-feature
-# 3. 提交更改
-git commit -m "Add your feature"
-# 4. 推送并创建 PR
+
+# 4. 开发并提交更改
+git add .
+git commit -m "feat: 添加新功能描述"
+
+# 5. 推送到远程
 git push origin feature/your-feature
+
+# 6. 创建 Pull Request
+在 GitHub 页面创建 PR，详细描述您的改动
 ```
 
 **问题反馈**

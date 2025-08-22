@@ -59,7 +59,7 @@ class StreamlitArxivRecommender:
                 'arxiv_delay': int(os.getenv('ARXIV_DELAY', '5')),
                 'arxiv_categories': os.getenv('ARXIV_CATEGORIES', 'cs.CV,cs.LG').split(','),
                 'max_entries': int(os.getenv('MAX_ENTRIES', '50')),
-                'num_papers': int(os.getenv('NUM_PAPERS', '5')),
+                'num_brief_papers': int(os.getenv('NUM_BRIEF_PAPERS', '7')),
                 'num_detailed_papers': int(os.getenv('NUM_DETAILED_PAPERS', '3')),
                 
                 # LLM配置
@@ -159,21 +159,40 @@ class StreamlitArxivRecommender:
                 self.app = app_instance
                 
             def emit(self, record):
-                if self.app.log_container is not None:
-                    log_entry = self.format(record)
-                    self.app.log_messages.append(log_entry)
-                    # 只保留最近的20条日志
-                    if len(self.app.log_messages) > 20:
-                        self.app.log_messages = self.app.log_messages[-20:]
+                try:
+                    # 检查是否在主线程中且有有效的Streamlit会话
+                    import threading
+                    from streamlit.runtime.scriptrunner import get_script_run_ctx
                     
-                    # 更新显示
-                    log_text = "\n".join(self.app.log_messages)
-                    self.app.log_container.text_area(
-                        "📋 实时运行日志",
-                        value=log_text,
-                        height=200,
-                        disabled=True
-                    )
+                    if (self.app.log_container is not None and 
+                        threading.current_thread() == threading.main_thread() and
+                        get_script_run_ctx() is not None):
+                        
+                        log_entry = self.format(record)
+                        self.app.log_messages.append(log_entry)
+                        # 只保留最近的20条日志
+                        if len(self.app.log_messages) > 20:
+                            self.app.log_messages = self.app.log_messages[-20:]
+                        
+                        # 更新显示
+                        log_text = "\n".join(self.app.log_messages)
+                        self.app.log_container.text_area(
+                            "📋 实时运行日志",
+                            value=log_text,
+                            height=200,
+                            disabled=True
+                        )
+                    else:
+                        # 在多线程环境中，只添加到消息列表，不更新UI
+                        if self.app.log_container is not None:
+                            log_entry = self.format(record)
+                            self.app.log_messages.append(log_entry)
+                            # 只保留最近的20条日志
+                            if len(self.app.log_messages) > 20:
+                                self.app.log_messages = self.app.log_messages[-20:]
+                except Exception:
+                    # 如果日志处理失败，静默忽略，避免影响主程序
+                    pass
         
         # 添加处理器到根日志记录器
         handler = StreamlitLogHandler(self)

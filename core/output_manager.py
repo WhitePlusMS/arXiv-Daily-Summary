@@ -86,6 +86,7 @@ class OutputManager:
         markdown_content: str, 
         save_dir: str, 
         current_time: str,
+        username: str = "TEST",
         filename: Optional[str] = None
     ) -> Optional[str]:
         """将Markdown研究报告转换为HTML格式并保存。
@@ -94,6 +95,7 @@ class OutputManager:
             markdown_content: Markdown内容
             save_dir: 保存目录
             current_time: 当前时间
+            username: 用户名，用于模板渲染
             filename: 文件名，如果为None则使用日期生成
             
         Returns:
@@ -114,7 +116,8 @@ class OutputManager:
             html_content = self.template_renderer.render_template(
                 'markdown_report_email.j2',
                 markdown_content=markdown_content,
-                current_time=current_time
+                current_time=current_time,
+                username=username
             )
             
             # 保存文件
@@ -128,7 +131,7 @@ class OutputManager:
             logger.error(f"HTML研究报告保存失败: {e}")
             return None
     
-    def save_markdown_report_as_html_separated(self, summary_content: str, detailed_analysis: str, brief_analysis: str, save_dir: str, current_time: str, filename: str = None, papers: list = None):
+    def save_markdown_report_as_html_separated(self, summary_content: str, detailed_analysis: str, brief_analysis: str, save_dir: str, current_time: str, username: str = "TEST", filename: str = None, papers: list = None):
         """将分离的Markdown内容保存为HTML格式的研究报告。
         
         Args:
@@ -137,6 +140,7 @@ class OutputManager:
             brief_analysis: 简要分析内容
             save_dir: 保存目录
             current_time: 当前时间
+            username: 用户名，用于模板渲染
             filename: 文件名，如果为None则使用日期生成
             papers: 论文数据列表，用于生成统计信息
             
@@ -177,9 +181,9 @@ class OutputManager:
                     if 'title' in paper:
                         titles.append(paper['title'])
                     
-                    # 统计分类（从arXiv_id中提取或使用category字段）
+                    # 统计分类（优先使用category字段）
                     category = None
-                    if 'category' in paper:
+                    if 'category' in paper and paper['category']:
                         category = paper['category']
                     elif 'arXiv_id' in paper:
                         # 从arXiv ID中提取分类，格式通常为 "2024.0001" 或 "cs.AI/2024001"
@@ -187,8 +191,10 @@ class OutputManager:
                         if '/' in arxiv_id:
                             category = arxiv_id.split('/')[0]
                         else:
-                            # 如果没有明确分类，默认为CS类
-                            category = 'CS'
+                            # 尝试从arXiv ID的前缀提取分类
+                            # 新格式的arXiv ID通常以年份开头，无法直接提取分类
+                            # 这种情况下保持category为None，不进行统计
+                            pass
                     
                     if category:
                         category_counts[category] = category_counts.get(category, 0) + 1
@@ -204,6 +210,7 @@ class OutputManager:
                 detailed_analysis=detailed_analysis,
                 brief_analysis=brief_analysis,
                 current_time=current_time,
+                username=username,
                 category_stats=category_stats,
                 total_papers=total_papers,
                 paper_titles=paper_titles,

@@ -37,6 +37,9 @@ conda-meta/
 # ArXiv 历史记录文件（生成的摘要文件）
 arxiv_history/*.html
 arxiv_history/*.md
+# 但保留特定的示例文件
+!arxiv_history/2025-08-23_ARXIV_summary.html
+!arxiv_history/2025-08-23_ARXIV_summary.md
 
 # 临时文件和缓存
 *.tmp

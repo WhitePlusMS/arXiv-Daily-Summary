@@ -489,16 +489,16 @@ def render_arxiv_config(config_manager):
         # 使用辅助函数跟踪配置更改
         track_config_change('MAX_ENTRIES', str(max_entries))
         
-        num_papers = st.number_input(
-            "推荐论文总数",
+        brief_papers = st.number_input(
+            "简要分析论文数",
             min_value=1,
-            max_value=20,
-            value=int(st.session_state.config_changes.get('NUM_PAPERS', 3)),
-            help="最终推荐的论文总数",
-            key="num_papers_input"
+            max_value=15,
+            value=int(st.session_state.config_changes.get('NUM_BRIEF_PAPERS', 7)),
+            help="需要简要分析的论文数量（总推荐数 = 详细分析数 + 简要分析数）",
+            key="brief_papers_input"
         )
         # 使用辅助函数跟踪配置更改
-        track_config_change('NUM_PAPERS', str(num_papers))
+        track_config_change('NUM_BRIEF_PAPERS', str(brief_papers))
         
         detailed_papers = st.number_input(
             "详细分析论文数",

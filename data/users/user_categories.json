@@ -1,7 +1,12 @@
 [
-	{
-		"username": "TEST",
-		"category_id": "cs.CL,cs.IR,cs.LG",
-		"user_input": "# 个人研究兴趣\n我正在从事RAG领域的研究。具体来说，我对以下领域感兴趣：\n1. RAG（检索增强生成）\n2. LLM（大语言模型）\n3. 多模态大语言模型\n我对以下领域不感兴趣：\n1. 除了RAG、LLM和多模态大语言模型，我对其他领域的研究也不感兴趣。"
-	}
+  {
+    "username": "TEST",
+    "category_id": "cs.CL,cs.IR,cs.LG,cs.AI,cs.CC",
+    "user_input": "# 个人研究兴趣\n我正在从事RAG领域的研究。具体来说，我对以下领域感兴趣：\n1. RAG（检索增强生成）\n2. LLM（大语言模型）\n3. 多模态大语言模型\n我对以下领域不感兴趣：\n1. 除了RAG、LLM和多模态大语言模型，我对其他领域的研究也不感兴趣。"
+  },
+  {
+    "username": "Chalice",
+    "category_id": "cs.CE,cs.SY,eess.SY,cs.AI,cs.RO",
+    "user_input": "数字孪生"
+  }
 ]

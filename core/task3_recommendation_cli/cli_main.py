@@ -57,7 +57,7 @@ class ArxivRecommenderCLI:
         self.config = self._load_config()
         # 加载用户分类标签，更新配置
         self._load_user_categories()
-        logger.success(f"系统配置加载完成 - 论文数量: {self.config['num_papers']}, 详细分析: {self.config['num_detailed_papers']}, 分类标签: {self.config['arxiv_categories']}")
+        logger.success(f"系统配置加载完成 - 简要分析论文数: {self.config['num_brief_papers']}, 详细分析: {self.config['num_detailed_papers']}, 分类标签: {self.config['arxiv_categories']}")
         
     def _load_config(self) -> Dict[str, Any]:
         """从环境变量加载配置。
@@ -77,7 +77,7 @@ class ArxivRecommenderCLI:
             'arxiv_delay': int(os.getenv('ARXIV_DELAY', '5')),
             'arxiv_categories': os.getenv('ARXIV_CATEGORIES', 'cs.CV,cs.LG').split(','),
             'max_entries': int(os.getenv('MAX_ENTRIES', '50')),
-            'num_papers': int(os.getenv('NUM_PAPERS', '5')),
+            'num_brief_papers': int(os.getenv('NUM_BRIEF_PAPERS', '7')),
             'num_detailed_papers': int(os.getenv('NUM_DETAILED_PAPERS', '3')),
             
             # LLM配置
@@ -114,6 +114,31 @@ class ArxivRecommenderCLI:
         }
         
         return config
+    
+    def _get_current_username(self) -> str:
+        """获取当前用户名。
+        
+        Returns:
+            用户名字符串，如果没有找到则返回默认值"TEST"
+        """
+        if self.username:
+            return self.username
+        
+        # 从用户配置文件中获取用户名
+        categories_file = self.config['user_categories_file']
+        try:
+            if os.path.exists(categories_file):
+                with open(categories_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                
+                if isinstance(data, list) and len(data) > 0:
+                    first_user = data[0]
+                    if isinstance(first_user, dict) and 'username' in first_user:
+                        return first_user['username']
+        except Exception as e:
+            logger.warning(f"获取用户名失败: {e}")
+        
+        return "TEST"  # 默认用户名
     
     def _load_user_categories(self):
         """从用户分类JSON文件加载分类标签，更新配置。"""
@@ -195,24 +220,29 @@ class ArxivRecommenderCLI:
             # 初始化LLM提供商
             logger.debug(f"初始化LLM提供商 - 模型: {self.config['qwen_model']}")
             self.llm_provider = LLMProvider(
-                api_key=self.config['dashscope_api_key'],
+                model=self.config['qwen_model'],
                 base_url=self.config['dashscope_base_url'],
-                model=self.config['qwen_model']
+                api_key=self.config['dashscope_api_key']
             )
             logger.debug("LLM提供商初始化完成")
             
             # 初始化推荐引擎
             logger.debug("初始化推荐引擎")
             research_interests = self._load_research_interests()
+            
+            # 获取用户名，如果没有指定则从用户配置中获取
+            username = self._get_current_username()
+            
             self.recommendation_engine = RecommendationEngine(
                 categories=self.config['arxiv_categories'],
                 max_entries=self.config['max_entries'],
-                max_paper_num=self.config['num_papers'],
+                num_brief_papers=self.config['num_brief_papers'],
                 num_detailed_papers=self.config['num_detailed_papers'],
                 model=self.config['qwen_model'],
                 base_url=self.config['dashscope_base_url'],
                 api_key=self.config['dashscope_api_key'],
                 description=research_interests,
+                username=username,
                 num_workers=self.config['max_workers'],
                 temperature=self.config['temperature']
             )
@@ -405,10 +435,12 @@ class ArxivRecommenderCLI:
             filename = f"{date_str}_ARXIV_summary.html"
             
             # 保存HTML文件
+            username = self._get_current_username()
             filepath = self.output_manager.save_markdown_report_as_html(
                 markdown_content=markdown_content,
                 save_dir=self.config['save_directory'],
                 current_time=current_time,
+                username=username,
                 filename=filename
             )
             
@@ -444,12 +476,14 @@ class ArxivRecommenderCLI:
             logger.debug(f"生成HTML文件名: {filename}")
             
             # 保存HTML文件，传递分离的内容
+            username = self._get_current_username()
             filepath, html_content = self.output_manager.save_markdown_report_as_html_separated(
                 summary_content=summary_content,
                 detailed_analysis=detailed_analysis,
                 brief_analysis=brief_analysis,
                 save_dir=self.config['save_directory'],
                 current_time=current_time,
+                username=username,
                 filename=filename,
                 papers=papers
             )

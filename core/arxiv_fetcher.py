@@ -45,7 +45,7 @@ class ArxivFetcher:
             logger.error(f"PDF处理失败 - {pdf_url}: {e}")
             return f"处理PDF失败: {e}"
 
-    def _parse_api_entry(self, entry) -> Dict[str, Any]:
+    def _parse_api_entry(self, entry, category: str = None) -> Dict[str, Any]:
         try:
             arxiv_id = entry.id.split('/abs/')[-1]
             
@@ -75,6 +75,7 @@ class ArxivFetcher:
                 "authors": authors,
                 "published": published,
                 "full_text": "",
+                "category": category,  # 添加分类信息
             }
         except Exception as error:
             logger.error(f"论文解析失败: {error}")
@@ -88,6 +89,7 @@ class ArxivFetcher:
                 "authors": [],
                 "published": "",
                 "full_text": "",
+                "category": category,
             }
 
     def fetch_papers(self, category: str, max_results: int = 100) -> List[Dict[str, Any]]:
@@ -102,7 +104,7 @@ class ArxivFetcher:
                 response = self.session.get(url, timeout=30)
                 response.raise_for_status()
                 feed = feedparser.parse(response.text)
-                papers = [self._parse_api_entry(entry) for entry in feed.entries]
+                papers = [self._parse_api_entry(entry, category) for entry in feed.entries]
                 logger.success(f"论文获取完成 - {category}: {len(papers)} 篇")
                 return papers
             except requests.RequestException as error:
@@ -148,7 +150,7 @@ class ArxivFetcher:
             logger.debug(f"查询条件: {query}")
             
             # 使用指数退避重试机制处理每一页的请求
-            page_papers = self._fetch_page_with_retry(url, page + 1)
+            page_papers = self._fetch_page_with_retry(url, page + 1, category)
             if page_papers is None:
                 logger.warning(f"第 {page+1} 页获取失败，跳过该页继续处理")
                 continue
@@ -171,7 +173,7 @@ class ArxivFetcher:
         logger.success(f"分页获取完成 - {category}: 总计 {len(all_papers)} 篇论文")
         return all_papers
     
-    def _fetch_page_with_retry(self, url: str, page_num: int, max_retries: int = 5) -> Optional[List[Dict[str, Any]]]:
+    def _fetch_page_with_retry(self, url: str, page_num: int, category: str = None, max_retries: int = 5) -> Optional[List[Dict[str, Any]]]:
         """使用指数退避重试机制获取单页数据"""
         for attempt in range(max_retries):
             try:
@@ -187,7 +189,7 @@ class ArxivFetcher:
                 # 详细的状态码检查和错误处理
                 if resp.status_code == 200:
                     feed = feedparser.parse(resp.text)
-                    page_papers = [self._parse_api_entry(e) for e in feed.entries]
+                    page_papers = [self._parse_api_entry(e, category) for e in feed.entries]
                     logger.debug(f"第 {page_num} 页请求成功 - 状态码: {resp.status_code}, 获取: {len(page_papers)} 篇")
                     return page_papers
                 elif resp.status_code in [502, 503, 504]:  # 服务器临时性错误

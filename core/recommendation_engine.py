@@ -21,12 +21,13 @@ class RecommendationEngine:
         self,
         categories: List[str],
         max_entries: int,
-        max_paper_num: int,
         num_detailed_papers: int,
+        num_brief_papers: int,
         model: str,
         base_url: str,
         api_key: str,
         description: str,
+        username: str = "TEST",
         num_workers: int = 2,
         temperature: float = 0.7,
     ):
@@ -35,29 +36,31 @@ class RecommendationEngine:
         Args:
             categories: ArXiv分类列表
             max_entries: 每个分类获取的最大论文数
-            max_paper_num: 推荐的最大论文数
+            num_detailed_papers: 详细分析的论文数
+            num_brief_papers: 简要分析的论文数
             model: LLM模型名称
             base_url: LLM API基础URL
             api_key: LLM API密钥
             description: 研究兴趣描述
+            username: 用户名，用于生成报告时的署名
             num_workers: 并行处理线程数
             temperature: LLM生成温度
         """
         logger.info("推荐引擎初始化开始")
         self.categories = categories
         self.max_entries = max_entries
-        self.max_paper_num = max_paper_num
         self.num_detailed_papers = num_detailed_papers
+        self.num_brief_papers = num_brief_papers
         self.description = description
         self.num_workers = num_workers
         
         # 初始化ArXiv获取器和LLM提供商
         logger.debug("初始化ArXiv获取器和LLM提供商")
         self.arxiv_fetcher = ArxivFetcher()
-        self.llm_provider = LLMProvider(model=model, base_url=base_url, api_key=api_key, description=description)
+        self.llm_provider = LLMProvider(model=model, base_url=base_url, api_key=api_key, description=description, username=username)
         self.temperature = temperature
         
-        logger.success(f"推荐引擎初始化完成 - 分类: {categories}, 论文数: {max_paper_num}, 详细分析: {num_detailed_papers}")
+        logger.success(f"推荐引擎初始化完成 - 分类: {categories}, 详细分析: {num_detailed_papers}, 简要分析: {num_brief_papers}")
 
     def _fetch_papers_from_categories(self, date: str = None) -> List[Dict[str, Any]]:
         """从所有指定分类中获取论文。
@@ -110,11 +113,14 @@ class RecommendationEngine:
 
     def _process_single_paper(self, paper: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """处理单篇论文，包含重试机制。"""
-        max_retries = 3
+        max_retries = 2  # 减少重试次数
         title_short = paper['title'][:50] + '...' if len(paper['title']) > 50 else paper['title']
         
         for attempt in range(max_retries):
             try:
+                # 添加请求间隔，避免API限流
+                time.sleep(0.1)  # 每篇论文评估前等待0.5秒
+                
                 evaluation = self._evaluate_paper_relevance(paper)
                 
                 # 合并论文信息和评估结果
@@ -130,7 +136,13 @@ class RecommendationEngine:
                 logger.warning(f"论文评估失败 ({attempt + 1}/{max_retries}) - {title_short}: {e}")
                 if attempt == max_retries - 1:
                     logger.error(f"论文评估彻底失败，跳过 - {title_short}")
-                    return None
+                    # 当API调用失败时，返回一个标记以便上层处理
+                    return {"__api_failed": True, "title": paper['title']}
+                
+                # 指数退避重试
+                wait_time = (attempt + 1) * 2
+                logger.debug(f"等待 {wait_time} 秒后重试")
+                time.sleep(wait_time)
         
         return None
 
@@ -139,9 +151,12 @@ class RecommendationEngine:
         logger.info(f"相关性评估开始 - 待评估: {len(papers)} 篇")
         
         recommended_papers = []
+        api_failure_count = 0
+        max_failures = 5  # 最大允许失败次数
         
-        # 使用线程池并行处理论文
-        with ThreadPoolExecutor(max_workers=self.num_workers) as executor:
+        # 使用线程池并行处理论文，降低并发数
+        max_concurrent = min(self.num_workers, 2)  # 最多2个并发线程
+        with ThreadPoolExecutor(max_workers=max_concurrent) as executor:
             future_to_paper = {
                 executor.submit(self._process_single_paper, paper): paper
                 for paper in papers
@@ -152,21 +167,35 @@ class RecommendationEngine:
                 try:
                     result = future.result()
                     if result:
-                        recommended_papers.append(result)
+                        # 检查API失败标记
+                        if result.get("__api_failed"):
+                            api_failure_count += 1
+                            if api_failure_count >= max_failures:
+                                logger.error(f"检测到API调用失败达到上限({max_failures})，终止评估流程")
+                                raise Exception("API调用失败，终止流程")
+                        else:
+                            recommended_papers.append(result)
                 except Exception as exc:
                     title_short = paper['title'][:50] + '...' if len(paper['title']) > 50 else paper['title']
                     logger.error(f"论文处理异常 - {title_short}: {exc}")
+                    if "API调用失败" in str(exc):
+                        raise  # 重新抛出API失败异常
 
-        # 过滤掉相关性评分低于6分的论文
-        recommended_papers = [paper for paper in recommended_papers if paper['relevance_score'] >= 0]
+        # 过滤掉相关性评分低于6分的论文和API失败标记
+        recommended_papers = [paper for paper in recommended_papers 
+                          if paper.get('relevance_score', 0) >= 0 and not paper.get("__api_failed")]
         
         # 按相关性评分排序
         recommended_papers.sort(key=lambda x: x['relevance_score'], reverse=True)
         
-        # 限制推荐数量
-        recommended_papers = recommended_papers[:self.max_paper_num]
+        # 限制推荐数量（详细分析数 + 简要分析数）
+        max_total_papers = self.num_detailed_papers + self.num_brief_papers
+        recommended_papers = recommended_papers[:max_total_papers]
         
-        logger.success(f"相关性评估完成 - 推荐论文: {len(recommended_papers)} 篇")
+        if api_failure_count > 0:
+            logger.warning(f"相关性评估完成 - 成功: {len(recommended_papers)} 篇, API失败: {api_failure_count} 篇")
+        else:
+            logger.success(f"相关性评估完成 - 推荐论文: {len(recommended_papers)} 篇")
         return recommended_papers
 
 
@@ -240,9 +269,9 @@ class RecommendationEngine:
         if not papers or len(papers) <= self.num_detailed_papers:
             return ""
         
-        # 获取需要简要分析的论文（第num_detailed_papers+1到第10篇）
+        # 获取需要简要分析的论文（第num_detailed_papers+1到第num_detailed_papers+num_brief_papers篇）
         start_idx = self.num_detailed_papers
-        end_idx = min(10, len(papers))  # 修改为10篇，增加简要分析的论文数量
+        end_idx = min(self.num_detailed_papers + self.num_brief_papers, len(papers))
         brief_papers = papers[start_idx:end_idx]
         
         if not brief_papers:
