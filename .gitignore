@@ -9,11 +9,18 @@ __pycache__/
 .env
 .DS_Store
 
-# VSCode 配置
+# IDE 配置
+.trae
 .vscode/
+.idea/
+*.swp
+*.swo
+*~
 
 # 日志和缓存
 *.log
+logs/
+*.log.*
 
 # Jupyter Notebook 检查点
 .ipynb_checkpoints/
@@ -23,9 +30,51 @@ __pycache__/
 venv/
 ENV/
 env/
+.conda/
+conda-meta/
 
-formatters/
+# 项目特定忽略项
+# ArXiv 历史记录文件（生成的摘要文件）
+arxiv_history/*.html
+arxiv_history/*.md
+
+# 临时文件和缓存
+*.tmp
+*.temp
+*.cache
+.cache/
+
+# 系统文件
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Docker 相关（如果不需要版本控制）
+# docker/.env
+# docker/volumes/
+
+# 备份文件
+*.bak
+*.backup
+*.orig
+
+# 测试覆盖率报告
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# 分发和打包
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# PyInstaller
+*.manifest
+*.spec
+
 # 允许保留空目录（可选）
 !.gitkeep
 
-.trae
+/docker
