@@ -33,18 +33,39 @@
 ## ⚡ 快速开始
 
 ```bash
-# 1. 克隆项目
+# 1. 克隆项目到本地
 git clone https://github.com/WhitePlusMS/arXiv-Daily-Summary.git
+
+# 2. 进入项目目录
 cd arXiv-Daily-Summary
 
-# 2. 配置环境变量
-cp .env.example .env
-# 编辑 .env 文件，填入您的 API 密钥
+# 3. 推荐使用 uv 安装依赖 (如果尚未安装)
+pip install uv
 
-# 3. 启动系统
+# 4. 使用 uv 创建虚拟环境
+uv venv
+
+# 5. 激活虚拟环境 (Windows)
+.venv\Scripts\activate
+
+# 6. 使用 uv 安装项目依赖（在uv环境启动状态下）
+pip install -r requirements.txt
+
+# 7. 复制环境变量配置文件
+copy .env.example .env
+
+# 8. 编辑 .env 文件，填入您的 API 密钥 (重要！)
+#    请手动打开 .env 文件并填入 DASHSCOPE_API_KEY
+#    您可以从通义千问获取 API 密钥：https://console.aliyun.com/dashscope
+
+# 9. 启动应用程序！
 python start.py
-# 第一次运行时根据提示进行环境配置，本项目环境管理依托于uv
 
+# 10. 访问 Web 界面
+#    打开浏览器，访问 http://localhost:8501
+#    您可以在界面中配置研究兴趣、调整参数，查看实时推荐结果
+
+# enjoy it!
 ```
 
 系统会自动处理环境配置、依赖安装和服务启动。
