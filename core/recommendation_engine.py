@@ -133,8 +133,11 @@ class RecommendationEngine:
         return all_papers
 
     def _evaluate_paper_relevance(self, paper: Dict[str, Any]) -> Dict[str, Any]:
-        """评估单篇论文的相关性。"""
-        return self.light_llm_provider.evaluate_paper_relevance(paper, self.description, self.light_llm_provider.temperature)
+        """使用轻量模型评估论文相关性。"""
+        # 使用轻量模型的默认温度配置（通过传入None以便使用provider的default设置）
+        return self.light_llm_provider.evaluate_paper_relevance(
+            paper, self.description, temperature=None
+        )
 
     def _process_single_paper(self, paper: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """处理单篇论文，包含重试机制。"""
@@ -309,7 +312,7 @@ class RecommendationEngine:
         for i, paper in enumerate(brief_papers, start=start_idx+1):
             try:
                 # 使用LLM提供商生成简要总结
-                tldr = self.llm_provider.generate_brief_analysis(paper, temperature=0.5)
+                tldr = self.llm_provider.generate_brief_analysis(paper, temperature=None)
                 
                 # 格式化输出
                 brief_analysis = f"""
@@ -414,8 +417,8 @@ def main():
     load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
     
     # 从环境变量获取配置
-    api_key = os.getenv("QWEN_API_KEY")
-    base_url = os.getenv("QWEN_BASE_URL")
+    api_key = os.getenv("DASHSCOPE_API_KEY")
+    base_url = os.getenv("DASHSCOPE_BASE_URL")
     model = os.getenv("QWEN_MODEL")
     
     if not all([api_key, base_url, model]):
@@ -423,7 +426,7 @@ def main():
         return
     
     # 读取研究兴趣描述
-    description_path = "data/users/user_categories.json"
+    description_path = os.getenv("USER_CATEGORIES_FILE", "data/users/user_categories.json")
     try:
         import json
         with open(description_path, "r", encoding="utf-8") as f:
@@ -448,18 +451,27 @@ def main():
         return
     
     # 初始化推荐引擎
+    categories = os.getenv("ARXIV_CATEGORIES", "cs.CL,cs.IR,cs.LG").split(',')
+    max_entries = int(os.getenv("MAX_ENTRIES", "50"))
+    num_detailed_papers = int(os.getenv("NUM_DETAILED_PAPERS", "3"))
+    num_brief_papers = int(os.getenv("NUM_BRIEF_PAPERS", "7"))
+    temperature = float(os.getenv("QWEN_MODEL_TEMPERATURE", "0.7"))
+    top_p = float(os.getenv("QWEN_MODEL_TOP_P", "0.9"))
+    max_tokens = int(os.getenv("QWEN_MODEL_MAX_TOKENS", "4000"))
+    
     engine = RecommendationEngine(
-        categories=["cs.CV"],
-        max_entries=3,
-        max_paper_num=3,
-        num_detailed_papers=1,  # 在测试中只分析一篇
+        categories=categories,
+        max_entries=max_entries,
+        num_detailed_papers=num_detailed_papers,
+        num_brief_papers=num_brief_papers,
         model=model,
         base_url=base_url,
         api_key=api_key,
         description=description,
-        num_workers=2,
-        temperature=0.7,
-        save_dir="./output/history"
+        num_workers=int(os.getenv("MAX_WORKERS", "2")),
+        temperature=temperature,
+        top_p=top_p,
+        max_tokens=max_tokens
     )
     
     # 运行推荐流程

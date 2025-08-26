@@ -211,13 +211,13 @@ class LLMProvider:
 #     "tldr": "<用一段话总结论文的核心贡献>"
 # }}
 
-    def evaluate_paper_relevance(self, paper: Dict[str, Any], description: str, temperature: float = 0.7) -> Dict[str, Any]:
+    def evaluate_paper_relevance(self, paper: Dict[str, Any], description: str, temperature: float = None) -> Dict[str, Any]:
         """评估单篇论文的相关性。
         
         Args:
             paper: 论文信息字典
             description: 研究兴趣描述
-            temperature: 生成温度
+            temperature: 生成温度（为None时使用provider默认值）
             
         Returns:
             评估结果字典
@@ -312,14 +312,14 @@ class LLMProvider:
 * **方法论创新 (Methodological Innovations):**
     * **[论文A名称]:** [简述其核心方法、模型架构或算法的创新之处。]
     * **[论文B名称]:** [简述其核心方法、模型架构或算法的创新之处。]
-* **研究启示 (Insights & Implications):** 这些研究成果对该领域意味着什么？它们验证了什么假设，或者推翻了什么传统认知？
+* **研究启示 (Insights & Implications):** 这些成果的研究成果对该领域意味着什么？它们验证了什么假设，或者推翻了什么传统认知？
 
 ### 主题二：[主题名称，例如：Agent的自主学习与进化]
 * **核心问题 (Problem Domain):** 该主题下的论文主要致力于解决什么关键科学或工程问题？
 * **代表性论文 (Key Papers):** [列出该主题下的1-3篇关键论文的标题]
 * **方法论创新 (Methodological Innovations):**
     * **[论文A名称]:** [简述其核心方法、模型架构或算法的创新之处。]
-* **研究启示 (Insights & Implications):** 这些研究成果对该领域意味着什么？它们验证了什么假设，或者推翻了什么传统认知？
+* **研究启示 (Insights & Implications):** 这些成果的研究成果对该领域意味着什么？它们验证了什么假设，或者推翻了什么传统认知？
 
 
 ## 📈 宏观趋势与前瞻
@@ -347,13 +347,13 @@ class LLMProvider:
 
 
 
-    def generate_summary_report(self, papers: List[Dict[str, Any]], current_time: str, temperature: float = 0.3) -> str:
+    def generate_summary_report(self, papers: List[Dict[str, Any]], current_time: str, temperature: float = None) -> str:
         """生成论文推荐的Markdown总结报告。
         
         Args:
             papers: 论文列表（已排序）
             current_time: 当前时间
-            temperature: 生成温度
+            temperature: 生成温度（为None时使用provider默认值）
             
         Returns:
             Markdown格式的总结报告
@@ -481,12 +481,12 @@ class LLMProvider:
 5.  请注意，我的研究兴趣可能是用英文描述的，请在分析时充分理解并将其与论文内容关联。
         """.strip()
 
-    def generate_detailed_paper_analysis(self, paper: Dict[str, Any], temperature: float = 0.5) -> str:
+    def generate_detailed_paper_analysis(self, paper: Dict[str, Any], temperature: float = None) -> str:
         """为单篇论文生成详细的分析报告.
         
         Args:
             paper: 包含全文的论文信息字典
-            temperature: 生成温度
+            temperature: 生成温度（为None时使用provider默认值）
             
         Returns:
             Markdown格式的详细分析报告
@@ -528,12 +528,12 @@ class LLMProvider:
 请用1-2句话总结这篇论文的核心贡献和主要发现，使用流畅的中文。
 """.strip()
 
-    def generate_brief_analysis(self, paper: Dict[str, Any], temperature: float = 0.3) -> str:
+    def generate_brief_analysis(self, paper: Dict[str, Any], temperature: float = None) -> str:
         """为单篇论文生成简要分析（TLDR）。
         
         Args:
             paper: 论文信息字典
-            temperature: 生成温度
+            temperature: 生成温度（为None时使用provider默认值）
             
         Returns:
             简要分析的TLDR文本

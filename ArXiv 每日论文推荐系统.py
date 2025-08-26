@@ -44,365 +44,129 @@ class StreamlitArxivRecommender:
         self.log_messages = []  # 存储日志消息
         
     def load_config(self):
-        """加载配置（与cli_main.py保持一致）"""
+        """加载配置（通过CLI模块）"""
         try:
-            # 强制重新加载环境变量
-            load_dotenv(os.path.join(os.path.dirname(__file__), '.env'), override=True)
+            if self.cli_app is None:
+                self.cli_app = ArxivRecommenderCLI()
             
-            self.config = {
-                # API配置
-                'dashscope_api_key': os.getenv('DASHSCOPE_API_KEY', ''),
-                'dashscope_base_url': os.getenv('DASHSCOPE_BASE_URL', 'https://dashscope.aliyuncs.com/compatible-mode/v1'),
-                'qwen_model': os.getenv('QWEN_MODEL', 'qwen-plus'),
-                
-                # ArXiv获取器配置
-                'arxiv_base_url': os.getenv('ARXIV_BASE_URL', 'http://export.arxiv.org/api/query'),
-                'arxiv_retries': int(os.getenv('ARXIV_RETRIES', '3')),
-                'arxiv_delay': int(os.getenv('ARXIV_DELAY', '5')),
-                'arxiv_categories': os.getenv('ARXIV_CATEGORIES', 'cs.CV,cs.LG').split(','),
-                'max_entries': int(os.getenv('MAX_ENTRIES', '50')),
-                'num_brief_papers': int(os.getenv('NUM_BRIEF_PAPERS', '7')),
-                'num_detailed_papers': int(os.getenv('NUM_DETAILED_PAPERS', '3')),
-                
-                # LLM配置
-    
-                'max_workers': int(os.getenv('MAX_WORKERS', '5')),
-                
-                # 文件路径配置
-                'user_categories_file': os.getenv('USER_CATEGORIES_FILE', 'data/users/user_categories.json'),
-                'save_directory': os.getenv('SAVE_DIRECTORY', 'arxiv_history'),
-                'save_markdown': os.getenv('SAVE_MARKDOWN', 'true').lower() == 'true',
-                
-                # 邮件配置
-                'send_email': os.getenv('SEND_EMAIL', 'false').lower() == 'true',
-                'sender_email': os.getenv('SENDER_EMAIL', ''),
-                'receiver_email': os.getenv('RECEIVER_EMAIL', ''),
-                'email_password': os.getenv('EMAIL_PASSWORD', ''),
-                'smtp_server': os.getenv('SMTP_SERVER', ''),
-                'smtp_port': int(os.getenv('SMTP_PORT', '587')),
-                'use_ssl': os.getenv('USE_SSL', 'false').lower() == 'true',
-                'use_tls': os.getenv('USE_TLS', 'true').lower() == 'true',
-                'subject_prefix': os.getenv('SUBJECT_PREFIX', '每日arXiv'),
-                
-                # 时区和格式配置
-                'timezone': os.getenv('TIMEZONE', 'Asia/Shanghai'),
-                'date_format': os.getenv('DATE_FORMAT', '%Y-%m-%d'),
-                'time_format': os.getenv('TIME_FORMAT', '%H:%M:%S'),
-                
-                # 调试模式配置
-                'debug_mode': os.getenv('DEBUG_MODE', 'false').lower() == 'true',
-                
-                # 日志配置
-                'log_level': os.getenv('LOG_LEVEL', 'INFO'),
-                'log_file': os.getenv('LOG_FILE', 'logs/arxiv_recommender.log'),
-                'log_to_console': os.getenv('LOG_TO_CONSOLE', 'true').lower() == 'true',
-                'log_max_size': int(os.getenv('LOG_MAX_SIZE', '10')),
-                'log_backup_count': int(os.getenv('LOG_BACKUP_COUNT', '5')),
-            }
+            self.config = self.cli_app.get_config()
+            st.success("✅ 配置加载成功")
             return True
         except Exception as e:
-            st.error(f"配置加载失败: {str(e)}")
+            st.error(f"❌ 配置加载失败: {str(e)}")
             return False
     
     def load_research_interests(self):
-        """加载研究兴趣"""
+        """加载研究兴趣（通过CLI模块）"""
         try:
-            interests_file = project_root / "research_interests.md"
-            if interests_file.exists():
-                with open(interests_file, 'r', encoding='utf-8') as f:
-                    self.research_interests = [line.strip() for line in f if line.strip()]
-            return True
+            if self.cli_app is None:
+                self.cli_app = ArxivRecommenderCLI()
+            
+            success = self.cli_app.load_research_interests_from_file()
+            if success:
+                self.research_interests = self.cli_app.get_research_interests()
+            else:
+                self.research_interests = []
+            return success
         except Exception as e:
             st.error(f"研究兴趣加载失败: {str(e)}")
             return False
 
     def load_user_profiles(self):
-        """加载用户配置"""
+        """加载用户配置（通过CLI模块）"""
         try:
-            user_profiles_file = project_root / "data" / "users" / "user_categories.json"
-            if user_profiles_file.exists():
-                with open(user_profiles_file, 'r', encoding='utf-8') as f:
-                    self.user_profiles = json.load(f)
-            return True
+            if self.cli_app is None:
+                self.cli_app = ArxivRecommenderCLI()
+            
+            success = self.cli_app.load_user_profiles()
+            if success:
+                self.user_profiles = self.cli_app.get_user_profiles()
+            else:
+                self.user_profiles = []
+            return success
         except Exception as e:
             st.error(f"用户配置加载失败: {str(e)}")
             return False
     
     def initialize_components(self, selected_username=None):
-        """初始化系统组件
+        """初始化系统组件（通过CLI模块）
         
         Args:
             selected_username: 选择的用户名，如果为None或"自定义"则不传入用户名
         """
         try:
-            # 初始化CLI应用实例，传入用户名（如果不是自定义的话
+            # 初始化CLI应用实例，传入用户名（如果不是自定义的话）
             username = selected_username if selected_username and selected_username != "自定义" else None
             self.cli_app = ArxivRecommenderCLI(username=username)
             
             # 更新CLI应用的研究兴趣
-            self.cli_app.research_interests = self.research_interests
+            self.cli_app.update_research_interests(self.research_interests)
+            
+            # 设置实时日志
+            self.cli_app.setup_realtime_logging()
             
             # 初始化输出管理器（用于配置显示）
             template_dir = project_root / 'templates'
             self.output_manager = OutputManager(str(template_dir))
             
+            st.success("✅ 系统组件初始化成功")
             return True
         except Exception as e:
-            st.error(f"组件初始化失败: {str(e)}")
+            st.error(f"❌ 组件初始化失败: {str(e)}")
             return False
     
     def setup_realtime_logging(self):
         """设置实时日志显示"""
-        # 创建日志容器
-        self.log_container = st.empty()
-        self.log_messages = []
-        
-        # 创建自定义日志处理器
-        class StreamlitLogHandler(logging.Handler):
-            def __init__(self, app_instance):
-                super().__init__()
-                self.app = app_instance
-                
-            def emit(self, record):
-                try:
-                    # 检查是否在主线程中且有有效的Streamlit会话
-                    import threading
-                    from streamlit.runtime.scriptrunner import get_script_run_ctx
-                    
-                    if (self.app.log_container is not None and 
-                        threading.current_thread() == threading.main_thread() and
-                        get_script_run_ctx() is not None):
-                        
-                        log_entry = self.format(record)
-                        self.app.log_messages.append(log_entry)
-                        # 只保留最近的20条日志
-                        if len(self.app.log_messages) > 20:
-                            self.app.log_messages = self.app.log_messages[-20:]
-                        
-                        # 更新显示
-                        log_text = "\n".join(self.app.log_messages)
-                        self.app.log_container.text_area(
-                            "📋 实时运行日志",
-                            value=log_text,
-                            height=200,
-                            disabled=True
-                        )
-                    else:
-                        # 在多线程环境中，只添加到消息列表，不更新UI
-                        if self.app.log_container is not None:
-                            log_entry = self.format(record)
-                            self.app.log_messages.append(log_entry)
-                            # 只保留最近的20条日志
-                            if len(self.app.log_messages) > 20:
-                                self.app.log_messages = self.app.log_messages[-20:]
-                except Exception:
-                    # 如果日志处理失败，静默忽略，避免影响主程序
-                    pass
-        
-        # 添加处理器到根日志记录器
-        handler = StreamlitLogHandler(self)
-        handler.setLevel(logging.INFO)
-        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-        handler.setFormatter(formatter)
-        
-        # 获取根日志记录器并添加处理器
-        root_logger = logging.getLogger()
-        root_logger.addHandler(handler)
-        root_logger.setLevel(logging.INFO)
-        
-        return handler
+        try:
+            # 创建日志容器
+            self.log_container = st.empty()
+            self.log_messages = []
+            
+            if self.cli_app is None:
+                self.cli_app = ArxivRecommenderCLI()
+            
+            # 调用CLI模块的日志设置方法
+            log_handler = self.cli_app.setup_realtime_logging()
+            
+            return log_handler
+            
+        except Exception as e:
+            st.error(f"日志设置失败: {str(e)}")
+            return None
     
     def _run_debug_mode(self, specific_date=None):
-        """调试模式：返回假数据，不调用真实API"""
+        """调试模式：通过CLI模块运行"""
         try:
-            # 设置实时日志显示
-            log_handler = self.setup_realtime_logging()
+            if self.cli_app is None:
+                self.cli_app = ArxivRecommenderCLI()
             
-            try:
-                target_date = specific_date or (datetime.now().date() - timedelta(days=1)).strftime('%Y-%m-%d')
-                
-                # 模拟日志输出
-                self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - INFO - [调试模式] 开始获取 {target_date} 的论文推荐...")
-                self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - INFO - [调试模式] 模拟获取ArXiv论文数据...")
-                self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - INFO - [调试模式] 模拟LLM分析处理...")
-                self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - SUCCESS - [调试模式] 成功获取到 {target_date} 的论文！")
-                
-                # 生成假数据
-                fake_summary = f"""# ArXiv 每日论文推荐报告 - {target_date}
-
-## 📊 今日概览
-
-**[调试模式]** 本报告为测试数据，未调用真实API。
-
-- 📅 **目标日期**: {target_date}
-- 🔍 **检索分类**: {', '.join(self.config.get('arxiv_categories', ['cs.CV', 'cs.LG']))}
-- 📄 **论文总数**: 15篇
-- ⭐ **重点推荐**: 3篇
-- 📝 **简要分析**: 7篇
-
-## 🎯 研究兴趣匹配度
-
-根据您的研究方向：
-{chr(10).join([f'- {interest}' for interest in self.research_interests[:3]])}
-
-系统为您筛选出最相关的论文。
-
----
-
-"""
-                
-                fake_detailed = """## 🌟 重点推荐论文
-
-### 1. [调试] Advanced Deep Learning Techniques for Computer Vision
-
-**作者**: Zhang Wei, Li Ming, Wang Xiaoli  
-**发布时间**: {target_date}  
-**分类**: cs.CV, cs.LG  
-**链接**: https://arxiv.org/abs/2024.12345
-
-#### 📋 论文摘要
-本文提出了一种新的深度学习方法，用于改进计算机视觉任务的性能。该方法结合了注意力机制和残差网络，在多个基准数据集上取得了显著的改进。
-
-#### 🔍 详细分析
-**技术创新点**:
-- 提出了多尺度注意力机制
-- 设计了新的残差连接结构
-- 引入了自适应学习率调整策略
-
-**实验结果**:
-- 在ImageNet上准确率提升2.3%
-- 推理速度提升15%
-- 模型参数减少10%
-
-**研究意义**:
-该工作为计算机视觉领域提供了新的思路，特别是在模型效率和性能平衡方面有重要贡献。
-
----
-
-### 2. [调试] Efficient Natural Language Processing with Transformer Variants
-
-**作者**: Chen Yifan, Liu Jiawei, Zhou Mengting  
-**发布时间**: {target_date}  
-**分类**: cs.CL, cs.LG  
-**链接**: https://arxiv.org/abs/2024.12346
-
-#### 📋 论文摘要
-本研究探索了Transformer架构的新变体，旨在提高自然语言处理任务的效率和性能。
-
-#### 🔍 详细分析
-**技术创新点**:
-- 优化了自注意力机制的计算复杂度
-- 提出了新的位置编码方法
-- 设计了层次化的特征融合策略
-
-**实验结果**:
-- 在GLUE基准上平均提升1.8%
-- 训练时间减少30%
-- 内存使用降低25%
-
----
-
-""".format(target_date=target_date)
-                
-                fake_brief = """## 📝 简要分析论文
-
-### 3. [调试] Reinforcement Learning for Robotics Applications
-**作者**: Wang Hao, Li Shan  
-**分类**: cs.RO, cs.LG  
-**简要**: 提出了一种新的强化学习算法，用于机器人控制任务，在仿真环境中表现优异。
-
-### 4. [调试] Graph Neural Networks for Social Network Analysis
-**作者**: Yang Mei, Zhang Lei  
-**分类**: cs.SI, cs.LG  
-**简要**: 设计了专门用于社交网络分析的图神经网络架构，能够有效捕获社交关系的复杂模式。
-
-### 5. [调试] Federated Learning with Privacy Preservation
-**作者**: Liu Qiang, Chen Xin  
-**分类**: cs.CR, cs.LG  
-**简要**: 在联邦学习框架中引入了新的隐私保护机制，平衡了模型性能和隐私安全。
-
-### 6. [调试] Multi-Modal Learning for Medical Image Analysis
-**作者**: Zhou Ling, Wang Jun  
-**分类**: cs.CV, cs.LG  
-**简要**: 结合多模态数据进行医学图像分析，在疾病诊断任务上取得了显著改进。
-
-### 7. [调试] Quantum Machine Learning Algorithms
-**作者**: Li Feng, Zhang Yu  
-**分类**: quant-ph, cs.LG  
-**简要**: 探索了量子计算在机器学习中的应用，提出了几种新的量子机器学习算法。
-
----
-
-## 📈 总结
-
-**[调试模式提示]** 以上内容为模拟数据，用于测试系统功能。在实际使用中，系统会调用真实的ArXiv API和LLM服务来生成准确的论文推荐报告。
-
-今日推荐的论文涵盖了计算机视觉、自然语言处理、强化学习等多个前沿领域，为您的研究提供了丰富的参考资料。
-
-"""
-                
-                # 合并内容
-                markdown_content = fake_summary + fake_detailed + fake_brief
-                
-                # 生成HTML内容（简化版）
-                fake_html = f"""<!DOCTYPE html>
-<html>
-<head>
-    <title>ArXiv推荐报告 - {target_date}</title>
-    <meta charset="utf-8">
-</head>
-<body>
-    <h1>ArXiv 每日论文推荐报告 - {target_date}</h1>
-    <p><strong>[调试模式]</strong> 本报告为测试数据</p>
-    <div>{markdown_content.replace(chr(10), '<br>')}</div>
-</body>
-</html>"""
-                
-                # 生成文件名
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                filename = f"arxiv_recommendations_debug_{timestamp}.md"
-                html_filename = f"arxiv_recommendations_debug_{timestamp}.html"
-                
-                # 为调试模式创建临时HTML文件
-                save_dir = Path(self.config.get('save_directory', './arxiv_history'))
-                save_dir.mkdir(exist_ok=True)
-                html_filepath = save_dir / html_filename
-                
-                # 保存HTML文件以便查看
-                try:
-                    with open(html_filepath, 'w', encoding='utf-8') as f:
-                        f.write(fake_html)
-                    self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - INFO - [调试模式] HTML报告已保存: {html_filepath}")
-                except Exception as e:
-                    self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - WARNING - [调试模式] HTML保存失败: {str(e)}")
-                    html_filepath = None
-                
-                self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - SUCCESS - [调试模式] 推荐系统运行完成！")
-                
+            # 调用CLI模块的调试模式
+            success, result_data, error_msg = self.cli_app.run_debug_mode(specific_date)
+            
+            if success:
                 return {
                     'success': True,
-                    'report': markdown_content,
-                    'summary_content': fake_summary,
-                    'detailed_analysis': fake_detailed,
-                    'brief_analysis': fake_brief,
-                    'html_content': fake_html,
-                    'html_filepath': str(html_filepath) if html_filepath else None,
-                    'filename': filename,
-                    'target_date': target_date,
+                    'report': result_data['summary'],
+                    'summary_content': result_data['summary'],
+                    'detailed_analysis': result_data['detailed_analysis'],
+                    'brief_analysis': result_data['brief_analysis'],
+                    'html_content': None,  # CLI模块生成HTML文件
+                    'html_filepath': result_data.get('html_file'),
+                    'filename': f"arxiv_recommendation_{result_data['target_date']}_debug.md",
+                    'target_date': result_data['target_date'],
+                    'debug_mode': True
+                }
+            else:
+                return {
+                    'success': False,
+                    'error': error_msg,
                     'debug_mode': True
                 }
                 
-            finally:
-                # 移除日志处理器
-                root_logger = logging.getLogger()
-                root_logger.removeHandler(log_handler)
-                
         except Exception as e:
-            if hasattr(self, 'log_messages'):
-                self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - ERROR - [调试模式] 系统异常: {str(e)}")
             return {
                 'success': False,
-                'error': f"[调试模式] 推荐系统运行失败: {str(e)}",
+                'error': f"调试模式运行失败: {str(e)}",
                 'debug_mode': True
             }
     
@@ -417,93 +181,53 @@ class StreamlitArxivRecommender:
             if self.config.get('debug_mode', False):
                 return self._run_debug_mode(specific_date)
             
-            # 设置实时日志显示
-            log_handler = self.setup_realtime_logging()
+            if self.cli_app is None:
+                self.cli_app = ArxivRecommenderCLI()
             
-            try:
-                # 调用CLI的get_recommendations方法获取推荐结果
-                if specific_date:
-                    self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - INFO - 开始获取 {specific_date} 的论文推荐...")
-                else:
-                    self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - INFO - 开始获取论文推荐...")
-                cli_result = self.cli_app.get_recommendations(specific_date=specific_date)
-                
-                if cli_result['success']:
-                    # 显示成功信息
-                    self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - SUCCESS - 成功获取到 {cli_result['target_date']} 的论文！")
-                    
-                    # 获取推荐数据
-                    report_data = cli_result['data']
-                    
-                    # 调用CLI的save_reports方法保存报告
-                    self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - INFO - 正在保存报告...")
-                    save_result = self.cli_app.save_reports(report_data, cli_result['current_time'], target_date=cli_result.get('target_date'))
-                    
-                    # 获取分离的内容
-                    summary_content = report_data.get('summary', '')
-                    detailed_analysis = report_data.get('detailed_analysis', '')
-                    brief_analysis = report_data.get('brief_analysis', '')
-                    
-                    # 为向后兼容，合并内容
-                    markdown_content = summary_content + detailed_analysis + brief_analysis
-                    
-                    # 生成文件名用于下载
-                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    filename = f"arxiv_recommendations_{timestamp}.md"
-                    
-                    self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - SUCCESS - 推荐系统运行完成！")
-                    
-                    return {
-                        'success': True,
-                        'report': markdown_content,
-                        'summary_content': summary_content,
-                        'detailed_analysis': detailed_analysis,
-                        'brief_analysis': brief_analysis,
-                        'html_content': save_result.get('html_content'),
-                        'html_filepath': save_result.get('html_filepath'),
-                        'filename': filename,
-                        'target_date': cli_result['target_date']
-                    }
-                else:
-                    # 检查是否是"未找到论文"的特定情况
-                    no_papers_found_messages = ["未找到相关论文", "在目标日期范围内未找到相关论文"]
-                    is_no_papers_error = any(msg in cli_result.get('error', '') for msg in no_papers_found_messages)
+            # 调用CLI的完整推荐流程
+            success, result_data, error_msg = self.cli_app.run_full_recommendation(specific_date)
+            
+            if success:
+                return {
+                    'success': True,
+                    'report': result_data['markdown_content'],
+                    'summary_content': result_data['summary_content'],
+                    'detailed_analysis': result_data['detailed_analysis'],
+                    'brief_analysis': result_data['brief_analysis'],
+                    'html_content': result_data.get('html_content'),
+                    'html_filepath': result_data.get('html_filepath'),
+                    'filename': result_data['filename'],
+                    'target_date': result_data['target_date']
+                }
+            else:
+                # 检查是否是"未找到论文"的特定情况
+                no_papers_found_messages = ["未找到相关论文", "在目标日期范围内未找到相关论文"]
+                is_no_papers_error = any(msg in error_msg for msg in no_papers_found_messages)
 
-                    if is_no_papers_error:
-                        target_date_str = cli_result.get('target_date', '最近')
-                        self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - WARNING - 在 {target_date_str} 未找到符合条件的论文")
-                        
-                        # 检查是否为连续两天未找到论文的情况（CLI已经尝试了昨天和前天）
-                        # CLI返回的错误信息格式为："在目标日期 YYYY-MM-DD 未找到相关论文"
-                        if "在目标日期" in cli_result.get('error', '') and "未找到相关论文" in cli_result.get('error', ''):
-                            # 显示周末提示
-                            return {
-                                'success': False,
-                                'error': cli_result['error'],
-                                'warning': f"在 {target_date_str} 未找到论文",
-                                'show_weekend_tip': True  # 标记需要显示周末提示
-                            }
-                        else:
-                            return {
-                                'success': False,
-                                'error': cli_result['error'],
-                                'warning': f"在 {target_date_str} 未找到论文"
-                            }
-                    else:
-                        # 处理其他未知错误
-                        self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - ERROR - 推荐系统运行失败: {cli_result['error']}")
+                if is_no_papers_error:
+                    target_date_str = result_data.get('target_date', '最近') if result_data else '最近'
+                    
+                    # 检查是否为连续两天未找到论文的情况
+                    if "在目标日期" in error_msg and "未找到相关论文" in error_msg:
                         return {
                             'success': False,
-                            'error': cli_result['error']
+                            'error': error_msg,
+                            'warning': f"在 {target_date_str} 未找到论文",
+                            'show_weekend_tip': True
                         }
-            finally:
-                # 移除日志处理器
-                root_logger = logging.getLogger()
-                root_logger.removeHandler(log_handler)
+                    else:
+                        return {
+                            'success': False,
+                            'error': error_msg,
+                            'warning': f"在 {target_date_str} 未找到论文"
+                        }
+                else:
+                    return {
+                        'success': False,
+                        'error': error_msg
+                    }
                     
         except Exception as e:
-            if hasattr(self, 'log_messages'):
-                self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - ERROR - 系统异常: {str(e)}")
             return {
                 'success': False, 
                 'error': f"推荐系统运行失败: {str(e)}",
@@ -515,22 +239,8 @@ class StreamlitArxivRecommender:
 def get_recent_reports(limit=10):
     """获取最近的报告文件"""
     try:
-        reports_dir = project_root / "arxiv_history"
-        if not reports_dir.exists():
-            return []
-        
-        report_files = []
-        for file_path in reports_dir.glob("*.md"):
-            if file_path.is_file():
-                report_files.append({
-                    'name': file_path.name,
-                    'path': file_path,
-                    'modified': datetime.fromtimestamp(file_path.stat().st_mtime)
-                })
-        
-        # 按修改时间排序，最新的在前
-        report_files.sort(key=lambda x: x['modified'], reverse=True)
-        return report_files[:limit]
+        cli_app = ArxivRecommenderCLI()
+        return cli_app.get_recent_reports(limit)
     except Exception:
         return []
 
@@ -620,6 +330,8 @@ def main():
             # 显示详细配置信息
             st.success(
                 f"✅ **已加载用户 {selected_profile_name} 的配置**\n\n"
+                f"**分类标签**: `{selected_profile.get('category_id', '未设置')}`\n\n"
+                f"**研究兴趣**:\n```\n{selected_profile.get('user_input', '未设置')}\n```\n\n"
             )
 
     st.markdown("---")
