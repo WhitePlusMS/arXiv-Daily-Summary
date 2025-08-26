@@ -142,17 +142,34 @@ def initialize_matcher():
     # 强制重新加载环境变量
     load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'), override=True)
     
-    model = os.getenv("QWEN_MODEL_LIGHT", "qwen-plus")
-    base_url = os.getenv("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
-    api_key = os.getenv("DASHSCOPE_API_KEY")
-    
-    if not api_key:
-        st.error("❌ 请配置API密钥")
-        st.info("请前往 **环境配置** 页面设置 DASHSCOPE_API_KEY")
-        return None
+    # 根据提供商选择加载参数
+    provider = os.getenv("LIGHT_MODEL_PROVIDER", "dashscope").lower()
+
+    if provider == "ollama":
+        # 使用本地 OLLAMA
+        model = os.getenv("OLLAMA_MODEL_LIGHT", "qwen3:0.6B")
+        base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
+        # OpenAI SDK 需要 api_key 参数，但本地 OLLAMA 实际不会验证；传入占位值即可
+        api_key = os.getenv("OLLAMA_API_KEY", "ollama")
+    else:
+        # 默认使用 DashScope (通义千问) API
+        model = os.getenv("QWEN_MODEL_LIGHT", "qwen-plus")
+        base_url = os.getenv("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
+        api_key = os.getenv("DASHSCOPE_API_KEY")
+        
+        if not api_key:
+            st.error("❌ 请配置API密钥")
+            st.info("请前往 **环境配置** 页面设置 DASHSCOPE_API_KEY")
+            return None
     
     try:
-        matcher = CategoryMatcher(model, base_url, api_key)
+        matcher = CategoryMatcher(model, base_url, api_key or "ollama")
+        # 预热模型：对Ollama等本地服务首次加载较慢的情况进行一次小请求，降低冷启动失败概率
+        try:
+            matcher.warmup(attempts=10)
+        except Exception:
+            # 预热失败不影响后续流程
+            pass
         return matcher
     except Exception as e:
         st.error(f"❌ 初始化匹配器失败: {e}")
@@ -206,12 +223,19 @@ def main():
     with st.sidebar:
         st.header("⚙️ 配置选项")
         
-        # API配置状态
-        api_key = os.getenv("DASHSCOPE_API_KEY")
-        if api_key:
-            st.success("✅ API密钥已配置")
+        # 根据提供商展示配置状态
+        provider = os.getenv("LIGHT_MODEL_PROVIDER", "dashscope").lower()
+        if provider == "ollama":
+            base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
+            model = os.getenv("OLLAMA_MODEL_LIGHT", "qwen3:0.6B")
+            st.success(f"✅ 已使用本地 OLLAMA: {model}")
+            st.caption(f"Base URL: {base_url}")
         else:
-            st.error("❌ 请配置API密钥")
+            api_key = os.getenv("DASHSCOPE_API_KEY")
+            if api_key:
+                st.success("✅ DashScope API密钥已配置")
+            else:
+                st.error("❌ 请配置DashScope API密钥")
         
         # 匹配参数
         top_n = st.slider("返回结果数量", min_value=1, max_value=10, value=5)

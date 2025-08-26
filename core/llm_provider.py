@@ -1,12 +1,13 @@
 """LLM提供商模块
 
-为论文分析和总结提供OpenAI兼容API集成，支持通义千问、SiliconFlow等。
+为论文分析和总结提供OpenAI兼容API集成，支持通义千问、SiliconFlow、OLLAMA等。
 同时包含LLM提供商的抽象基类定义。
 """
 
 import time
 import json
 import traceback
+import os
 from openai import OpenAI
 from typing import Optional, Dict, Any, List
 from loguru import logger
@@ -601,6 +602,52 @@ def main():
 
     except Exception as e:
         logger.error(f"\n测试过程中发生错误: {e}")
+
+
+def create_light_llm_provider(description: str = "", username: str = "TEST") -> LLMProvider:
+    """根据环境变量配置创建轻量模型LLM提供者。
+    
+    Args:
+        description: 研究兴趣描述
+        username: 用户名
+        
+    Returns:
+        配置好的LLM提供者实例
+    """
+    # 获取轻量模型提供商类型
+    provider_type = os.getenv('LIGHT_MODEL_PROVIDER', 'qwen').lower()
+    
+    if provider_type == 'ollama':
+        # OLLAMA配置
+        model = os.getenv('OLLAMA_MODEL_LIGHT', 'llama3.2:3b')
+        base_url = os.getenv('OLLAMA_BASE_URL', 'http://localhost:11434/v1')
+        api_key = 'ollama'  # OLLAMA通常不需要真实的API密钥
+        temperature = float(os.getenv('OLLAMA_MODEL_LIGHT_TEMPERATURE', '0.7'))
+        top_p = float(os.getenv('OLLAMA_MODEL_LIGHT_TOP_P', '0.9'))
+        max_tokens = int(os.getenv('OLLAMA_MODEL_LIGHT_MAX_TOKENS', '2000'))
+        
+        logger.info(f"创建OLLAMA轻量模型提供者 - 模型: {model}, URL: {base_url}")
+    else:
+        # 通义千问配置（默认）
+        model = os.getenv('QWEN_MODEL_LIGHT', 'qwen3-30b-a3b-instruct-2507')
+        base_url = os.getenv('DASHSCOPE_BASE_URL', 'https://dashscope.aliyuncs.com/compatible-mode/v1')
+        api_key = os.getenv('DASHSCOPE_API_KEY', '')
+        temperature = float(os.getenv('QWEN_MODEL_LIGHT_TEMPERATURE', '0.5'))
+        top_p = float(os.getenv('QWEN_MODEL_LIGHT_TOP_P', '0.8'))
+        max_tokens = int(os.getenv('QWEN_MODEL_LIGHT_MAX_TOKENS', '2000'))
+        
+        logger.info(f"创建通义千问轻量模型提供者 - 模型: {model}")
+    
+    return LLMProvider(
+        model=model,
+        base_url=base_url,
+        api_key=api_key,
+        description=description,
+        username=username,
+        temperature=temperature,
+        top_p=top_p,
+        max_tokens=max_tokens
+    )
 
 
 if __name__ == "__main__":

@@ -423,14 +423,41 @@ def render_api_config(config_manager):
         )
         st.session_state.config_changes['QWEN_MODEL'] = model
         
-        current_light_model = st.session_state.config_changes.get('QWEN_MODEL_LIGHT', model_options[1])
-        light_model = st.selectbox(
-            "轻量模型（分类匹配）",
-            options=model_options,
-            index=model_options.index(current_light_model) if current_light_model in model_options else 1,
-            help="选择轻量级模型"
+        # 轻量模型提供商选择
+        provider_options = ["qwen", "ollama"]
+        current_provider = st.session_state.config_changes.get('LIGHT_MODEL_PROVIDER', 'qwen')
+        light_provider = st.selectbox(
+            "轻量模型提供商",
+            options=provider_options,
+            index=provider_options.index(current_provider) if current_provider in provider_options else 0,
+            help="选择轻量模型的提供商：通义千问或OLLAMA本地模型"
         )
-        st.session_state.config_changes['QWEN_MODEL_LIGHT'] = light_model
+        st.session_state.config_changes['LIGHT_MODEL_PROVIDER'] = light_provider
+        
+        # 根据提供商显示不同的模型选择
+        if light_provider == "qwen":
+            current_light_model = st.session_state.config_changes.get('QWEN_MODEL_LIGHT', model_options[1])
+            light_model = st.selectbox(
+                "轻量模型（分类匹配）",
+                options=model_options,
+                index=model_options.index(current_light_model) if current_light_model in model_options else 1,
+                help="选择轻量级通义千问模型"
+            )
+            st.session_state.config_changes['QWEN_MODEL_LIGHT'] = light_model
+        else:  # ollama
+            ollama_model = st.text_input(
+                "OLLAMA轻量模型名称",
+                value=st.session_state.config_changes.get('OLLAMA_MODEL_LIGHT', 'llama3.2:3b'),
+                help="输入OLLAMA本地模型名称，如：llama3.2:3b, qwen2.5:7b等"
+            )
+            st.session_state.config_changes['OLLAMA_MODEL_LIGHT'] = ollama_model
+            
+            ollama_url = st.text_input(
+                "OLLAMA服务器地址",
+                value=st.session_state.config_changes.get('OLLAMA_BASE_URL', 'http://localhost:11434/v1'),
+                help="OLLAMA服务器的API地址"
+            )
+            st.session_state.config_changes['OLLAMA_BASE_URL'] = ollama_url
 
 def render_arxiv_config(config_manager):
     """渲染ArXiv配置"""
@@ -557,43 +584,89 @@ def render_llm_config(config_manager):
     
     # 轻量模型配置
     st.markdown("### ⚡ 轻量模型参数配置")
-    col4, col5, col6 = st.columns(3)
     
-    with col4:
-        qwen_light_temperature = st.slider(
-            "轻量模型温度参数",
-            min_value=0.0,
-            max_value=2.0,
-            value=float(st.session_state.config_changes.get('QWEN_MODEL_LIGHT_TEMPERATURE', 0.5)),
-            step=0.1,
-            help="控制轻量模型生成文本的随机性，值越高越随机",
-            key="qwen_light_temperature_slider"
-        )
-        track_config_change('QWEN_MODEL_LIGHT_TEMPERATURE', str(qwen_light_temperature))
+    # 获取当前选择的轻量模型提供商
+    current_light_provider = st.session_state.config_changes.get('LIGHT_MODEL_PROVIDER', 'qwen')
     
-    with col5:
-        qwen_light_top_p = st.slider(
-            "轻量模型Top-P参数",
-            min_value=0.0,
-            max_value=1.0,
-            value=float(st.session_state.config_changes.get('QWEN_MODEL_LIGHT_TOP_P', 0.8)),
-            step=0.05,
-            help="控制轻量模型词汇选择的多样性，值越小越保守",
-            key="qwen_light_top_p_slider"
-        )
-        track_config_change('QWEN_MODEL_LIGHT_TOP_P', str(qwen_light_top_p))
+    if current_light_provider == "qwen":
+        st.markdown("**通义千问轻量模型参数**")
+        col4, col5, col6 = st.columns(3)
+        
+        with col4:
+            qwen_light_temperature = st.slider(
+                "轻量模型温度参数",
+                min_value=0.0,
+                max_value=2.0,
+                value=float(st.session_state.config_changes.get('QWEN_MODEL_LIGHT_TEMPERATURE', 0.5)),
+                step=0.1,
+                help="控制轻量模型生成文本的随机性，值越高越随机",
+                key="qwen_light_temperature_slider"
+            )
+            track_config_change('QWEN_MODEL_LIGHT_TEMPERATURE', str(qwen_light_temperature))
+        
+        with col5:
+            qwen_light_top_p = st.slider(
+                "轻量模型Top-P参数",
+                min_value=0.0,
+                max_value=1.0,
+                value=float(st.session_state.config_changes.get('QWEN_MODEL_LIGHT_TOP_P', 0.8)),
+                step=0.05,
+                help="控制轻量模型词汇选择的多样性，值越小越保守",
+                key="qwen_light_top_p_slider"
+            )
+            track_config_change('QWEN_MODEL_LIGHT_TOP_P', str(qwen_light_top_p))
+        
+        with col6:
+            qwen_light_max_tokens = st.number_input(
+                "轻量模型最大Token数",
+                min_value=500,
+                max_value=4000,
+                value=int(st.session_state.config_changes.get('QWEN_MODEL_LIGHT_MAX_TOKENS', 2000)),
+                step=100,
+                help="轻量模型单次生成的最大token数量",
+                key="qwen_light_max_tokens_input"
+            )
+            track_config_change('QWEN_MODEL_LIGHT_MAX_TOKENS', str(qwen_light_max_tokens))
     
-    with col6:
-        qwen_light_max_tokens = st.number_input(
-            "轻量模型最大Token数",
-            min_value=500,
-            max_value=4000,
-            value=int(st.session_state.config_changes.get('QWEN_MODEL_LIGHT_MAX_TOKENS', 2000)),
-            step=100,
-            help="轻量模型单次生成的最大token数量",
-            key="qwen_light_max_tokens_input"
-        )
-        track_config_change('QWEN_MODEL_LIGHT_MAX_TOKENS', str(qwen_light_max_tokens))
+    else:  # ollama
+        st.markdown("**OLLAMA本地模型参数**")
+        col4, col5, col6 = st.columns(3)
+        
+        with col4:
+            ollama_light_temperature = st.slider(
+                "OLLAMA温度参数",
+                min_value=0.0,
+                max_value=2.0,
+                value=float(st.session_state.config_changes.get('OLLAMA_MODEL_LIGHT_TEMPERATURE', 0.7)),
+                step=0.1,
+                help="控制OLLAMA模型生成文本的随机性，值越高越随机",
+                key="ollama_light_temperature_slider"
+            )
+            track_config_change('OLLAMA_MODEL_LIGHT_TEMPERATURE', str(ollama_light_temperature))
+        
+        with col5:
+            ollama_light_top_p = st.slider(
+                "OLLAMA Top-P参数",
+                min_value=0.0,
+                max_value=1.0,
+                value=float(st.session_state.config_changes.get('OLLAMA_MODEL_LIGHT_TOP_P', 0.9)),
+                step=0.05,
+                help="控制OLLAMA模型词汇选择的多样性，值越小越保守",
+                key="ollama_light_top_p_slider"
+            )
+            track_config_change('OLLAMA_MODEL_LIGHT_TOP_P', str(ollama_light_top_p))
+        
+        with col6:
+            ollama_light_max_tokens = st.number_input(
+                "OLLAMA最大Token数",
+                min_value=500,
+                max_value=8000,
+                value=int(st.session_state.config_changes.get('OLLAMA_MODEL_LIGHT_MAX_TOKENS', 2000)),
+                step=100,
+                help="OLLAMA模型单次生成的最大token数量",
+                key="ollama_light_max_tokens_input"
+            )
+            track_config_change('OLLAMA_MODEL_LIGHT_MAX_TOKENS', str(ollama_light_max_tokens))
     
     # 通用配置
     st.markdown("### ⚙️ 通用配置")

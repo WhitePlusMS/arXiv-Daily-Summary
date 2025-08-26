@@ -18,5 +18,20 @@
     "username": "JIM am",
     "category_id": "cs.CE,cs.SY,eess.SY,math.OC,cs.AI",
     "user_input": "Scheduling optimization based on digital twin"
+  },
+  {
+    "username": "TEST OLLAMA",
+    "category_id": "cs.AI,cs.RO,cs.SY,eess.SY,math.OC",
+    "user_input": "车辆的路径规划"
+  },
+  {
+    "username": "你好",
+    "category_id": "cs.CY,cs.CL,cs.SI,econ.GN,eess.IV",
+    "user_input": "车辆的路径规划"
+  },
+  {
+    "username": "你好2",
+    "category_id": "cs.AI,cs.RO,cs.SY,eess.SY,math.OC",
+    "user_input": "车辆的路径规划"
   }
 ]

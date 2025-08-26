@@ -11,7 +11,7 @@ from datetime import datetime
 from loguru import logger
 
 from .arxiv_fetcher import ArxivFetcher
-from .llm_provider import LLMProvider
+from .llm_provider import LLMProvider, create_light_llm_provider
 
 
 class RecommendationEngine:
@@ -61,6 +61,8 @@ class RecommendationEngine:
         # 初始化ArXiv获取器和LLM提供商
         logger.debug("初始化ArXiv获取器和LLM提供商")
         self.arxiv_fetcher = ArxivFetcher()
+        
+        # 主LLM提供者（用于详细分析和报告生成）
         self.llm_provider = LLMProvider(
             model=model, 
             base_url=base_url, 
@@ -71,6 +73,13 @@ class RecommendationEngine:
             top_p=top_p,
             max_tokens=max_tokens
         )
+        
+        # 轻量模型提供者（用于论文相关性评估）
+        self.light_llm_provider = create_light_llm_provider(
+            description=description,
+            username=username
+        )
+        
         self.temperature = temperature
         self.top_p = top_p
         self.max_tokens = max_tokens
@@ -125,7 +134,7 @@ class RecommendationEngine:
 
     def _evaluate_paper_relevance(self, paper: Dict[str, Any]) -> Dict[str, Any]:
         """评估单篇论文的相关性。"""
-        return self.llm_provider.evaluate_paper_relevance(paper, self.description, self.temperature)
+        return self.light_llm_provider.evaluate_paper_relevance(paper, self.description, self.light_llm_provider.temperature)
 
     def _process_single_paper(self, paper: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """处理单篇论文，包含重试机制。"""

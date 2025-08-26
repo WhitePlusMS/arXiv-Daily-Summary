@@ -3,12 +3,16 @@
 基于用户研究方向描述，通过LLM分批评估匹配度，找出最符合的ArXiv分类。
 """
 
-import json
 import os
-from typing import List, Dict, Any, Tuple
+import re
+import json
+import time
+from typing import List, Dict, Optional, Tuple
 from openai import OpenAI
 from loguru import logger
 from datetime import datetime
+import re
+import time
 
 
 class MultiUserDataManager:
@@ -109,6 +113,7 @@ class CategoryMatcher:
             api_key: API密钥
         """
         self.model = model
+        self.base_url = base_url
         self.client = OpenAI(base_url=base_url, api_key=api_key)
         self.categories = self._load_categories()
         # Token统计
@@ -116,6 +121,48 @@ class CategoryMatcher:
         self.total_output_tokens = 0
         self.total_tokens = 0
         logger.info(f"分类匹配器初始化完成 - 加载了 {len(self.categories)} 个分类")
+    
+    def warmup(self, attempts: int = 2):
+        """预热OLLAMA模型，避免冷启动问题
+        
+        Args:
+            attempts: 预热尝试次数
+        """
+        # 检查是否为OLLAMA模型（通过base_url判断）
+        is_ollama = 'localhost' in self.base_url.lower() or 'ollama' in self.base_url.lower()
+        
+        if not is_ollama:
+            logger.info("检测到API模型，跳过预热过程")
+            return
+        
+        logger.info(f"检测到OLLAMA模型，开始预热，尝试 {attempts} 次...")
+        
+        for i in range(attempts):
+            try:
+                # 发送简单的预热请求
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=[
+                        {"role": "system", "content": "You are a scoring assistant. You MUST respond with only a single integer between 0-100. No explanations, no text, just the number."},
+                        {"role": "user", "content": "Output only a number 0-100. No text. Test warmup:"}
+                    ],
+                    max_tokens=3,
+                    temperature=0.0
+                )
+                
+                output = response.choices[0].message.content.strip()
+                logger.info(f"预热第{i+1}次成功，输出: '{output}'")
+                
+                # 短暂延迟
+                if i < attempts - 1:
+                    time.sleep(0.5)
+                    
+            except Exception as e:
+                logger.warning(f"预热第{i+1}次失败: {e}")
+                # 继续尝试，不中断预热过程
+                continue
+        
+        logger.info("OLLAMA模型预热完成")
     
     def _load_categories(self) -> List[Dict[str, str]]:
         """加载ArXiv分类数据
@@ -182,7 +229,7 @@ class CategoryMatcher:
     # CO-STAR Prompt for Academic Category Matching
 
     ## (C) Context:
-    你正在为一个内部的“智能投稿助手”系统提供核心判断能力。该系统的用户是严谨的科研人员，他们需要根据你的评分来决定自己耗费心血的研究论文应该投往哪个ArXiv分类。ArXiv的分类体系复杂，存在广泛的交叉和重叠，一个研究方向往往与多个分类都有关联，但关联的性质和程度有细微差别。你的判断是这个决策过程中的关键一环。
+    你正在为一个内部的"智能投稿助手"系统提供核心判断能力。该系统的用户是严谨的科研人员，他们需要根据你的评分来决定自己耗费心血的研究论文应该投往哪个ArXiv分类。ArXiv的分类体系复杂，存在广泛的交叉和重叠，一个研究方向往往与多个分类都有关联，但关联的性质和程度有细微差别。你的判断是这个决策过程中的关键一环。
 
     ## (S) Style & (T) Tone:
     请扮演一位极其严谨、经验丰富的ArXiv高级审核员。你的判断风格必须是分析性的、批判性的，并且对细节极其敏感。你的工作语气是要求苛刻的，追求绝对的精确，不接受任何模棱两可或过于概括的评估。
@@ -191,7 +238,7 @@ class CategoryMatcher:
     你的评估结果的最终受众是一位正在为自己的重要论文（可能是博士毕业论文或一项重大研究的成果）寻找最恰当分类的研究者。他们依赖你的精确评分来避免论文被错投或淹没在不相关的领域中。
 
     ## (O) Objective:
-    你的核心目标是，严格评估以下提供的“用户研究方向”与“ArXiv分类”之间的匹配程度，并输出一个**精确到个位数的整数评分（0-100）**。这个评分必须能反映两者之间哪怕最细微的关联度差异。
+    你的核心目标是，严格评估以下提供的"用户研究方向"与"ArXiv分类"之间的匹配程度，并输出一个**精确到个位数的整数评分（0-100）**。这个评分必须能反映两者之间哪怕最细微的关联度差异。
     - **100分** 代表该研究是此分类的教科书式范例。
     - **85-99分** 代表非常核心的匹配，是理想的投稿目标。
     - **60-84分** 代表强相关，研究属于该分类的常见子领域或应用领域。
@@ -203,7 +250,7 @@ class CategoryMatcher:
     你的输出**必须且只能是**一个0到100之间的整数。
     - **禁止**返回任何解释、理由、文字或单位。
     - **必须**提供细粒度的分数，例如 78, 93, 62，而不是笼统的 70, 80, 90。
-
+    Output only a number 0-100. No text.
     ---
     ### [输入数据]
 
@@ -219,7 +266,7 @@ class CategoryMatcher:
     """.strip()
 
     def _call_llm(self, prompt: str) -> int:
-        """调用LLM获取评分
+        """调用LLM获取评分，带重试与稳健解析
         
         Args:
             prompt: 提示词
@@ -227,34 +274,59 @@ class CategoryMatcher:
         Returns:
             0-100的评分
         """
-        try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ],
-                temperature=0.1  # 使用较低温度确保结果稳定
-            )
-            
-            # 统计token使用量
-            if hasattr(response, 'usage') and response.usage:
-                self.total_input_tokens += response.usage.prompt_tokens
-                self.total_output_tokens += response.usage.completion_tokens
-                self.total_tokens += response.usage.total_tokens
-            
-            # 提取数字评分
-            content = response.choices[0].message.content.strip()
-            score = int(content)
-            
-            # 确保评分在0-100范围内
-            return max(0, min(100, score))
-            
-        except Exception as e:
-            logger.warning(f"LLM调用失败: {e}")
-            return 0
+        max_retries = 3
+        backoff_base = 1.5
+        last_error = None
+        for attempt in range(max_retries):
+            try:
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=[
+                        {"role": "system", "content": "You are a scoring assistant. You MUST respond with only a single integer between 0-100. NEVER use <think> tags or any thinking process. NEVER provide explanations. Output format: just the number, nothing else."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.0,
+                    max_tokens=10
+                )
+
+                # 统计token使用量（兼容无usage场景）
+                try:
+                    if hasattr(response, 'usage') and response.usage:
+                        self.total_input_tokens += getattr(response.usage, 'prompt_tokens', 0) or 0
+                        self.total_output_tokens += getattr(response.usage, 'completion_tokens', 0) or 0
+                        self.total_tokens += getattr(response.usage, 'total_tokens', 0) or 0
+                except Exception:
+                    pass
+
+                # 提取数字评分（稳健解析）
+                content = (response.choices[0].message.content or "").strip()
+                # 直接尝试转换
+                try:
+                    score = int(content)
+                    return max(0, min(100, score))
+                except Exception:
+                    # 使用正则在任意文本中抓取0-100的整数（选择最后一个更可能是最终答案）
+                    matches = re.findall(r"\b(100|[1-9]?\d)\b", content)
+                    if matches:
+                        score = int(matches[-1])
+                        return max(0, min(100, score))
+                    # 未能解析则抛出错误以触发重试
+                    raise ValueError(f"无法从模型输出中解析整数评分，输出内容片段: {content[:80]}")
+
+            except Exception as e:
+                last_error = e
+                logger.warning(f"LLM调用失败(第{attempt+1}次): {e}")
+                # 指数退避等待，给Ollama冷启动/模型加载留时间
+                if attempt < max_retries - 1:
+                    sleep_s = backoff_base * (2 ** attempt)
+                    time.sleep(sleep_s)
+                else:
+                    # 最后一次失败，返回0分避免中断全流程
+                    logger.warning("LLM多次调用失败，返回0作为该分类评分")
+                    return 0
+        # 理论上不会到达这里
+        logger.warning(f"LLM调用异常(返回兜底0): {last_error}")
+        return 0
     
     def match_categories(self, user_description: str, top_n: int = 5) -> List[Tuple[str, str, int]]:
         """匹配用户研究方向到ArXiv分类
