@@ -1,12 +1,22 @@
 [
   {
     "username": "TEST",
-    "category_id": "cs.CL,cs.IR,cs.LG,cs.AI,cs.CC",
+    "category_id": "cs.CL",
     "user_input": "# 个人研究兴趣\n我正在从事RAG领域的研究。具体来说，我对以下领域感兴趣：\n1. RAG（检索增强生成）\n2. LLM（大语言模型）\n3. 多模态大语言模型\n我对以下领域不感兴趣：\n1. 除了RAG、LLM和多模态大语言模型，我对其他领域的研究也不感兴趣。"
   },
   {
     "username": "Chalice",
-    "category_id": "cs.CE,cs.SY,eess.SY,cs.AI,cs.RO",
+    "category_id": "cs.CE",
     "user_input": "数字孪生"
+  },
+  {
+    "username": "JIM",
+    "category_id": "cs.CV,cs.LG,eess.IV,stat.ML,eess.SP",
+    "user_input": "data engineer; ml ;cv"
+  },
+  {
+    "username": "JIM am",
+    "category_id": "cs.CE,cs.SY,eess.SY,math.OC,cs.AI",
+    "user_input": "Scheduling optimization based on digital twin"
   }
 ]

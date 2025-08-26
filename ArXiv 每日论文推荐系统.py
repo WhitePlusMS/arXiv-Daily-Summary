@@ -15,6 +15,8 @@ import webbrowser
 import logging
 from io import StringIO
 import pytz
+import streamlit.components.v1 as components
+import base64
 
 # 添加项目根目录到 Python 路径
 project_root = Path(__file__).parent
@@ -207,16 +209,23 @@ class StreamlitArxivRecommender:
         
         return handler
     
-    def run_recommendation(self):
-        """运行推荐系统（调用CLI核心逻辑）"""
+    def run_recommendation(self, specific_date=None):
+        """运行推荐系统（调用CLI核心逻辑）
+        
+        Args:
+            specific_date: 指定日期，格式为YYYY-MM-DD，如果为None则使用智能回溯逻辑
+        """
         try:
             # 设置实时日志显示
             log_handler = self.setup_realtime_logging()
             
             try:
                 # 调用CLI的get_recommendations方法获取推荐结果
-                self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - INFO - 开始获取论文推荐...")
-                cli_result = self.cli_app.get_recommendations()
+                if specific_date:
+                    self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - INFO - 开始获取 {specific_date} 的论文推荐...")
+                else:
+                    self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - INFO - 开始获取论文推荐...")
+                cli_result = self.cli_app.get_recommendations(specific_date=specific_date)
                 
                 if cli_result['success']:
                     # 显示成功信息
@@ -227,7 +236,7 @@ class StreamlitArxivRecommender:
                     
                     # 调用CLI的save_reports方法保存报告
                     self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - INFO - 正在保存报告...")
-                    save_result = self.cli_app.save_reports(report_data, cli_result['current_time'])
+                    save_result = self.cli_app.save_reports(report_data, cli_result['current_time'], target_date=cli_result.get('target_date'))
                     
                     # 获取分离的内容
                     summary_content = report_data.get('summary', '')
@@ -250,6 +259,7 @@ class StreamlitArxivRecommender:
                         'detailed_analysis': detailed_analysis,
                         'brief_analysis': brief_analysis,
                         'html_content': save_result.get('html_content'),
+                        'html_filepath': save_result.get('html_filepath'),
                         'filename': filename,
                         'target_date': cli_result['target_date']
                     }
@@ -431,7 +441,10 @@ def main():
     # 运行推荐系统按钮
     st.subheader("🚀 运行推荐系统")
     
-    if st.button("🔍 开始推荐论文", type="primary", use_container_width=True):
+    # 主按钮：智能推荐（默认功能）
+    yesterday_str = (datetime.now().date() - timedelta(days=1)).strftime('%Y-%m-%d')
+    prev_str = (datetime.now().date() - timedelta(days=2)).strftime('%Y-%m-%d')
+    if st.button(f"🔍 生成最新推荐报告（将优先查询：{yesterday_str}，若无则：{prev_str}）", type="primary", use_container_width=True, help="系统将自动查找最近可用的论文并生成推荐报告"):
         if not app.research_interests:
             st.error("请先输入研究兴趣！")
         elif not app.config.get('dashscope_api_key'):
@@ -449,6 +462,7 @@ def main():
             st.info("🚀 开始运行推荐系统...")
             result = app.run_recommendation()
             
+            # 处理结果的代码保持不变...
             if result['success']:
                 # 检查是否有警告信息
                 if 'warning' in result:
@@ -460,32 +474,28 @@ def main():
                 # 显示报告结果
                 st.subheader("📊 推荐结果")
                 
-                # 创建标签页
-                tab1, tab2, tab3, tab4 = st.tabs(["📋 摘要内容", "🔍 详细分析", "📝 简要分析", "📄 完整报告"])
-                
-                with tab1:
-                    if result.get('summary_content'):
-                        st.markdown(result['summary_content'])
-                    else:
-                        st.info("暂无摘要内容")
-                
-                with tab2:
-                    if result.get('detailed_analysis'):
-                        st.markdown(result['detailed_analysis'])
-                    else:
-                        st.info("暂无详细分析内容")
-                
-                with tab3:
-                    if result.get('brief_analysis'):
-                        st.markdown(result['brief_analysis'])
-                    else:
-                        st.info("暂无简要分析内容")
-                
-                with tab4:
-                    if result.get('report'):
-                        st.markdown(result['report'])
-                    else:
-                        st.info("暂无完整报告内容")
+                # 检查是否有HTML报告文件
+                if result.get('html_filepath'):
+                    # 显示查看报告按钮
+                    st.markdown("### 📄 查看完整报告")
+                    
+                    # 创建查看报告按钮（使用唯一 key 避免点击后消失）
+                    if st.button("🔍 查看HTML报告", key=f"view_report_latest_{datetime.now().strftime('%Y%m%d_%H%M%S')}", use_container_width=True):
+                        try:
+                            html_path = Path(result['html_filepath'])
+                            if html_path.exists():
+                                # 与预览按钮一致：使用系统浏览器新标签页打开本地HTML
+                                webbrowser.open(f"file://{html_path.resolve()}", new=2)
+                            else:
+                                st.error("HTML 报告文件不存在，请检查生成路径。")
+                        except Exception as e:
+                            st.error(f"打开失败: {str(e)}")
+                    
+                    # 显示报告路径信息
+                    st.info(f"📁 HTML报告路径: {result['html_filepath']}")
+                else:
+                    # 如果没有HTML文件，显示简要信息
+                    st.info("📋 报告生成完成，但HTML文件未保存。请检查配置设置。")
                 
                 # 下载报告按钮
                 st.subheader("💾 下载报告")
@@ -494,6 +504,7 @@ def main():
                 download_content = f"""# ArXiv 论文推荐报告
 
 生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+查询日期: {result.get('target_date', '')}
 
 ## 配置信息
 - ArXiv 分类: {', '.join(app.config.get('arxiv_categories', []))}
@@ -540,6 +551,120 @@ def main():
                 if 'traceback' in result:
                     with st.expander("查看详细错误信息"):
                         st.code(result['traceback'])
+    
+    # 高级功能：查询特定日期（折叠选项）
+    with st.expander("🔧 高级选项：查询特定日期的报告", expanded=False):
+        st.markdown(
+            "💡 **提示：** 如果您需要查看特定日期的论文推荐，可以在这里指定日期。\n\n"
+            "⚠️ **注意：** ArXiv通常在周日至周四发布论文，周五和周六不发布新论文。"
+        )
+        
+        # 日期选择器
+        selected_date = st.date_input(
+            "选择查询日期",
+            value=datetime.now().date() - timedelta(days=1),  # 默认选择昨天
+            max_value=datetime.now().date(),  # 不能选择未来日期
+            help="选择您想要查询论文的日期"
+        )
+        
+        # 规范化目标日期字符串（用于展示和查询）
+        target_date_str = selected_date.strftime('%Y-%m-%d')
+        
+        # 查询特定日期按钮
+        if st.button(f"🔍 查询指定日期（{target_date_str}）", use_container_width=True):
+                if not app.research_interests:
+                    st.error("请先输入研究兴趣！")
+                elif not app.config.get('dashscope_api_key'):
+                    st.error("DashScope API Key 未配置，请检查 .env 文件！")
+                else:
+                    # 创建实时日志显示区域
+                    st.subheader("📋 运行状态")
+                    
+                    # 初始化组件
+                    with st.spinner("正在初始化系统组件..."):
+                        if not app.initialize_components(selected_profile_name):
+                            st.stop()
+                    
+                    # 运行推荐系统（指定日期）
+                    st.info(f"🚀 开始查询 {target_date_str} 的论文...")
+                    result = app.run_recommendation(specific_date=target_date_str)
+                    
+                    # 处理特定日期查询的结果
+                    if result['success']:
+                        st.success(f"🎉 成功获取到 {target_date_str} 的论文推荐！")
+                        st.balloons()
+                        
+                        # 显示报告结果
+                        st.subheader("📊 推荐结果")
+                        
+                        # 检查是否有HTML报告文件
+                        if result.get('html_filepath'):
+                            # 显示查看报告按钮
+                            if st.button("🔍 查看HTML报告", key=f"view_report_specific_{datetime.now().strftime('%Y%m%d_%H%M%S')}", use_container_width=True):
+                                try:
+                                    html_path = Path(result['html_filepath'])
+                                    if html_path.exists():
+                                        # 与预览按钮一致：使用系统浏览器新标签页打开本地HTML
+                                        webbrowser.open(f"file://{html_path.resolve()}", new=2)
+                                    else:
+                                        st.error("HTML 报告文件不存在，请检查生成路径。")
+                                except Exception as e:
+                                    st.error(f"打开失败: {str(e)}")
+                                
+                                # 显示报告路径信息
+                                st.info(f"📁 HTML报告路径: {result['html_filepath']}")
+                        else:
+                            # 如果没有HTML文件，显示简要信息
+                            st.info("📋 报告生成完成，但HTML文件未保存。请检查配置设置。")
+                        
+                        # 下载报告按钮
+                        st.subheader("💾 下载报告")
+                        
+                        # 生成下载内容
+                        download_content = f"""# ArXiv 论文推荐报告
+
+生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+查询日期: {target_date_str}
+
+## 配置信息
+- ArXiv 分类: {', '.join(app.config.get('arxiv_categories', []))}
+- 推荐论文数: {app.config.get('num_recommendations', 10)}
+- 详细分析数: {app.config.get('detailed_analysis_count', 3)}
+- 研究兴趣: {', '.join(app.research_interests)}
+
+{result['report']}
+"""
+                        
+                        st.download_button(
+                            label="📥 下载完整报告 (Markdown)",
+                            data=download_content,
+                            file_name=result.get('filename', 'arxiv_recommendations.md'),
+                            mime="text/markdown",
+                            use_container_width=True
+                        )
+                        
+                        # 显示保存信息
+                        if 'saved_path' in result:
+                            st.info(f"📁 报告已保存至: {result['saved_path']}")
+                    
+                    else:
+                        # 特定日期查询失败的处理
+                        st.error(f"❌ 在 {target_date_str} 未找到相关论文")
+                        st.info(
+                            f"💡 **可能的原因：**\n\n"
+                            f"• 该日期为周末（ArXiv周五和周六不发布新论文）\n"
+                            f"• 该日期为美国联邦假日\n"
+                            f"• 您选择的分类在该日期没有新提交\n\n"
+                            f"**建议：**\n"
+                            f"• 尝试选择其他日期\n"
+                            f"• 尝试选择更多的ArXiv分类\n"
+                            f"• 查看ArXiv官方发布时间表"
+                        )
+                        
+                        if 'traceback' in result:
+                            with st.expander("查看详细错误信息"):
+                                st.code(result['traceback'])
+
     
     st.markdown("---")
     

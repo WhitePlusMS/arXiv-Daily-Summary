@@ -80,7 +80,8 @@ class RecommendationEngine:
                     category.strip(), 
                     date, 
                     per_page=min(self.max_entries, 200), 
-                    max_pages=5
+                    max_pages=5,
+                    max_total=self.max_entries
                 )
                 logger.debug(f"分类 {category} ({date}): {len(papers)} 篇论文")
             else:

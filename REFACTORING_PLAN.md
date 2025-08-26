@@ -1,61 +1,4 @@
-# 最终版项目结构树 (v5 - 完全展开)
-
-```
-C:\Users\admin\Desktop\arxiv_recommender_v2/
-├── .env
-├── .env.example
-├── .gitignore
-├── .python-version
-├── pyproject.toml
-├── requirements.txt
-├── README.md
-├── REFACTORING_PLAN.md
-│
-├── data/
-│   ├── arxiv_categories.json
-│   ├── arxiv_categories_cn.json
-│   ├── user_selections.json
-│   └── task_artifacts/
-│       ├── extracted_categories.md
-│       ├── source.html
-│       └── README.md
-│
-├── history/
-│   ├── 2025-08-08_ARXIV_summary.html
-│   ├── 2025-08-08_ARXIV_summary.md
-│   ├── 2025-08-09_ARXIV_summary.html
-│   ├── 2025-08-09_ARXIV_summary.md
-│   ├── 2025-08-10_ARXIV_summary.html
-│   ├── 2025-08-10_ARXIV_summary.md
-│   ├── 2025-08-13_ARXIV_summary.html
-│   ├── 2025-08-13_ARXIV_summary.md
-│   ├── 2025-08-18_ARXIV_summary.html
-│   └── 2025-08-18_ARXIV_summary.md
-│
-├── logs/
-│   ├── arxiv_recommender.log
-│   ├── cleanup.log
-│   └── translation.log
-│
-├── scripts/
-│   ├── cleanup_translated_file.py
-│   ├── convert_md_to_json.py
-│   ├── category_matcher.py
-│   ├── extract_categories.py
-│   └── translate_categories.py
-│
-├── src/
-│   ├── __init__.py
-│   ├── app.py
-│   ├── cli.py
-│   ├── config.py
-│   │
-│   ├── core/
-│   │   ├── __init__.py
-│   │   ├── arxiv_fetcher.py
-│   │   ├── llm_provider.py
-│   │   ├── output_manager.py
-│   │   └── recommendation_engine.py
+#trecommendation_engine.py
 │   │
 │   ├── data_models/
 │   │   ├── __init__.py
@@ -108,6 +51,4 @@ C:\Users\admin\Desktop\arxiv_recommender_v2/
 | `scripts/convert_md_to_json.py` | `core/task1_category_extraction/task1_convert_md_to_json.py` |
 | `scripts/category_matcher.py` | `core/task2_category_matching/task2_category_matcher.py` |
 | `scripts/cleanup_translated_file.py`| `utils/cleanup_translated_file.py` |
-| `scripts/translate_categories.py`| `utils/translate_categories.py` |
-| `data/task_artifacts/*` | `core/task1_category_extraction/*.md`, `core/task1_category_extraction/*.html`, `core/task2_category_matching/README.md` |
-
+| `scripts/traies.py`| `utils/translate_caaask1_egotaskegoz

@@ -416,7 +416,7 @@ def render_api_config(config_manager):
         
         current_model = st.session_state.config_changes.get('QWEN_MODEL', model_options[0])
         model = st.selectbox(
-            "主模型",
+            "主模型（生成报告/详细分析）",
             options=model_options,
             index=model_options.index(current_model) if current_model in model_options else 0,
             help="选择要使用的通义千问模型"
@@ -425,7 +425,7 @@ def render_api_config(config_manager):
         
         current_light_model = st.session_state.config_changes.get('QWEN_MODEL_LIGHT', model_options[1])
         light_model = st.selectbox(
-            "轻量模型",
+            "轻量模型（分类匹配）",
             options=model_options,
             index=model_options.index(current_light_model) if current_light_model in model_options else 1,
             help="选择轻量级模型"

@@ -330,8 +330,8 @@
 </head>
 <body>
   <div class="header">
-    <h1>🔬 ArXiv 研究洞察报告</h1>
-    <div class="date">{{ current_time }}</div>
+    <h1>ArXiv 研究洞察报告</h1>
+    <div class="date">生成时间：{{ current_time }}{% if target_date %} ｜ 查询日期：{{ target_date }}{% endif %}</div>
   </div>
 
   <!-- 论文统计数据 -->

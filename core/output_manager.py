@@ -23,6 +23,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from .utils.template_renderer import TemplateRenderer
+import re
 
 
 class OutputManager:
@@ -43,11 +44,19 @@ class OutputManager:
         self.template_renderer = TemplateRenderer(template_dir)
         logger.success("OutputManager初始化完成")
 
+    def _sanitize_username_for_filename(self, username: str) -> str:
+        """将用户名转换为安全的文件名片段（用于文件名）。"""
+        if not username:
+            return "USER"
+        return re.sub(r'[\\/:*?"<>|\s]+', '_', username.strip())
+    
     def save_markdown_report(
         self, 
         content: str, 
         save_dir: str, 
-        filename: Optional[str] = None
+        filename: Optional[str] = None,
+        username: str = "TEST",
+        target_date: Optional[str] = None,
     ) -> Optional[str]:
         """保存Markdown报告到文件。
         
@@ -55,6 +64,8 @@ class OutputManager:
             content: Markdown内容
             save_dir: 保存目录
             filename: 文件名，如果为None则使用日期生成
+            username: 用于文件名的用户名（可选，默认"TEST"）
+            target_date: 查询目标日期（用于文件名日期）
             
         Returns:
             保存的文件路径，失败时返回None
@@ -65,8 +76,9 @@ class OutputManager:
             
             # 生成文件名
             if filename is None:
-                date_str = datetime.datetime.now().strftime("%Y-%m-%d")
-                filename = f"{date_str}_ARXIV_summary.md"
+                date_str = target_date if target_date else datetime.datetime.now().strftime("%Y-%m-%d")
+                safe_username = self._sanitize_username_for_filename(username)
+                filename = f"{date_str}_{safe_username}_ARXIV_summary.md"
             
             filepath = Path(save_dir) / filename
             
@@ -87,7 +99,8 @@ class OutputManager:
         save_dir: str, 
         current_time: str,
         username: str = "TEST",
-        filename: Optional[str] = None
+        filename: Optional[str] = None,
+        target_date: Optional[str] = None,
     ) -> Optional[str]:
         """将Markdown研究报告转换为HTML格式并保存。
         
@@ -97,6 +110,7 @@ class OutputManager:
             current_time: 当前时间
             username: 用户名，用于模板渲染
             filename: 文件名，如果为None则使用日期生成
+            target_date: 查询目标日期（用于文件名与模板展示）
             
         Returns:
             保存的文件路径，失败时返回None
@@ -107,8 +121,9 @@ class OutputManager:
             
             # 生成文件名
             if filename is None:
-                date_str = datetime.datetime.now().strftime("%Y-%m-%d")
-                filename = f"{date_str}_ARXIV_summary.html"
+                date_str = target_date if target_date else datetime.datetime.now().strftime("%Y-%m-%d")
+                safe_username = self._sanitize_username_for_filename(username)
+                filename = f"{date_str}_{safe_username}_ARXIV_summary.html"
             
             filepath = Path(save_dir) / filename
             
@@ -117,7 +132,8 @@ class OutputManager:
                 'markdown_report_email.j2',
                 markdown_content=markdown_content,
                 current_time=current_time,
-                username=username
+                username=username,
+                target_date=target_date,
             )
             
             # 保存文件
@@ -131,7 +147,7 @@ class OutputManager:
             logger.error(f"HTML研究报告保存失败: {e}")
             return None
     
-    def save_markdown_report_as_html_separated(self, summary_content: str, detailed_analysis: str, brief_analysis: str, save_dir: str, current_time: str, username: str = "TEST", filename: str = None, papers: list = None):
+    def save_markdown_report_as_html_separated(self, summary_content: str, detailed_analysis: str, brief_analysis: str, save_dir: str, current_time: str, username: str = "TEST", filename: str = None, papers: list = None, target_date: Optional[str] = None):
         """将分离的Markdown内容保存为HTML格式的研究报告。
         
         Args:
@@ -143,6 +159,7 @@ class OutputManager:
             username: 用户名，用于模板渲染
             filename: 文件名，如果为None则使用日期生成
             papers: 论文数据列表，用于生成统计信息
+            target_date: 查询目标日期（用于文件名与模板展示）
             
         Returns:
             tuple: (保存的文件路径, HTML内容)，失败时返回(None, None)
@@ -153,8 +170,9 @@ class OutputManager:
             
             # 生成文件名
             if filename is None:
-                date_str = datetime.datetime.now().strftime("%Y-%m-%d")
-                filename = f"{date_str}_ARXIV_summary.html"
+                date_str = target_date if target_date else datetime.datetime.now().strftime("%Y-%m-%d")
+                safe_username = self._sanitize_username_for_filename(username)
+                filename = f"{date_str}_{safe_username}_ARXIV_summary.html"
             
             filepath = Path(save_dir) / filename
             
@@ -191,9 +209,6 @@ class OutputManager:
                         if '/' in arxiv_id:
                             category = arxiv_id.split('/')[0]
                         else:
-                            # 尝试从arXiv ID的前缀提取分类
-                            # 新格式的arXiv ID通常以年份开头，无法直接提取分类
-                            # 这种情况下保持category为None，不进行统计
                             pass
                     
                     if category:
@@ -214,7 +229,8 @@ class OutputManager:
                 category_stats=category_stats,
                 total_papers=total_papers,
                 paper_titles=paper_titles,
-                papers=papers
+                papers=papers,
+                target_date=target_date,
             )
             
             # 保存文件
@@ -412,7 +428,8 @@ def main():
         try:
             md_path = output_manager.save_markdown_report(
                 content=test_markdown,
-                save_dir="./test_output"
+                save_dir="./test_output",
+                username="TEST",
             )
             logger.success(f"Markdown报告测试完成 - {md_path}")
         except Exception as e:

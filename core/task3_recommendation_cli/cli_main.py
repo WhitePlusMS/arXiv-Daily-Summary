@@ -32,6 +32,7 @@ from ..utils.template_renderer import TemplateRenderer
 from ..utils.mcp_time_service import MCPTimeService
 from ..utils.mcp_time_service import get_current_time
 from core.output_manager import OutputManager
+import re
 
 
 class ArxivRecommenderCLI:
@@ -387,12 +388,17 @@ class ArxivRecommenderCLI:
             logger.warning("邮件发送失败，但报告已成功生成并保存到本地")
             # 不重新抛出异常，让程序继续运行
     
-    def _save_markdown_if_configured(self, markdown_content: str, current_time: str):
+    def _sanitize_username(self, username: str) -> str:
+        """将用户名转换为安全的文件名片段"""
+        return re.sub(r'[\\/:*?"<>|\s]+', '_', username.strip()) if username else "USER"
+    
+    def _save_markdown_if_configured(self, markdown_content: str, current_time: str, target_date: str = None):
         """如果配置了保存Markdown，则保存报告。
         
         Args:
             markdown_content: Markdown内容
             current_time: 当前时间
+            target_date: 查询目标日期（用于文件命名）
         """
         if not self.config['save_markdown']:
             logger.debug("Markdown保存已禁用")
@@ -401,15 +407,19 @@ class ArxivRecommenderCLI:
         logger.debug("Markdown报告保存开始")
         try:
             # 生成文件名
-            date_str = datetime.datetime.now().strftime("%Y-%m-%d")
-            filename = f"{date_str}_ARXIV_summary.md"
+            date_str = target_date if target_date else datetime.datetime.now().strftime("%Y-%m-%d")
+            username = self._get_current_username()
+            safe_username = self._sanitize_username(username)
+            filename = f"{date_str}_{safe_username}_ARXIV_summary.md"
             logger.debug(f"生成文件名: {filename}")
             
             # 保存文件
             filepath = self.output_manager.save_markdown_report(
                 content=markdown_content,
                 save_dir=self.config['save_directory'],
-                filename=filename
+                filename=filename,
+                username=username,
+                target_date=target_date,
             )
             
             if not filepath:
@@ -418,12 +428,14 @@ class ArxivRecommenderCLI:
         except Exception as e:
             logger.error(f"Markdown报告保存异常: {e}")
     
-    def _save_html_report_if_configured(self, markdown_content: str, current_time: str):
+    def _save_html_report_if_configured(self, markdown_content: str, current_time: str, target_date: str = None):
         """如果配置了保存Markdown，则同时保存HTML格式的研究报告。
         
         Args:
             markdown_content: Markdown内容
+            save_dir: 保存目录
             current_time: 当前时间
+            target_date: 查询目标日期（用于文件命名与展示）
         """
         if not self.config['save_markdown']:
             logger.debug("HTML报告保存已禁用")
@@ -431,17 +443,19 @@ class ArxivRecommenderCLI:
         
         try:
             # 生成文件名
-            date_str = datetime.datetime.now().strftime("%Y-%m-%d")
-            filename = f"{date_str}_ARXIV_summary.html"
+            date_str = target_date if target_date else datetime.datetime.now().strftime("%Y-%m-%d")
+            username = self._get_current_username()
+            safe_username = self._sanitize_username(username)
+            filename = f"{date_str}_{safe_username}_ARXIV_summary.html"
             
             # 保存HTML文件
-            username = self._get_current_username()
             filepath = self.output_manager.save_markdown_report_as_html(
                 markdown_content=markdown_content,
                 save_dir=self.config['save_directory'],
                 current_time=current_time,
                 username=username,
-                filename=filename
+                filename=filename,
+                target_date=target_date,
             )
             
             if not filepath:
@@ -451,7 +465,7 @@ class ArxivRecommenderCLI:
             logger.error(f"HTML报告保存异常: {e}")
             return None
     
-    def _save_html_report_if_configured_separated(self, summary_content: str, detailed_analysis: str, brief_analysis: str, current_time: str, papers: list = None):
+    def _save_html_report_if_configured_separated(self, summary_content: str, detailed_analysis: str, brief_analysis: str, current_time: str, papers: list = None, target_date: str = None):
         """如果配置了保存Markdown，则保存分离内容的HTML格式研究报告。
         
         Args:
@@ -460,23 +474,25 @@ class ArxivRecommenderCLI:
             brief_analysis: 简要分析内容
             current_time: 当前时间
             papers: 论文数据列表，用于生成统计信息
+            target_date: 查询目标日期（用于文件命名与展示）
             
         Returns:
-            HTML内容字符串，如果未配置保存或失败则返回None
+            tuple: (HTML文件路径, HTML内容字符串)，如果未配置保存或失败则返回(None, None)
         """
         if not self.config['save_markdown']:
             logger.debug("HTML报告保存已禁用")
-            return None
+            return None, None
         
         logger.debug("HTML报告生成开始")
         try:
             # 生成文件名
-            date_str = datetime.datetime.now().strftime("%Y-%m-%d")
-            filename = f"{date_str}_ARXIV_summary.html"
+            date_str = target_date if target_date else datetime.datetime.now().strftime("%Y-%m-%d")
+            username = self._get_current_username()
+            safe_username = self._sanitize_username(username)
+            filename = f"{date_str}_{safe_username}_ARXIV_summary.html"
             logger.debug(f"生成HTML文件名: {filename}")
             
             # 保存HTML文件，传递分离的内容
-            username = self._get_current_username()
             filepath, html_content = self.output_manager.save_markdown_report_as_html_separated(
                 summary_content=summary_content,
                 detailed_analysis=detailed_analysis,
@@ -485,21 +501,25 @@ class ArxivRecommenderCLI:
                 current_time=current_time,
                 username=username,
                 filename=filename,
-                papers=papers
+                papers=papers,
+                target_date=target_date,
             )
             
             if filepath:
-                return html_content
+                return filepath, html_content
             else:
                 logger.error("HTML报告保存失败")
-                return None
+                return None, None
                 
         except Exception as e:
             logger.error(f"HTML报告保存异常: {e}")
-            return None
+            return None, None
     
-    def get_recommendations(self):
+    def get_recommendations(self, specific_date=None):
         """获取推荐结果，适用于Streamlit调用。
+        
+        Args:
+            specific_date: 指定日期，格式为YYYY-MM-DD，如果为None则使用智能回溯逻辑
         
         Returns:
             dict: 包含推荐结果的字典，格式为:
@@ -522,13 +542,14 @@ class ArxivRecommenderCLI:
             # 加载研究兴趣
             research_interests = self._load_research_interests()
             
-            # 尝试获取昨天和前天的论文
+            # 根据是否指定日期选择不同的逻辑
             report_result = None
             target_date_str = None
-            for days_back in [1, 2]:  # 先尝试昨天，再尝试前天
-                target_date = datetime.datetime.now() - datetime.timedelta(days=days_back)
-                target_date_str = target_date.strftime('%Y-%m-%d')
-                logger.info(f"论文获取日期: {target_date_str} (往前{days_back}天)")
+            
+            if specific_date:
+                # 指定日期模式：直接查询指定日期
+                target_date_str = specific_date
+                logger.info(f"论文获取日期: {target_date_str} (用户指定日期)")
                 
                 # 执行推荐流程
                 logger.info("论文推荐流程开始")
@@ -536,9 +557,24 @@ class ArxivRecommenderCLI:
                 
                 if report_result:
                     logger.success(f"在{target_date_str}找到了论文")
-                    break
                 else:
                     logger.warning(f"在{target_date_str}未找到相关论文")
+            else:
+                # 智能回溯模式：尝试获取昨天和前天的论文
+                for days_back in [1, 2]:  # 先尝试昨天，再尝试前天
+                    target_date = datetime.datetime.now() - datetime.timedelta(days=days_back)
+                    target_date_str = target_date.strftime('%Y-%m-%d')
+                    logger.info(f"论文获取日期: {target_date_str} (往前{days_back}天)")
+                    
+                    # 执行推荐流程
+                    logger.info("论文推荐流程开始")
+                    report_result = self.recommendation_engine.run(current_time, target_date_str)
+                    
+                    if report_result:
+                        logger.success(f"在{target_date_str}找到了论文")
+                        break
+                    else:
+                        logger.warning(f"在{target_date_str}未找到相关论文")
             
             if report_result:
                 logger.success("论文推荐流程完成")
@@ -551,14 +587,21 @@ class ArxivRecommenderCLI:
                 }
             else:
                 logger.warning("在目标日期范围内未找到相关论文")
-                # 确定最终的错误信息日期
-                final_target_date_str = (datetime.datetime.now() - datetime.timedelta(days=2)).strftime('%Y-%m-%d')
+                # 根据模式确定错误信息
+                if specific_date:
+                    error_msg = f"在指定日期 {target_date_str} 未找到相关论文"
+                else:
+                    # 智能回溯模式的错误信息
+                    final_target_date_str = (datetime.datetime.now() - datetime.timedelta(days=2)).strftime('%Y-%m-%d')
+                    error_msg = f"在目标日期 {final_target_date_str} 未找到相关论文"
+                    target_date_str = final_target_date_str
+                
                 return {
                     'success': False,
                     'data': None,
-                    'error': f"在目标日期 {final_target_date_str} 未找到相关论文",
+                    'error': error_msg,
                     'current_time': current_time,
-                    'target_date': final_target_date_str
+                    'target_date': target_date_str
                 }
             
         except Exception as e:
@@ -571,12 +614,13 @@ class ArxivRecommenderCLI:
                 'target_date': None
             }
     
-    def save_reports(self, report_result: dict, current_time: str):
+    def save_reports(self, report_result: dict, current_time: str, target_date: str = None):
         """保存报告文件，适用于Streamlit调用。
         
         Args:
             report_result: 推荐结果数据
             current_time: 当前时间
+            target_date: 查询目标日期
             
         Returns:
             dict: 保存结果，格式为:
@@ -599,9 +643,9 @@ class ArxivRecommenderCLI:
             
             logger.info("报告保存和发送开始")
             # 保存为Markdown
-            self._save_markdown_if_configured(markdown_content, current_time)
+            self._save_markdown_if_configured(markdown_content, current_time, target_date)
             # 保存为HTML研究报告，传递分离的内容和papers数据
-            html_content = self._save_html_report_if_configured_separated(summary_content, detailed_analysis, brief_analysis, current_time, papers)
+            html_filepath, html_content = self._save_html_report_if_configured_separated(summary_content, detailed_analysis, brief_analysis, current_time, papers, target_date)
             # 发送邮件，使用生成的HTML内容
             self._send_email_if_configured(html_content)
             
@@ -609,9 +653,9 @@ class ArxivRecommenderCLI:
                 'markdown_saved': self.config['save_markdown'],
                 'html_saved': html_content is not None,
                 'html_content': html_content,
+                'html_filepath': html_filepath,
                 'email_sent': self.config['send_email']
             }
-            
         except Exception as e:
             logger.error(f"报告保存异常: {e}")
             return {
@@ -630,7 +674,7 @@ class ArxivRecommenderCLI:
             
             if result['success']:
                 # 保存报告
-                save_result = self.save_reports(result['data'], result['current_time'])
+                save_result = self.save_reports(result['data'], result['current_time'], target_date=result['target_date'])
                 logger.success("ArXiv每日论文推荐系统运行完成")
             else:
                 logger.error(result['error'])

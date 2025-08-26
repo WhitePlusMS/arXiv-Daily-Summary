@@ -117,9 +117,17 @@ class ArxivFetcher:
                     return []
         return []
 
-    def fetch_papers_paged(self, category: str, date: str, per_page: int = 200, max_pages: int = 5) -> List[Dict[str, Any]]:
-        """分页 + 日期过滤（按北京时区）"""
-        logger.info(f"分页获取开始 - 分类: {category}, 日期: {date}, 每页: {per_page}, 最大页数: {max_pages}")
+    def fetch_papers_paged(self, category: str, date: str, per_page: int = 200, max_pages: int = 5, max_total: Optional[int] = None) -> List[Dict[str, Any]]:
+        """分页 + 日期过滤（按北京时区）
+        
+        Args:
+            category: arXiv 分类
+            date: 目标日期（YYYY-MM-DD，按北京时区过滤）
+            per_page: 每页请求数量
+            max_pages: 最大分页页数
+            max_total: 期望的最大返回数量（达到该数量后提前停止分页）
+        """
+        logger.info(f"分页获取开始 - 分类: {category}, 日期: {date}, 每页: {per_page}, 最大页数: {max_pages}, 目标总量: {max_total}")
         
         # 将输入日期转换为北京时区的开始和结束时间
         beijing_tz = pytz.timezone('Asia/Shanghai')
@@ -143,10 +151,22 @@ class ArxivFetcher:
         
         all_papers = []
         for page in range(max_pages):
+            # 如果已达到或超过目标数量，提前结束
+            if max_total is not None and len(all_papers) >= max_total:
+                logger.info(f"分页提前结束 - 已满足目标总量: {len(all_papers)}/{max_total}")
+                break
+            
+            # 本页实际请求数量不超过剩余所需
+            if max_total is not None:
+                remaining = max_total - len(all_papers)
+                req_per_page = max(1, min(per_page, remaining))
+            else:
+                req_per_page = per_page
+            
             start = page * per_page
             query = f"cat:{category}+AND+submittedDate:[{start_date_str}+TO+{end_date_str}]"
-            url = f"{self.base_url}?search_query={query}&start={start}&max_results={per_page}&sortBy=submittedDate&sortOrder=ascending"
-            logger.debug(f"获取第 {page+1} 页 - 起始位置: {start}")
+            url = f"{self.base_url}?search_query={query}&start={start}&max_results={req_per_page}&sortBy=submittedDate&sortOrder=ascending"
+            logger.debug(f"获取第 {page+1} 页 - 起始位置: {start}，本页请求数量: {req_per_page}")
             logger.debug(f"查询条件: {query}")
             
             # 使用指数退避重试机制处理每一页的请求
@@ -160,16 +180,26 @@ class ArxivFetcher:
                 break
                 
             all_papers.extend(page_papers)
-            logger.debug(f"第 {page+1} 页完成 - 获取: {len(page_papers)} 篇")
-            
-            if len(page_papers) < per_page:
+            logger.debug(f"第 {page+1} 页完成 - 获取: {len(page_papers)} 篇，累计: {len(all_papers)} 篇")
+
+            # 达到目标数量后立即结束（不再 sleep）
+            if max_total is not None and len(all_papers) >= max_total:
+                logger.info(f"分页提前结束 - 已满足目标总量: {len(all_papers)}/{max_total}")
+                break
+
+            # 如果本页返回数量少于请求数量，说明后续无更多条目
+            if len(page_papers) < req_per_page:
                 logger.info(f"分页结束 - 第 {page+1} 页返回数量少于请求数")
                 break
-            
+
             if page < max_pages - 1:  # 不是最后一页才等待
                 logger.debug(f"等待 {self.delay} 秒后获取下一页")
                 time.sleep(self.delay)
             
+        # 若超过目标数量，裁剪至目标数量
+        if max_total is not None and len(all_papers) > max_total:
+            all_papers = all_papers[:max_total]
+        
         logger.success(f"分页获取完成 - {category}: 总计 {len(all_papers)} 篇论文")
         return all_papers
     
