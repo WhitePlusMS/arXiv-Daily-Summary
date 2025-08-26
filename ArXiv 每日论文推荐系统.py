@@ -89,6 +89,9 @@ class StreamlitArxivRecommender:
                 'date_format': os.getenv('DATE_FORMAT', '%Y-%m-%d'),
                 'time_format': os.getenv('TIME_FORMAT', '%H:%M:%S'),
                 
+                # 调试模式配置
+                'debug_mode': os.getenv('DEBUG_MODE', 'false').lower() == 'true',
+                
                 # 日志配置
                 'log_level': os.getenv('LOG_LEVEL', 'INFO'),
                 'log_file': os.getenv('LOG_FILE', 'logs/arxiv_recommender.log'),
@@ -209,6 +212,200 @@ class StreamlitArxivRecommender:
         
         return handler
     
+    def _run_debug_mode(self, specific_date=None):
+        """调试模式：返回假数据，不调用真实API"""
+        try:
+            # 设置实时日志显示
+            log_handler = self.setup_realtime_logging()
+            
+            try:
+                target_date = specific_date or (datetime.now().date() - timedelta(days=1)).strftime('%Y-%m-%d')
+                
+                # 模拟日志输出
+                self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - INFO - [调试模式] 开始获取 {target_date} 的论文推荐...")
+                self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - INFO - [调试模式] 模拟获取ArXiv论文数据...")
+                self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - INFO - [调试模式] 模拟LLM分析处理...")
+                self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - SUCCESS - [调试模式] 成功获取到 {target_date} 的论文！")
+                
+                # 生成假数据
+                fake_summary = f"""# ArXiv 每日论文推荐报告 - {target_date}
+
+## 📊 今日概览
+
+**[调试模式]** 本报告为测试数据，未调用真实API。
+
+- 📅 **目标日期**: {target_date}
+- 🔍 **检索分类**: {', '.join(self.config.get('arxiv_categories', ['cs.CV', 'cs.LG']))}
+- 📄 **论文总数**: 15篇
+- ⭐ **重点推荐**: 3篇
+- 📝 **简要分析**: 7篇
+
+## 🎯 研究兴趣匹配度
+
+根据您的研究方向：
+{chr(10).join([f'- {interest}' for interest in self.research_interests[:3]])}
+
+系统为您筛选出最相关的论文。
+
+---
+
+"""
+                
+                fake_detailed = """## 🌟 重点推荐论文
+
+### 1. [调试] Advanced Deep Learning Techniques for Computer Vision
+
+**作者**: Zhang Wei, Li Ming, Wang Xiaoli  
+**发布时间**: {target_date}  
+**分类**: cs.CV, cs.LG  
+**链接**: https://arxiv.org/abs/2024.12345
+
+#### 📋 论文摘要
+本文提出了一种新的深度学习方法，用于改进计算机视觉任务的性能。该方法结合了注意力机制和残差网络，在多个基准数据集上取得了显著的改进。
+
+#### 🔍 详细分析
+**技术创新点**:
+- 提出了多尺度注意力机制
+- 设计了新的残差连接结构
+- 引入了自适应学习率调整策略
+
+**实验结果**:
+- 在ImageNet上准确率提升2.3%
+- 推理速度提升15%
+- 模型参数减少10%
+
+**研究意义**:
+该工作为计算机视觉领域提供了新的思路，特别是在模型效率和性能平衡方面有重要贡献。
+
+---
+
+### 2. [调试] Efficient Natural Language Processing with Transformer Variants
+
+**作者**: Chen Yifan, Liu Jiawei, Zhou Mengting  
+**发布时间**: {target_date}  
+**分类**: cs.CL, cs.LG  
+**链接**: https://arxiv.org/abs/2024.12346
+
+#### 📋 论文摘要
+本研究探索了Transformer架构的新变体，旨在提高自然语言处理任务的效率和性能。
+
+#### 🔍 详细分析
+**技术创新点**:
+- 优化了自注意力机制的计算复杂度
+- 提出了新的位置编码方法
+- 设计了层次化的特征融合策略
+
+**实验结果**:
+- 在GLUE基准上平均提升1.8%
+- 训练时间减少30%
+- 内存使用降低25%
+
+---
+
+""".format(target_date=target_date)
+                
+                fake_brief = """## 📝 简要分析论文
+
+### 3. [调试] Reinforcement Learning for Robotics Applications
+**作者**: Wang Hao, Li Shan  
+**分类**: cs.RO, cs.LG  
+**简要**: 提出了一种新的强化学习算法，用于机器人控制任务，在仿真环境中表现优异。
+
+### 4. [调试] Graph Neural Networks for Social Network Analysis
+**作者**: Yang Mei, Zhang Lei  
+**分类**: cs.SI, cs.LG  
+**简要**: 设计了专门用于社交网络分析的图神经网络架构，能够有效捕获社交关系的复杂模式。
+
+### 5. [调试] Federated Learning with Privacy Preservation
+**作者**: Liu Qiang, Chen Xin  
+**分类**: cs.CR, cs.LG  
+**简要**: 在联邦学习框架中引入了新的隐私保护机制，平衡了模型性能和隐私安全。
+
+### 6. [调试] Multi-Modal Learning for Medical Image Analysis
+**作者**: Zhou Ling, Wang Jun  
+**分类**: cs.CV, cs.LG  
+**简要**: 结合多模态数据进行医学图像分析，在疾病诊断任务上取得了显著改进。
+
+### 7. [调试] Quantum Machine Learning Algorithms
+**作者**: Li Feng, Zhang Yu  
+**分类**: quant-ph, cs.LG  
+**简要**: 探索了量子计算在机器学习中的应用，提出了几种新的量子机器学习算法。
+
+---
+
+## 📈 总结
+
+**[调试模式提示]** 以上内容为模拟数据，用于测试系统功能。在实际使用中，系统会调用真实的ArXiv API和LLM服务来生成准确的论文推荐报告。
+
+今日推荐的论文涵盖了计算机视觉、自然语言处理、强化学习等多个前沿领域，为您的研究提供了丰富的参考资料。
+
+"""
+                
+                # 合并内容
+                markdown_content = fake_summary + fake_detailed + fake_brief
+                
+                # 生成HTML内容（简化版）
+                fake_html = f"""<!DOCTYPE html>
+<html>
+<head>
+    <title>ArXiv推荐报告 - {target_date}</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <h1>ArXiv 每日论文推荐报告 - {target_date}</h1>
+    <p><strong>[调试模式]</strong> 本报告为测试数据</p>
+    <div>{markdown_content.replace(chr(10), '<br>')}</div>
+</body>
+</html>"""
+                
+                # 生成文件名
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                filename = f"arxiv_recommendations_debug_{timestamp}.md"
+                html_filename = f"arxiv_recommendations_debug_{timestamp}.html"
+                
+                # 为调试模式创建临时HTML文件
+                save_dir = Path(self.config.get('save_directory', './arxiv_history'))
+                save_dir.mkdir(exist_ok=True)
+                html_filepath = save_dir / html_filename
+                
+                # 保存HTML文件以便查看
+                try:
+                    with open(html_filepath, 'w', encoding='utf-8') as f:
+                        f.write(fake_html)
+                    self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - INFO - [调试模式] HTML报告已保存: {html_filepath}")
+                except Exception as e:
+                    self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - WARNING - [调试模式] HTML保存失败: {str(e)}")
+                    html_filepath = None
+                
+                self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - SUCCESS - [调试模式] 推荐系统运行完成！")
+                
+                return {
+                    'success': True,
+                    'report': markdown_content,
+                    'summary_content': fake_summary,
+                    'detailed_analysis': fake_detailed,
+                    'brief_analysis': fake_brief,
+                    'html_content': fake_html,
+                    'html_filepath': str(html_filepath) if html_filepath else None,
+                    'filename': filename,
+                    'target_date': target_date,
+                    'debug_mode': True
+                }
+                
+            finally:
+                # 移除日志处理器
+                root_logger = logging.getLogger()
+                root_logger.removeHandler(log_handler)
+                
+        except Exception as e:
+            if hasattr(self, 'log_messages'):
+                self.log_messages.append(f"{datetime.now().strftime('%H:%M:%S')} - ERROR - [调试模式] 系统异常: {str(e)}")
+            return {
+                'success': False,
+                'error': f"[调试模式] 推荐系统运行失败: {str(e)}",
+                'debug_mode': True
+            }
+    
     def run_recommendation(self, specific_date=None):
         """运行推荐系统（调用CLI核心逻辑）
         
@@ -216,6 +413,10 @@ class StreamlitArxivRecommender:
             specific_date: 指定日期，格式为YYYY-MM-DD，如果为None则使用智能回溯逻辑
         """
         try:
+            # 检查是否启用调试模式
+            if self.config.get('debug_mode', False):
+                return self._run_debug_mode(specific_date)
+            
             # 设置实时日志显示
             log_handler = self.setup_realtime_logging()
             
@@ -380,6 +581,12 @@ def main():
                 st.stop()
             st.session_state.force_reload_config = False
 
+    # 显示调试模式状态
+    if app.config.get('debug_mode', False):
+        st.warning("🔧 **调试模式已启用** - 系统将使用模拟数据，不会调用真实的ArXiv API和LLM服务")
+    else:
+        st.info("🚀 **生产模式** - 系统将调用真实的ArXiv API和LLM服务")
+
     # 用户选择
     st.subheader("👤 用户配置")
     profile_names = [p['username'] for p in app.user_profiles]
@@ -468,31 +675,24 @@ def main():
                 if 'warning' in result:
                     st.warning(f"⚠️ {result['warning']}")
                 else:
-                    st.success("🎉 推荐完成！")
+                    # 根据是否为调试模式显示不同的成功消息
+                    if result.get('debug_mode', False):
+                        st.success("🎉 调试模式推荐完成！（使用模拟数据）")
+                    else:
+                        st.success("🎉 推荐完成！")
                     st.balloons()
                 
                 # 显示报告结果
-                st.subheader("📊 推荐结果")
+                if result.get('debug_mode', False):
+                    st.subheader("📊 推荐结果 (调试模式)")
+                    st.info("💡 以下内容为调试模式生成的模拟数据，仅用于测试系统功能")
+                else:
+                    st.subheader("📊 推荐结果")
                 
                 # 检查是否有HTML报告文件
                 if result.get('html_filepath'):
-                    # 显示查看报告按钮
-                    st.markdown("### 📄 查看完整报告")
-                    
-                    # 创建查看报告按钮（使用唯一 key 避免点击后消失）
-                    if st.button("🔍 查看HTML报告", key=f"view_report_latest_{datetime.now().strftime('%Y%m%d_%H%M%S')}", use_container_width=True):
-                        try:
-                            html_path = Path(result['html_filepath'])
-                            if html_path.exists():
-                                # 与预览按钮一致：使用系统浏览器新标签页打开本地HTML
-                                webbrowser.open(f"file://{html_path.resolve()}", new=2)
-                            else:
-                                st.error("HTML 报告文件不存在，请检查生成路径。")
-                        except Exception as e:
-                            st.error(f"打开失败: {str(e)}")
-                    
                     # 显示报告路径信息
-                    st.info(f"📁 HTML报告路径: {result['html_filepath']}")
+                    st.info(f"📁 HTML报告已保存至: {result['html_filepath']}")
                 else:
                     # 如果没有HTML文件，显示简要信息
                     st.info("📋 报告生成完成，但HTML文件未保存。请检查配置设置。")
@@ -591,28 +791,24 @@ def main():
                     
                     # 处理特定日期查询的结果
                     if result['success']:
-                        st.success(f"🎉 成功获取到 {target_date_str} 的论文推荐！")
+                        # 根据是否为调试模式显示不同的成功消息
+                        if result.get('debug_mode', False):
+                            st.success(f"🎉 调试模式：成功获取到 {target_date_str} 的论文推荐！（使用模拟数据）")
+                        else:
+                            st.success(f"🎉 成功获取到 {target_date_str} 的论文推荐！")
                         st.balloons()
                         
                         # 显示报告结果
-                        st.subheader("📊 推荐结果")
+                        if result.get('debug_mode', False):
+                            st.subheader("📊 推荐结果 (调试模式)")
+                            st.info("💡 以下内容为调试模式生成的模拟数据，仅用于测试系统功能")
+                        else:
+                            st.subheader("📊 推荐结果")
                         
                         # 检查是否有HTML报告文件
                         if result.get('html_filepath'):
-                            # 显示查看报告按钮
-                            if st.button("🔍 查看HTML报告", key=f"view_report_specific_{datetime.now().strftime('%Y%m%d_%H%M%S')}", use_container_width=True):
-                                try:
-                                    html_path = Path(result['html_filepath'])
-                                    if html_path.exists():
-                                        # 与预览按钮一致：使用系统浏览器新标签页打开本地HTML
-                                        webbrowser.open(f"file://{html_path.resolve()}", new=2)
-                                    else:
-                                        st.error("HTML 报告文件不存在，请检查生成路径。")
-                                except Exception as e:
-                                    st.error(f"打开失败: {str(e)}")
-                                
-                                # 显示报告路径信息
-                                st.info(f"📁 HTML报告路径: {result['html_filepath']}")
+                            # 显示报告路径信息
+                            st.info(f"📁 HTML报告已保存至: {result['html_filepath']}")
                         else:
                             # 如果没有HTML文件，显示简要信息
                             st.info("📋 报告生成完成，但HTML文件未保存。请检查配置设置。")
