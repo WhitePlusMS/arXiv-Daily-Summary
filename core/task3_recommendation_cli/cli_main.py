@@ -56,6 +56,13 @@ class ArxivRecommenderCLI:
         self._load_user_categories()
         logger.success(f"系统配置加载完成 - 简要分析论文数: {self.config['num_brief_papers']}, 详细分析: {self.config['num_detailed_papers']}, 分类标签: {self.config['arxiv_categories']}")
         
+        # 使用MCP时间服务获取当前时间并记录INFO日志
+        try:
+            current_time = get_current_time()
+            logger.info(f"系统启动时间（MCP时间服务）: {current_time}")
+        except Exception as e:
+            logger.warning(f"MCP时间服务调用失败: {e}，将使用本地时间")
+        
     def _load_config(self) -> Dict[str, Any]:
         """从环境变量加载配置。
         
