@@ -16,7 +16,8 @@ class LLMProvider:
     """用于LLM交互的通用API提供商，支持通义千问、SiliconFlow等OpenAI兼容API。
     负责所有LLM提示词构建和交互逻辑。"""
     
-    def __init__(self, model: str, base_url: str, api_key: str, description: str = "", username: str = "TEST"):
+    def __init__(self, model: str, base_url: str, api_key: str, description: str = "", username: str = "TEST", 
+                 temperature: float = 0.7, top_p: float = 0.9, max_tokens: int = 4000):
         """初始化LLM提供商。
         
         Args:
@@ -25,13 +26,19 @@ class LLMProvider:
             api_key: API密钥
             description: 研究兴趣描述
             username: 用户名，用于生成报告时的署名
+            temperature: 默认温度参数
+            top_p: 默认top_p参数
+            max_tokens: 默认最大token数
         """
         logger.info(f"LLMProvider初始化开始")
         self._model_name = model
         self._client = OpenAI(base_url=base_url, api_key=api_key)
         self.description = description
         self.username = username
-        logger.success(f"LLMProvider初始化完成 - 模型: {model}, URL: {base_url}, 用户: {username}")
+        self.default_temperature = temperature
+        self.default_top_p = top_p
+        self.default_max_tokens = max_tokens
+        logger.success(f"LLMProvider初始化完成 - 模型: {model}, URL: {base_url}, 用户: {username}, 温度: {temperature}, top_p: {top_p}, max_tokens: {max_tokens}")
     
     @property
     def model_name(self) -> str:
@@ -64,13 +71,16 @@ class LLMProvider:
         ]
     
     def _call_api_with_retry(
-        self, messages: list, temperature: float, max_retries: int = 2, wait_time: int = 1
+        self, messages: list, temperature: float = None, top_p: float = None, 
+        max_tokens: int = None, max_retries: int = 2, wait_time: int = 1
     ) -> str:
         """使用重试机制调用OpenAI API。
         
         Args:
             messages: 消息列表
-            temperature: 生成温度
+            temperature: 生成温度，如果为None则使用默认值
+            top_p: top_p参数，如果为None则使用默认值
+            max_tokens: 最大token数，如果为None则使用默认值
             max_retries: 最大重试次数
             wait_time: 重试等待时间（秒）
             
@@ -80,7 +90,15 @@ class LLMProvider:
         Raises:
             Exception: API调用失败时抛出异常
         """
-        logger.debug(f"API调用开始 - 模型: {self._model_name}, 温度: {temperature}, 最大重试: {max_retries}")
+        # 使用默认值如果参数为None
+        if temperature is None:
+            temperature = self.default_temperature
+        if top_p is None:
+            top_p = self.default_top_p
+        if max_tokens is None:
+            max_tokens = self.default_max_tokens
+            
+        logger.debug(f"API调用开始 - 模型: {self._model_name}, 温度: {temperature}, top_p: {top_p}, max_tokens: {max_tokens}, 最大重试: {max_retries}")
         logger.debug(f"API配置 - 客户端: {self._client}, 基础URL: {self._client.base_url}")
         
         for attempt in range(max_retries):
@@ -90,6 +108,8 @@ class LLMProvider:
                     model=self._model_name,
                     messages=messages,
                     temperature=temperature,
+                    top_p=top_p,
+                    max_tokens=max_tokens,
                 )
                 logger.debug(f"API调用成功 - 尝试次数: {attempt + 1}")
                 return response.choices[0].message.content
@@ -136,18 +156,20 @@ class LLMProvider:
                     logger.error(f"API调用彻底失败 - 所有 {max_retries} 次尝试均失败")
                     raise
     
-    def generate_response(self, prompt: str, temperature: float = 0.7) -> str:
+    def generate_response(self, prompt: str, temperature: float = None, top_p: float = None, max_tokens: int = None) -> str:
         """使用OpenAI API生成响应。
         
         Args:
             prompt: 用户提示文本
-            temperature: 生成温度，控制输出的随机性
+            temperature: 生成温度，控制输出的随机性，如果为None则使用默认值
+            top_p: top_p参数，如果为None则使用默认值
+            max_tokens: 最大token数，如果为None则使用默认值
             
         Returns:
             生成的响应文本
         """
         messages = self._build_messages(prompt)
-        return self._call_api_with_retry(messages, temperature)
+        return self._call_api_with_retry(messages, temperature, top_p, max_tokens)
     
     def build_paper_evaluation_prompt(self, paper: Dict[str, Any], description: str) -> str:
         """构建论文评估提示词。

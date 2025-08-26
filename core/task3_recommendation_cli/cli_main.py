@@ -82,7 +82,13 @@ class ArxivRecommenderCLI:
             'num_detailed_papers': int(os.getenv('NUM_DETAILED_PAPERS', '3')),
             
             # LLM配置
-            'temperature': float(os.getenv('TEMPERATURE', '0.7')),
+
+            'qwen_model_temperature': float(os.getenv('QWEN_MODEL_TEMPERATURE', '0.7')),
+            'qwen_model_top_p': float(os.getenv('QWEN_MODEL_TOP_P', '0.9')),
+            'qwen_model_max_tokens': int(os.getenv('QWEN_MODEL_MAX_TOKENS', '4000')),
+            'qwen_model_light_temperature': float(os.getenv('QWEN_MODEL_LIGHT_TEMPERATURE', '0.5')),
+            'qwen_model_light_top_p': float(os.getenv('QWEN_MODEL_LIGHT_TOP_P', '0.8')),
+            'qwen_model_light_max_tokens': int(os.getenv('QWEN_MODEL_LIGHT_MAX_TOKENS', '2000')),
             'max_workers': int(os.getenv('MAX_WORKERS', '5')),
             
             # 文件路径配置
@@ -245,7 +251,9 @@ class ArxivRecommenderCLI:
                 description=research_interests,
                 username=username,
                 num_workers=self.config['max_workers'],
-                temperature=self.config['temperature']
+                temperature=self.config['qwen_model_temperature'],
+                top_p=self.config['qwen_model_top_p'],
+                max_tokens=self.config['qwen_model_max_tokens']
             )
             logger.debug(f"推荐引擎初始化完成 - 类别: {self.config['arxiv_categories']}, 工作线程: {self.config['max_workers']}")
             

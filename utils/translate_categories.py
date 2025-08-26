@@ -31,6 +31,11 @@ class CategoryTranslator:
         qwen_model = os.getenv("QWEN_MODEL")
         dashscope_base_url = os.getenv("DASHSCOPE_BASE_URL")
         dashscope_api_key = os.getenv("DASHSCOPE_API_KEY")
+        
+        # 读取模型参数配置
+        temperature = float(os.getenv("QWEN_MODEL_TEMPERATURE", "0.7"))
+        top_p = float(os.getenv("QWEN_MODEL_TOP_P", "0.9"))
+        max_tokens = int(os.getenv("QWEN_MODEL_MAX_TOKENS", "4000"))
 
         if not all([qwen_model, dashscope_base_url, dashscope_api_key]):
             raise ValueError("错误：请确保 .env 文件中已配置 QWEN_MODEL, DASHSCOPE_BASE_URL, 和 DASHSCOPE_API_KEY")
@@ -38,7 +43,10 @@ class CategoryTranslator:
         self.llm_provider = LLMProvider(
             model=qwen_model,
             base_url=dashscope_base_url,
-            api_key=dashscope_api_key
+            api_key=dashscope_api_key,
+            temperature=temperature,
+            top_p=top_p,
+            max_tokens=max_tokens
         )
         logger.info("LLMProvider 初始化成功，用于翻译。")
 

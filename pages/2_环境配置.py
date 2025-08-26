@@ -515,32 +515,98 @@ def render_llm_config(config_manager):
     """渲染LLM配置"""
     st.subheader("🤖 LLM配置")
     
-    col1, col2 = st.columns(2)
+    # 主模型配置
+    st.markdown("### 🚀 主模型参数配置")
+    col1, col2, col3 = st.columns(3)
     
     with col1:
-        temperature = st.slider(
-            "温度参数",
+        qwen_temperature = st.slider(
+            "主模型温度参数",
             min_value=0.0,
             max_value=2.0,
-            value=float(st.session_state.config_changes.get('TEMPERATURE', 0.7)),
+            value=float(st.session_state.config_changes.get('QWEN_MODEL_TEMPERATURE', 0.7)),
             step=0.1,
-            help="控制生成文本的随机性，值越高越随机",
-            key="temperature_slider"
+            help="控制主模型生成文本的随机性，值越高越随机",
+            key="qwen_temperature_slider"
         )
-        # 使用辅助函数跟踪配置更改
-        track_config_change('TEMPERATURE', str(temperature))
+        track_config_change('QWEN_MODEL_TEMPERATURE', str(qwen_temperature))
     
     with col2:
-        max_workers = st.number_input(
-            "最大并发工作线程数",
-            min_value=1,
-            max_value=20,
-            value=int(st.session_state.config_changes.get('MAX_WORKERS', 10)),
-            help="并发处理的最大线程数",
-            key="max_workers_input"
+        qwen_top_p = st.slider(
+            "主模型Top-P参数",
+            min_value=0.0,
+            max_value=1.0,
+            value=float(st.session_state.config_changes.get('QWEN_MODEL_TOP_P', 0.9)),
+            step=0.05,
+            help="控制主模型词汇选择的多样性，值越小越保守",
+            key="qwen_top_p_slider"
         )
-        # 使用辅助函数跟踪配置更改
-        track_config_change('MAX_WORKERS', str(max_workers))
+        track_config_change('QWEN_MODEL_TOP_P', str(qwen_top_p))
+    
+    with col3:
+        qwen_max_tokens = st.number_input(
+            "主模型最大Token数",
+            min_value=500,
+            max_value=8000,
+            value=int(st.session_state.config_changes.get('QWEN_MODEL_MAX_TOKENS', 4000)),
+            step=100,
+            help="主模型单次生成的最大token数量",
+            key="qwen_max_tokens_input"
+        )
+        track_config_change('QWEN_MODEL_MAX_TOKENS', str(qwen_max_tokens))
+    
+    # 轻量模型配置
+    st.markdown("### ⚡ 轻量模型参数配置")
+    col4, col5, col6 = st.columns(3)
+    
+    with col4:
+        qwen_light_temperature = st.slider(
+            "轻量模型温度参数",
+            min_value=0.0,
+            max_value=2.0,
+            value=float(st.session_state.config_changes.get('QWEN_MODEL_LIGHT_TEMPERATURE', 0.5)),
+            step=0.1,
+            help="控制轻量模型生成文本的随机性，值越高越随机",
+            key="qwen_light_temperature_slider"
+        )
+        track_config_change('QWEN_MODEL_LIGHT_TEMPERATURE', str(qwen_light_temperature))
+    
+    with col5:
+        qwen_light_top_p = st.slider(
+            "轻量模型Top-P参数",
+            min_value=0.0,
+            max_value=1.0,
+            value=float(st.session_state.config_changes.get('QWEN_MODEL_LIGHT_TOP_P', 0.8)),
+            step=0.05,
+            help="控制轻量模型词汇选择的多样性，值越小越保守",
+            key="qwen_light_top_p_slider"
+        )
+        track_config_change('QWEN_MODEL_LIGHT_TOP_P', str(qwen_light_top_p))
+    
+    with col6:
+        qwen_light_max_tokens = st.number_input(
+            "轻量模型最大Token数",
+            min_value=500,
+            max_value=4000,
+            value=int(st.session_state.config_changes.get('QWEN_MODEL_LIGHT_MAX_TOKENS', 2000)),
+            step=100,
+            help="轻量模型单次生成的最大token数量",
+            key="qwen_light_max_tokens_input"
+        )
+        track_config_change('QWEN_MODEL_LIGHT_MAX_TOKENS', str(qwen_light_max_tokens))
+    
+    # 通用配置
+    st.markdown("### ⚙️ 通用配置")
+    
+    max_workers = st.number_input(
+        "最大并发工作线程数",
+        min_value=1,
+        max_value=20,
+        value=int(st.session_state.config_changes.get('MAX_WORKERS', 10)),
+        help="并发处理的最大线程数",
+        key="max_workers_input"
+    )
+    track_config_change('MAX_WORKERS', str(max_workers))
 
 def render_file_config(config_manager):
     """渲染文件路径配置"""

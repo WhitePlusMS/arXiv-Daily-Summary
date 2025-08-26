@@ -65,7 +65,7 @@ class StreamlitArxivRecommender:
                 'num_detailed_papers': int(os.getenv('NUM_DETAILED_PAPERS', '3')),
                 
                 # LLM配置
-                'temperature': float(os.getenv('TEMPERATURE', '0.7')),
+    
                 'max_workers': int(os.getenv('MAX_WORKERS', '5')),
                 
                 # 文件路径配置

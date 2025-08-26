@@ -30,6 +30,8 @@ class RecommendationEngine:
         username: str = "TEST",
         num_workers: int = 2,
         temperature: float = 0.7,
+        top_p: float = 0.9,
+        max_tokens: int = 4000,
     ):
         """初始化推荐引擎。
         
@@ -45,6 +47,8 @@ class RecommendationEngine:
             username: 用户名，用于生成报告时的署名
             num_workers: 并行处理线程数
             temperature: LLM生成温度
+            top_p: LLM top_p参数
+            max_tokens: LLM最大token数
         """
         logger.info("推荐引擎初始化开始")
         self.categories = categories
@@ -57,8 +61,19 @@ class RecommendationEngine:
         # 初始化ArXiv获取器和LLM提供商
         logger.debug("初始化ArXiv获取器和LLM提供商")
         self.arxiv_fetcher = ArxivFetcher()
-        self.llm_provider = LLMProvider(model=model, base_url=base_url, api_key=api_key, description=description, username=username)
+        self.llm_provider = LLMProvider(
+            model=model, 
+            base_url=base_url, 
+            api_key=api_key, 
+            description=description, 
+            username=username,
+            temperature=temperature,
+            top_p=top_p,
+            max_tokens=max_tokens
+        )
         self.temperature = temperature
+        self.top_p = top_p
+        self.max_tokens = max_tokens
         
         logger.success(f"推荐引擎初始化完成 - 分类: {categories}, 详细分析: {num_detailed_papers}, 简要分析: {num_brief_papers}")
 
