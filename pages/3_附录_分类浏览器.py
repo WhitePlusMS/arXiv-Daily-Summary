@@ -133,7 +133,8 @@ def main():
             <h3 style='color: #1e40af; font-size: 1.2rem; margin-bottom: 0.8rem;'>💡 使用指南</h3>
             <p style='color: #374151; font-size: 1.1rem; line-height: 1.6; margin: 0;'>
                 点击上方的 📁 展开按钮查看每个学术领域的详细分类信息。支持使用浏览器的 <kbd>Ctrl+F</kbd> 或 <kbd>Cmd+F</kbd> 
-                进行页面内搜索，快速定位你感兴趣的研究方向。
+                进行页面内搜索，快速定位你感兴趣的研究方向。<br><br>
+                原文详见 <a href='https://arxiv.org/category_taxonomy' target='_blank' style='color: #2563eb; text-decoration: none; font-weight: 500;'>https://arxiv.org/category_taxonomy</a>
             </p>
         </div>
     </div>
