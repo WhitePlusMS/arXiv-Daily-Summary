@@ -172,6 +172,68 @@ class LLMProvider:
         messages = self._build_messages(prompt)
         return self._call_api_with_retry(messages, temperature, top_p, max_tokens)
     
+    def build_research_description_optimization_prompt(self, user_description: str) -> str:
+        """构建研究内容描述优化提示词（基于COSTAR原则）。
+        
+        Args:
+            user_description: 用户输入的简短研究描述
+            
+        Returns:
+            优化提示词
+        """
+        return f"""
+# Context (背景)
+你是一位资深的学术研究顾问和科研写作专家，专门帮助研究人员完善和优化他们的研究兴趣描述。你具有丰富的跨学科研究经验，能够准确理解各个领域的研究方向和术语。
+
+# Objective (目标)
+请将用户提供的简短研究描述扩展为一个详细、专业、结构化的研究兴趣说明。这个优化后的描述将用于ArXiv论文分类匹配系统，帮助用户找到最相关的研究论文。
+
+# Style (风格)
+- 使用学术性但易懂的语言
+- 保持专业和客观的语调
+- 结构清晰，层次分明
+- 包含具体的技术术语和关键词
+
+# Tone (语调)
+专业、准确、详细但不冗长，体现研究者的专业水平
+
+# Audience (受众)
+学术论文推荐系统和其他研究人员
+
+# Response (响应格式)
+请按照以下结构优化用户的研究描述：
+
+## 用户原始描述
+{user_description}
+
+## 优化后的研究兴趣描述
+
+### 核心研究领域
+[明确指出主要的研究领域和方向]
+
+### 具体研究兴趣
+[详细列出具体的研究子领域、技术方向或问题]
+
+### 关键技术和方法
+[列出相关的技术、方法、算法或工具]
+
+### 应用场景和目标
+[描述研究的应用领域和预期目标]
+
+### 相关关键词
+[提供一系列相关的学术关键词，用逗号分隔]
+
+---
+
+**要求：**
+1. 保持用户原始意图不变，只进行扩展和完善
+2. 添加相关的学术术语和技术细节
+3. 确保描述足够具体，能够准确匹配相关论文
+4. 如果用户描述过于简单，请合理推断可能的研究方向
+5. 总长度控制在500字之内
+6. 使用中文回复
+        """.strip()
+
     def build_paper_evaluation_prompt(self, paper: Dict[str, Any], description: str) -> str:
         """构建论文评估提示词。
         
@@ -248,6 +310,29 @@ class LLMProvider:
             return {
                 "relevance_score": 0
             }
+    
+    def optimize_research_description(self, user_description: str, temperature: float = None) -> str:
+        """优化用户的研究内容描述。
+        
+        Args:
+            user_description: 用户输入的简短研究描述
+            temperature: 生成温度（为None时使用provider默认值）
+            
+        Returns:
+            优化后的研究描述
+        """
+        logger.debug(f"研究描述优化开始 - 原始长度: {len(user_description)} 字符")
+        
+        prompt = self.build_research_description_optimization_prompt(user_description)
+        
+        try:
+            response = self.generate_response(prompt, temperature)
+            logger.debug(f"研究描述优化完成 - 优化后长度: {len(response)} 字符")
+            return response
+            
+        except Exception as e:
+            logger.error(f"研究描述优化异常: {e}")
+            return f"优化失败，返回原始描述：\n\n{user_description}"
         except Exception as e:
             logger.error(f"论文评估异常 - {title_short}: {e}")
             return {

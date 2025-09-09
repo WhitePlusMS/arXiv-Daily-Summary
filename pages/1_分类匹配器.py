@@ -23,6 +23,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from core.task2_category_matching.task2_category_matcher import CategoryMatcher, MultiUserDataManager
+from core.llm_provider import LLMProvider
 
 # 加载环境变量
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'), override=True)
@@ -98,6 +99,20 @@ st.markdown("""
     padding: 1rem;
     border-radius: 0.5rem;
     border: 1px solid #f5c6cb;
+}
+.optimize-button {
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.optimize-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 </style>
 """, unsafe_allow_html=True)
@@ -267,23 +282,75 @@ def main():
     # 主界面布局
     st.markdown('<h2 class="sub-header">📝 输入研究信息</h2>', unsafe_allow_html=True)
         
-    # 用户输入表单
+    # 用户输入区域
+    username = st.text_input(
+        "用户名",
+        placeholder="请输入您的用户名",
+        help="用于标识和保存您的匹配结果"
+    )
+    
+    # 初始化session state中的用户输入
+    if 'user_input' not in st.session_state:
+        st.session_state.user_input = ""
+    
+    user_input = st.text_area(
+        "研究内容描述",
+        value=st.session_state.user_input,
+        height=200,
+        placeholder="请详细描述您的研究方向和兴趣领域...\n\n例如：\n# 个人研究兴趣\n我正在从事RAG领域的研究。具体来说，我对以下领域感兴趣：\n1. RAG（检索增强生成）\n2. LLM（大语言模型）\n3. 多模态大语言模型",
+        help="支持Markdown格式，请尽可能详细地描述您的研究方向",
+        key="research_description"
+    )
+    
+    # 更新session state
+    st.session_state.user_input = user_input
+    
+    # 优化按钮
+    col1, col2 = st.columns([3, 1])
+    with col2:
+        optimize_clicked = st.button(
+            "✨ AI优化描述",
+            help="使用AI来扩展和完善您的研究描述",
+            use_container_width=True
+        )
+    
+    # 处理优化请求
+    if optimize_clicked:
+        if not user_input.strip():
+            st.error("❌ 请先输入研究内容描述")
+        else:
+            with st.spinner("🤖 AI正在优化您的研究描述，请稍候..."):
+                try:
+                    # 初始化LLM提供商
+                    provider = os.getenv("LIGHT_MODEL_PROVIDER", "dashscope").lower()
+                    if provider == "ollama":
+                        model = os.getenv("OLLAMA_MODEL_LIGHT", "qwen3:0.6B")
+                        base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
+                        api_key = os.getenv("OLLAMA_API_KEY", "ollama")
+                    else:
+                        model = os.getenv("QWEN_MODEL_LIGHT", "qwen-plus")
+                        base_url = os.getenv("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
+                        api_key = os.getenv("DASHSCOPE_API_KEY")
+                        if not api_key:
+                            st.error("❌ 请配置API密钥")
+                            st.stop()
+                    
+                    llm_provider = LLMProvider(model, base_url, api_key)
+                    optimized_description = llm_provider.optimize_research_description(user_input)
+                    
+                    # 更新session state和重新运行
+                    st.session_state.user_input = optimized_description
+                    st.success("✅ 研究描述已优化完成！")
+                    st.rerun()
+                    
+                except Exception as e:
+                    st.error(f"❌ 优化过程中出现错误: {e}")
+    
+    # 匹配表单
     with st.form("matching_form"):
-        username = st.text_input(
-            "用户名",
-            placeholder="请输入您的用户名",
-            help="用于标识和保存您的匹配结果"
-        )
-        
-        user_input = st.text_area(
-            "研究内容描述",
-            height=200,
-            placeholder="请详细描述您的研究方向和兴趣领域...\n\n例如：\n# 个人研究兴趣\n我正在从事RAG领域的研究。具体来说，我对以下领域感兴趣：\n1. RAG（检索增强生成）\n2. LLM（大语言模型）\n3. 多模态大语言模型",
-            help="支持Markdown格式，请尽可能详细地描述您的研究方向"
-        )
-        
+        st.markdown("### 🚀 开始匹配")
         submitted = st.form_submit_button(
-            "🚀 开始匹配",
+            "开始匹配分类",
             type="primary",
             use_container_width=True
         )
