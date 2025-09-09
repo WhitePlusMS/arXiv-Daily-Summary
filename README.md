@@ -9,6 +9,10 @@
   一个智能的 arXiv 论文总结工具，每日自动为您筛选、总结和推荐符合您研究兴趣的最新论文。
 </p>
 
+<p align="center">
+  <a href="./README.md">中文</a> | <a href="./README_EN.md">English</a>
+</p>
+
 ---
 
 ## 📚 目录导航
