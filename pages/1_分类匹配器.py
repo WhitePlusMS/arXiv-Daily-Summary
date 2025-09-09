@@ -370,6 +370,12 @@ def main():
             if matcher is None:
                 st.warning("⚠️ 无法初始化匹配器，请检查API配置")
             else:
+                # 重置Token计数器
+                if hasattr(matcher, 'total_tokens'):
+                    matcher.total_tokens = 0
+                    matcher.total_input_tokens = 0
+                    matcher.total_output_tokens = 0
+                
                 # 执行匹配
                 with st.spinner("🔍 正在匹配分类，请稍候..."):
                     progress_bar = st.progress(0)

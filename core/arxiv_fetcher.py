@@ -9,6 +9,7 @@ from loguru import logger
 from datetime import datetime, timedelta
 import pytz
 import xml.etree.ElementTree as ET
+import urllib.parse
 
 class ArxivFetcher:
     def __init__(self, base_url: str = "http://export.arxiv.org/api/query", retries: int = 3, delay: int = 5):
@@ -92,10 +93,10 @@ class ArxivFetcher:
                 "category": category,
             }
 
-    def fetch_papers(self, category: str, max_results: int = 100) -> List[Dict[str, Any]]:
-        logger.info(f"论文获取开始 - 分类: {category}, 最大数量: {max_results}")
+    def fetch_papers(self, category: str, max_results: int = 100, sort_by: str = "lastUpdatedDate") -> List[Dict[str, Any]]:
+        logger.info(f"论文获取开始 - 分类: {category}, 最大数量: {max_results}, 排序方式: {sort_by}")
         query = f"cat:{category}"
-        url = f"{self.base_url}?search_query={query}&start=0&max_results={max_results}&sortBy=submittedDate&sortOrder=descending"
+        url = f"{self.base_url}?search_query={query}&start=0&max_results={max_results}&sortBy={sort_by}&sortOrder=descending"
         logger.debug(f"API请求URL: {url}")
         
         for attempt in range(self.retries):
@@ -114,6 +115,42 @@ class ArxivFetcher:
                     time.sleep(self.delay)
                 else:
                     logger.error(f"论文获取彻底失败 - {category}: 所有 {self.retries} 次尝试均失败")
+                    return []
+        return []
+
+    def fetch_papers_by_query(self, search_query: str, max_results: int = 100, sort_by: str = "relevance") -> List[Dict[str, Any]]:
+        """
+        根据给定的复杂搜索查询从ArXiv API获取论文。
+
+        :param search_query: 完整的ArXiv搜索查询字符串 (例如, "cat:cs.AI AND submittedDate:[20230101 TO 20231231]")
+        :param max_results: 返回的最大结果数
+        :param sort_by: 排序方式 ('relevance', 'lastUpdatedDate', 'submittedDate')
+        :return: 论文信息字典的列表
+        """
+        logger.info(f"复杂查询开始 - 查询: '{search_query}', 最大数量: {max_results}, 排序方式: {sort_by}")
+        
+        encoded_query = urllib.parse.quote(search_query)
+        
+        url = f"{self.base_url}?search_query={encoded_query}&start=0&max_results={max_results}&sortBy={sort_by}&sortOrder=descending"
+        logger.debug(f"API请求URL: {url}")
+
+        for attempt in range(self.retries):
+            try:
+                logger.debug(f"尝试获取论文 ({attempt + 1}/{self.retries})")
+                response = self.session.get(url, timeout=30)
+                response.raise_for_status()
+                feed = feedparser.parse(response.text)
+                # 注意: 对于复杂查询，分类是未知的，因此传递None
+                papers = [self._parse_api_entry(entry, None) for entry in feed.entries]
+                logger.success(f"复杂查询完成 - '{search_query}': {len(papers)} 篇")
+                return papers
+            except requests.RequestException as error:
+                logger.warning(f"复杂查询失败 ({attempt + 1}/{self.retries}) - '{search_query}': {error}")
+                if attempt < self.retries - 1:
+                    logger.debug(f"等待 {self.delay} 秒后重试")
+                    time.sleep(self.delay)
+                else:
+                    logger.error(f"复杂查询彻底失败 - '{search_query}': 所有 {self.retries} 次尝试均失败")
                     return []
         return []
 
@@ -164,8 +201,8 @@ class ArxivFetcher:
                 req_per_page = per_page
             
             start = page * per_page
-            query = f"cat:{category}+AND+submittedDate:[{start_date_str}+TO+{end_date_str}]"
-            url = f"{self.base_url}?search_query={query}&start={start}&max_results={req_per_page}&sortBy=submittedDate&sortOrder=ascending"
+            query = f"cat:{category}+AND+lastUpdatedDate:[{start_date_str}+TO+{end_date_str}]"
+            url = f"{self.base_url}?search_query={query}&start={start}&max_results={req_per_page}&sortBy=lastUpdatedDate&sortOrder=ascending"
             logger.debug(f"获取第 {page+1} 页 - 起始位置: {start}，本页请求数量: {req_per_page}")
             logger.debug(f"查询条件: {query}")
             

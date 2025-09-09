@@ -170,45 +170,88 @@ def create_top_categories_chart(categories, scores, category_names, metadata, js
     # 调整布局
     plt.tight_layout()
     
-    # 保存Top分类图表
-    top_output_path = Path(json_file_path).parent / "arxiv_top_categories_visualization.png"
+    # 保存Top分类图表（使用文件名前缀避免覆盖）
+    file_stem = Path(json_file_path).stem
+    top_output_path = Path(json_file_path).parent / f"{file_stem}_top_categories_visualization.png"
     plt.savefig(str(top_output_path), dpi=300, bbox_inches='tight')
     print(f"Top分类图表已保存到: {top_output_path}")
     # 不显示图表，只保存
     # plt.show()
 
-def main():
+def process_single_file(json_file_path):
     """
-    主函数
-    """
-    # JSON文件路径
-    json_file_path = r"c:\Users\admin\Desktop\ARXIV_daily_article_summary\data\users\detailed_scores\T3_20250909_111827_detailed_scores.json"
+    处理单个JSON文件
     
+    Args:
+        json_file_path (str): JSON文件路径
+    """
+    print(f"\n正在处理文件: {Path(json_file_path).name}")
     print("正在加载评分数据...")
     categories, scores, category_names, metadata = load_scores_data(json_file_path)
     
     if categories is None:
-        print("加载数据失败，程序退出。")
-        return
+        print(f"加载数据失败，跳过文件: {json_file_path}")
+        return False
     
     print(f"成功加载 {len(categories)} 个分类的评分数据")
     
     # 创建完整的评分可视化
-    print("\n正在生成完整评分图表...")
-    output_path = Path(json_file_path).parent / "arxiv_scores_visualization.png"
+    print("正在生成完整评分图表...")
+    file_stem = Path(json_file_path).stem
+    output_path = Path(json_file_path).parent / f"{file_stem}_scores_visualization.png"
     create_score_visualization(categories, scores, category_names, metadata, str(output_path))
     
     # 创建Top 20分类图表
-    print("\n正在生成Top 20分类图表...")
+    print("正在生成Top 20分类图表...")
     create_top_categories_chart(categories, scores, category_names, metadata, json_file_path, top_n=20)
     
-    print("\n可视化完成！")
+    print(f"文件 {Path(json_file_path).name} 可视化完成！")
     print(f"数据统计:")
     print(f"  - 总分类数: {len(categories)}")
     print(f"  - 最高评分: {max(scores)}")
     print(f"  - 最低评分: {min(scores)}")
     print(f"  - 平均评分: {np.mean(scores):.2f}")
     print(f"  - 评分大于0的分类数: {sum(1 for s in scores if s > 0)}")
+    
+    return True
+
+def main():
+    """
+    主函数 - 处理detailed_scores文件夹中的所有JSON文件
+    """
+    # detailed_scores文件夹路径
+    detailed_scores_dir = Path(r"c:\Users\admin\Desktop\ARXIV_daily_article_summary\data\users\detailed_scores")
+    
+    if not detailed_scores_dir.exists():
+        print(f"错误：文件夹不存在 {detailed_scores_dir}")
+        return
+    
+    # 查找所有JSON文件
+    json_files = list(detailed_scores_dir.glob("*.json"))
+    
+    if not json_files:
+        print(f"在文件夹 {detailed_scores_dir} 中未找到任何JSON文件")
+        return
+    
+    print(f"找到 {len(json_files)} 个JSON文件，开始批量处理...")
+    
+    successful_count = 0
+    failed_count = 0
+    
+    for json_file in json_files:
+        try:
+            if process_single_file(str(json_file)):
+                successful_count += 1
+            else:
+                failed_count += 1
+        except Exception as e:
+            print(f"处理文件 {json_file.name} 时发生错误: {e}")
+            failed_count += 1
+    
+    print(f"\n=== 批量处理完成 ===")
+    print(f"成功处理: {successful_count} 个文件")
+    print(f"失败: {failed_count} 个文件")
+    print(f"总计: {len(json_files)} 个文件")
 
 if __name__ == "__main__":
     main()

@@ -1,0 +1,4351 @@
+[
+  {
+    "id": "cs.AI",
+    "name_cn": "人工智能",
+    "description_cn": "涵盖人工智能的所有领域，但视觉、机器人、机器学习、多智能体系统以及计算与语言（自然语言处理）除外，这些领域有单独的分类。尤其包括专家系统、定理证明（尽管可能与计算机科学中的逻辑有所重叠）、知识表示、规划以及人工智能中的不确定性。大致对应ACM主题分类I.2.0、I.2.1、I.2.3、I.2.4、I.2.8和I.2.11的内容。",
+    "profile": {
+      "profile_summary": "cs.AI 分类聚焦于人工智能的核心理论与系统构建，强调知识表示、推理、规划、决策分析以及智能体系统的架构与应用。该分类旨在推动不依赖于特定感知或语言模型的通用智能系统发展，关注如何通过形式化知识、逻辑推理和多智能体协作来提升系统的可解释性、鲁棒性和实用性，尤其重视在企业自动化、公共健康、移动计算和可持续城市管理等现实场景中的部署与评估。",
+      "core_topics": [
+        "知识表示与推理",
+        "多智能体系统与智能体架构",
+        "决策理论与决策支持系统",
+        "去偏与可泛化的人工智能模型",
+        "因果与反事实推理"
+      ],
+      "common_methodologies": [
+        "知识图谱建模与补全",
+        "形式化本体设计模式",
+        "元学习与迭代优化算法",
+        "基于大语言模型的智能体系统构建",
+        "分层网络与极值分析"
+      ],
+      "interdisciplinary_connections": [
+        "认知科学与人类决策行为建模",
+        "软件工程与低代码/无代码平台开发",
+        "公共卫生与流行病监测系统"
+      ],
+      "key_terminologies": [
+        "知识图谱 (Knowledge Graph)",
+        "多智能体系统 (Multi-Agent System)",
+        "因果推理 (Causal Reasoning)",
+        "反事实推理 (Counterfactual Reasoning)",
+        "本体设计模式 (Ontology Design Pattern)",
+        "去偏基准 (Debiased Benchmark)",
+        "决策问题 (Decision Problem)",
+        "规则注入 (Rule Injection)",
+        "概念格 (Concept Lattice)",
+        "智能体评估平台 (Agent Evaluation Platform)"
+      ]
+    }
+  },
+  {
+    "id": "cs.AR",
+    "name_cn": "硬件架构",
+    "description_cn": "涵盖系统结构和硬件架构，大致包括ACM学科分类C.0、C.1和C.5中的内容。",
+    "profile": {
+      "profile_summary": "cs.AR（硬件架构）分类聚焦于计算机系统底层硬件的设计、优化与创新，致力于提升计算系统的性能、能效和灵活性。其核心研究内容涵盖处理器架构、存储系统、片上通信、专用加速器设计以及新型计算范式，目标是通过软硬件协同设计和先进架构创新，应对从边缘计算到数据中心等多样化应用场景下的计算挑战。",
+      "core_topics": [
+        "专用硬件加速器设计（如CNN、FFT、矩阵乘法加速器）",
+        "处理器微架构优化（如内存级并行、低功耗微控制器）",
+        "片上系统（SoC）与异构集成架构",
+        "可重构计算架构（如FPGA、CGRA）与动态资源管理",
+        "存储系统架构与能效优化（如压缩缓存、3D堆叠、DRAM利用）"
+      ],
+      "common_methodologies": [
+        "基于FPGA的原型设计与验证",
+        "硬件描述语言（如Verilog）建模与综合",
+        "高能效微架构设计（时钟门控、电源门控）",
+        "高阶综合（HLS）与设计空间探索（DSE）",
+        "定制指令集扩展与向量架构优化"
+      ],
+      "interdisciplinary_connections": [
+        "机器学习与人工智能（用于模型加速、边缘AI芯片设计）",
+        "嵌入式系统与物联网（面向低功耗边缘设备的架构设计）",
+        "计算机安全与可靠性（如真随机数生成、容错数据表示）"
+      ],
+      "key_terminologies": [
+        "FPGA",
+        "SoC",
+        "AHB/APB",
+        "CGRA",
+        "RISC-V",
+        "HLS",
+        "Matrix Multiplication Acceleration",
+        "Memory Level Parallelism",
+        "Energy Efficiency",
+        "Posit"
+      ]
+    }
+  },
+  {
+    "id": "cs.CC",
+    "name_cn": "计算复杂性",
+    "description_cn": "涵盖计算模型、复杂性类、结构复杂性、复杂性权衡、上下界等内容。大致包括ACM主题分类F.1（抽象设备计算）、F.2.3（复杂性度量间的权衡）和F.4.3（形式语言）中的材料，尽管部分形式语言内容可能更适合“计算机科学中的逻辑”类别。F.2.1和F.2.2中的部分内容也可能适用，但更可能以数据结构与算法为主要主题领域。",
+    "profile": {
+      "profile_summary": "计算复杂性（cs.CC）分类聚焦于计算模型的内在能力与限制，研究核心包括复杂性类的结构、计算资源（如时间、空间、电路大小）的上下界、以及不同复杂性度量之间的关系。该领域旨在通过形式化模型（如决策树、分支程序、电路）分析问题的固有难度，探索P与NP等核心问题，并推动伪随机性、下界证明和去随机化等理论进展。",
+      "core_topics": [
+        "复杂性类与计算模型的下界分析",
+        "决策树与分支程序的复杂性度量",
+        "伪随机生成器与去随机化技术",
+        "布尔函数的敏感性、块敏感性与多项式度量之间的关系",
+        "受限电路模型（如非交换电路、AC0电路）的复杂性"
+      ],
+      "common_methodologies": [
+        "随机限制与提取器技术",
+        "对称化多项式与插值分析",
+        "归约与NP-hardness证明",
+        "局部搜索与结构化图算法",
+        "矩阵表示与逆运算在可满足性问题中的应用"
+      ],
+      "interdisciplinary_connections": [
+        "理论计算机科学中的算法设计与数据结构",
+        "密码学中的伪随机性与计算安全性",
+        "人工智能中的自动推理与可满足性求解"
+      ],
+      "key_terminologies": [
+        "decision tree",
+        "branching program",
+        "pseudorandom generator",
+        "hazard-free computation",
+        "block sensitivity",
+        "circuit complexity",
+        "lower bound",
+        "Boolean satisfiability",
+        "polynomial degree",
+        "reduct"
+      ]
+    }
+  },
+  {
+    "id": "cs.CE",
+    "name_cn": "计算工程、金融与科学",
+    "description_cn": "涵盖计算机科学在科学、工程和金融领域复杂系统数学建模中的应用。本类论文具有跨学科和应用导向特点，侧重于实现复杂计算模拟的技术与工具，通常需要使用超级计算机或分布式计算平台。内容包括ACM主题分类J.2、J.3和J.4（经济学）的相关材料。",
+    "profile": {
+      "profile_summary": "cs.CE（计算工程、金融与科学）专注于计算机科学在科学、工程和金融领域中复杂系统数学建模的应用，强调跨学科性和应用导向。该分类的核心目标是开发高效、可扩展的计算方法与工具，以解决涉及多物理场、不确定性、大规模模拟和优化的复杂问题，广泛应用于材料设计、流体动力学、金融时间序列分析和生物序列工程等领域，通常依赖高性能计算平台实现。",
+      "core_topics": [
+        "复杂系统的多物理场建模与仿真",
+        "基于高性能计算的优化设计与不确定性量化",
+        "数据驱动的工程与科学建模范式（如物理增强神经网络）",
+        "金融与经济时间序列的计算建模与预测",
+        "生物与材料系统的逆向设计与智能重构"
+      ],
+      "common_methodologies": [
+        "有限元方法（FEM）与扩展形式（如PFEM、DG）",
+        "拓扑优化与结构设计中的梯度优化算法",
+        "图神经网络（GNN）与深度学习在物理系统建模中的应用",
+        "蒙特卡洛与泰勒展开等不确定性传播与风险约束优化技术",
+        "双向学习、代理模型与离线模型优化框架"
+      ],
+      "interdisciplinary_connections": [
+        "机械工程与材料科学（如超弹性材料建模、多孔介质设计）",
+        "金融计量学与经济建模（如时间序列分割、市场信号提取）",
+        "生物医学工程与计算生物学（如基因序列设计、科学影响分析）"
+      ],
+      "key_terminologies": [
+        "有限元模型（Finite Element Model）",
+        "不确定性量化（Uncertainty Quantification）",
+        "拓扑优化（Topology Optimization）",
+        "物理增强神经网络（Physics-Augmented Neural Network, PANN）",
+        "机会约束优化（Chance-Constrained Optimization）",
+        "离散元方法（Discrete Element Method, DEM）",
+        "Karhunen–Loève展开（Karhunen–Loève Expansion）",
+        "双向学习（Bidirectional Learning）",
+        "流固耦合（Fluid-Granular Interaction）",
+        "分段线性回归（Segmented Linear Regression）"
+      ]
+    }
+  },
+  {
+    "id": "cs.CG",
+    "name_cn": "计算几何",
+    "description_cn": "大致包含ACM主题分类I.3.5和F.2.2中的内容。",
+    "profile": {
+      "profile_summary": "计算几何（cs.CG）专注于几何对象的算法设计与分析，研究在欧几里得空间中点、线、多边形、曲面等几何结构的构造、重构、相似性度量、优化与可视化问题。该领域致力于解决几何数据的高效处理，涵盖从基础几何结构的理论性质到实际应用中的建模、分类与搜索策略，目标是开发具有理论保证且在实践中高效的算法。",
+      "core_topics": [
+        "几何结构的重构与拓扑推断",
+        "曲线与曲面的相似性度量（如Fréchet距离）",
+        "几何优化问题（如最大重叠、最长平面生成树）",
+        "几何图论与交集图识别",
+        "运动规划与搜索策略在地形中的应用"
+      ],
+      "common_methodologies": [
+        "扫描线与扫掠算法（sweeping algorithms）",
+        "自由空间分析与可达性计算",
+        "参数化启发式与固定参数可追踪算法",
+        "代数几何与隐式化技术",
+        "凸包、多面体与投影技术"
+      ],
+      "interdisciplinary_connections": [
+        "计算机图形学（用于曲面建模、渲染与几何处理）",
+        "机器人学（路径规划、可见性与搜索策略）",
+        "计算拓扑与拓扑数据分析（TDA，用于复形重构与树结构分析）"
+      ],
+      "key_terminologies": [
+        "simplicial complex",
+        "Fréchet distance",
+        "geodesic distance",
+        "merge tree",
+        "intersection graph",
+        "Laman graph",
+        "convex polyhedron",
+        "compatible matching",
+        "sweeping order",
+        "implicitization"
+      ]
+    }
+  },
+  {
+    "id": "cs.CL",
+    "name_cn": "计算与语言",
+    "description_cn": "涵盖自然语言处理。大致包括ACM学科分类I.2.7中的内容。请注意，关于人工语言（编程语言、逻辑、形式系统）的研究，若未明确涉及广义的自然语言问题（如自然语言处理、计算语言学、语音、文本检索等），则不适合本领域。",
+    "profile": {
+      "profile_summary": "计算与语言（cs.CL）分类聚焦于自然语言处理的核心问题，旨在通过计算方法理解和生成人类语言。该领域致力于开发能够处理、分析和生成自然语言的模型与系统，涵盖从基础的语言理解任务如文本分类、信息抽取，到高级应用如可控文本生成、多语言反仇恨言论生成、常识问答等。研究强调模型的可解释性、跨语言适应性、文化敏感性以及在低资源场景下的鲁棒性，同时探索如何利用大规模语言模型中的隐含知识和代码等形式化语言来增强智能代理能力。",
+      "core_topics": [
+        "自然语言理解与生成",
+        "多语言与低资源语言处理",
+        "可控文本生成与指令遵循",
+        "社会媒体内容分析与灾害信息处理",
+        "基于语言模型的知识利用与推理"
+      ],
+      "common_methodologies": [
+        "基于Transformer的预训练语言模型（如BERT, RoBERTa）",
+        "大语言模型（LLM）的微调与提示工程",
+        "迭代自改进与多样性优化框架",
+        "多任务学习与神经检索模型",
+        "序列到序列（Seq2Seq）建模与联合标注"
+      ],
+      "interdisciplinary_connections": [
+        "人工智能与机器学习（AI/ML）：通过深度学习架构推动NLP模型性能提升",
+        "计算社会科学：分析社交媒体中的仇恨言论、隐私政策理解等社会议题",
+        "生物信息学：将语言模型应用于基因序列与抗菌素耐药性预测"
+      ],
+      "key_terminologies": [
+        "自然语言处理（NLP）",
+        "大语言模型（LLM）",
+        "可控文本生成",
+        "多语言计数言论生成（Counterspeech Generation）",
+        "指令遵循（Instruction-following）",
+        "零样本学习（Zero-shot Learning）",
+        "命名实体识别（NER）",
+        "知识库集成",
+        "隐性结构学习（Latent Structure Learning）",
+        "对抗性重编程（Adversarial Reprogramming）"
+      ]
+    }
+  },
+  {
+    "id": "cs.CR",
+    "name_cn": "密码学与安全",
+    "description_cn": "涵盖密码学与安全的所有领域，包括认证、公钥密码系统、带证明代码等，大致包含ACM主题分类D.4.6和E.3中的内容。",
+    "profile": {
+      "profile_summary": "cs.CR（密码学与安全）分类聚焦于保障信息与通信系统的机密性、完整性、可用性和隐私性，涵盖从基础密码学机制到高级安全架构的广泛研究。该领域致力于开发和分析加密算法、隐私保护技术、身份认证机制以及主动防御策略，以应对网络空间中的各类威胁，如数据泄露、GPS欺骗、语音窃听和无线干扰等。研究目标是在理论严谨性与实际部署可行性之间取得平衡，尤其关注在物联网、区块链、5G网络和人工智能等新兴技术环境下的安全挑战。",
+      "core_topics": [
+        "隐私保护与数据匿名化技术",
+        "加密与安全通信机制",
+        "身份管理与认证攻击防御",
+        "主动防御与欺骗技术（如蜜罐、欺骗策略）",
+        "区块链与分布式系统的安全架构"
+      ],
+      "common_methodologies": [
+        "差分隐私与geo-indistinguishability",
+        "零知识证明（zk-SNARKs）与匿名凭证",
+        "联邦学习与安全多方计算（SMPC）",
+        "深度强化学习（DRL）用于动态安全决策",
+        "生成式人工智能与结构化提示工程（Prompt Engineering）"
+      ],
+      "interdisciplinary_connections": [
+        "人工智能与机器学习（用于自适应安全策略、异常检测）",
+        "物联网与边缘计算（涉及车联网、智能城市的安全架构）",
+        "网络与通信工程（5G、无线网络抗干扰、频谱共享安全）"
+      ],
+      "key_terminologies": [
+        "差分隐私",
+        "零知识证明",
+        "联邦学习",
+        "区块链分片",
+        "GPS欺骗检测",
+        "语音加密",
+        "蜜罐技术",
+        "同态加密",
+        "动态频谱共享",
+        "生成式AI安全应用"
+      ]
+    }
+  },
+  {
+    "id": "cs.CV",
+    "name_cn": "计算机视觉与模式识别",
+    "description_cn": "涵盖图像处理、计算机视觉、模式识别和场景理解，大致包括ACM主题分类I.2.10、I.4和I.5中的内容。",
+    "profile": {
+      "profile_summary": "计算机视觉与模式识别（cs.CV）致力于通过算法和模型使机器能够理解、分析和生成视觉数据。该领域涵盖图像处理、物体检测与分割、场景理解、三维重建、视觉生成与识别等多个方向，核心目标是开发能够从图像或视频中提取语义信息、进行精准识别与推理，并在跨域、少样本、零样本等复杂条件下保持鲁棒性的智能系统。",
+      "core_topics": [
+        "图像生成与深度伪造检测",
+        "物体检测与分割（包括零样本、少样本场景）",
+        "三维视觉与新视角合成（如NeRF）",
+        "视觉注意力与人眼注视预测",
+        "域自适应与鲁棒性视觉模型"
+      ],
+      "common_methodologies": [
+        "深度神经网络（CNN、Transformer）",
+        "生成对抗网络（GAN）与扩散模型（Diffusion Models）",
+        "对比学习与度量学习（Metric Learning）",
+        "提示学习（Prompt Learning）与知识引导建模",
+        "多阶段优化与迭代注意力机制"
+      ],
+      "interdisciplinary_connections": [
+        "自然语言处理（通过多模态模型如CLIP、大语言模型引导视觉任务）",
+        "机器人学（视觉导航、场景理解与三维重建）",
+        "医学影像分析（如脑肿瘤检测、植物病害识别）"
+      ],
+      "key_terminologies": [
+        "Neural Radiance Fields (NeRF)",
+        "Few-Shot Segmentation",
+        "Deepfake Detection",
+        "Domain Adaptation",
+        "Object Removal",
+        "Metric Learning",
+        "Saliency Prediction",
+        "Zero-Shot Object Detection",
+        "SAM (Segment Anything Model)",
+        "Diffusion Models"
+      ]
+    }
+  },
+  {
+    "id": "cs.CY",
+    "name_cn": "计算机与社会",
+    "description_cn": "涵盖计算机对社会的影响、计算机伦理、信息技术与公共政策、计算的法律问题、计算机与教育。大致包括ACM主题分类K.0、K.2、K.3、K.4、K.5和K.7的内容。",
+    "profile": {
+      "profile_summary": "计算机与社会（cs.CY）分类聚焦于计算技术对社会结构、制度和个体行为的广泛影响，致力于探讨技术发展所带来的伦理、政策、法律和教育挑战。该领域旨在推动技术的社会责任化应用，强调在创新与公平、透明、安全之间取得平衡，研究涵盖从公共部门到教育、从平台治理到职场实践的多维度社会互动，目标是构建以人为本、可信赖且包容的计算生态系统。",
+      "core_topics": [
+        "人工智能伦理与治理",
+        "信息技术在教育中的应用与影响",
+        "数字平台安全与用户行为",
+        "技术对公共政策与公共服务的影响",
+        "计算中的社会公平与多样性"
+      ],
+      "common_methodologies": [
+        "文本挖掘与政策文档分析",
+        "问卷调查与用户行为研究",
+        "数据集构建与实证分析",
+        "混合方法研究（定量与定性结合）",
+        "批判性技术分析与框架构建"
+      ],
+      "interdisciplinary_connections": [
+        "科学、技术与社会（STS）",
+        "教育学与学习科学",
+        "公共政策与治理"
+      ],
+      "key_terminologies": [
+        "Generative AI",
+        "Large Language Models (LLMs)",
+        "AI ethics",
+        "digital literacy",
+        "platform safety technology",
+        "online harms",
+        "corporate misinformation",
+        "backdoor poisoning",
+        "semi-supervised learning",
+        "affordance analysis"
+      ]
+    }
+  },
+  {
+    "id": "cs.DB",
+    "name_cn": "数据库",
+    "description_cn": "涵盖数据库管理、数据挖掘和数据处理，大致包括ACM主题分类E.2、E.5、H.0、H.2和J.1中的内容。",
+    "profile": {
+      "profile_summary": "cs.DB（数据库）分类聚焦于数据库管理、数据处理与数据挖掘的理论、系统与应用研究，旨在提升数据存储、查询、分析与可视化的效率和智能化水平。该领域不仅关注传统关系型与非关系型数据库系统的优化与评估，还积极探索数据立方体、动态图结构、分布式架构等高级数据模型的设计与实现，并致力于将机器学习、元学习、预训练模型等先进技术融入数据管理流程，以支持复杂场景下的数据发现、增强、推理与交互式分析，推动数据库系统向自动化、可扩展和智能化方向发展。",
+      "core_topics": [
+        "数据立方体与OLAP系统优化",
+        "动态图数据结构与查询处理",
+        "数据库系统性能评估与基准测试",
+        "基于机器学习的数据发现与增强",
+        "分布式图数据库与混合数据架构"
+      ],
+      "common_methodologies": [
+        "实验性系统实现与性能评测",
+        "机器学习与深度学习模型集成",
+        "元学习与小样本学习框架",
+        "查询优化与代理模型构建",
+        "数据立方体压缩与闭合表示"
+      ],
+      "interdisciplinary_connections": [
+        "机器学习与数据挖掘",
+        "人机交互与可视化系统",
+        "物联网与工业大数据分析"
+      ],
+      "key_terminologies": [
+        "data cube",
+        "OLAP",
+        "pre-trained foundation models",
+        "dynamic graphs",
+        "connectivity queries",
+        "distributed graph database",
+        "cardinality estimation",
+        "query synthesis",
+        "anomaly explanation",
+        "FAIR data"
+      ]
+    }
+  },
+  {
+    "id": "cs.DC",
+    "name_cn": "分布式、并行与集群计算",
+    "description_cn": "涵盖容错、分布式算法、稳定性、并行计算和集群计算。大致包括ACM主题分类C.1.2、C.1.4、C.2.4、D.1.3、D.4.5、D.4.7、E.1中的内容。",
+    "profile": {
+      "profile_summary": "cs.DC（分布式、并行与集群计算）专注于构建高效、可靠和可扩展的计算系统，研究内容涵盖分布式算法设计、容错机制、并行计算模型、集群资源管理以及在边缘-云协同环境下的系统优化。该领域致力于解决大规模计算任务中的通信开销、同步难题、资源调度和数据一致性等问题，目标是提升分布式系统的性能、鲁棒性和能效，支持从科学计算到边缘智能应用的广泛场景。",
+      "core_topics": [
+        "分布式共识与容错机制",
+        "联邦学习与分布式机器学习系统",
+        "边缘-云协同计算与资源调度",
+        "高性能计算中的I/O与存储优化",
+        "分布式系统中的时间同步与通信效率"
+      ],
+      "common_methodologies": [
+        "异步拜占庭容错协议设计",
+        "梯度压缩与模型聚合算法",
+        "动态资源分配与优化建模（如混合整数规划）",
+        "容器化工作流调度与边缘任务卸载",
+        "基于强化学习的自适应控制策略"
+      ],
+      "interdisciplinary_connections": [
+        "机器学习（特别是联邦学习与模型训练优化）",
+        "网络安全与隐私保护（如差分隐私、区块链）",
+        "物联网与智能交通系统（如车联网资源交易）"
+      ],
+      "key_terminologies": [
+        "Byzantine Agreement",
+        "Federated Learning",
+        "Split Learning",
+        "State Machine Replication",
+        "Edge-Cloud Continuum",
+        "Gradient Compression",
+        "Time Synchronization",
+        "Differential Privacy",
+        "KubeEdge",
+        "Hierarchical Storage"
+      ]
+    }
+  },
+  {
+    "id": "cs.DL",
+    "name_cn": "数字图书馆",
+    "description_cn": "涵盖数字图书馆设计以及文档和文本创建的各个方面。请注意，部分内容与信息检索（为独立主题领域）有所重叠。大致包括ACM主题分类H.3.5、H.3.6、H.3.7和I.7中的内容。",
+    "profile": {
+      "profile_summary": "cs.DL（数字图书馆）分类聚焦于数字图书馆系统的设计、管理与评估，涵盖学术资源的组织、元数据管理、开放科学监测、电子资源使用度量以及学术交流的数字化转型。其核心目标是通过技术手段提升学术信息的可访问性、透明度与再利用能力，推动开放科学实践，并解决数字环境下文献存档、引用完整性、科研评价公平性等关键问题。",
+      "core_topics": [
+        "数字图书馆系统设计与架构",
+        "学术元数据管理与质量控制",
+        "电子资源使用统计与评估指标",
+        "开放科学监测与科研政策评估",
+        "学术出版模式的数字化转型"
+      ],
+      "common_methodologies": [
+        "元数据分析与数据挖掘",
+        "网络爬虫与网页归档技术",
+        "相关性分析与统计建模（如Spearman相关系数）",
+        "文献计量与引文分析",
+        "系统设计与插件开发（如OJS插件）"
+      ],
+      "interdisciplinary_connections": [
+        "信息检索（Information Retrieval）",
+        "科学学与科研评价（Scientometrics and Research Assessment）",
+        "网络社会学与平台治理（Web Sociology and Platform Governance）"
+      ],
+      "key_terminologies": [
+        "数字图书馆",
+        "元数据",
+        "COUNTER R5",
+        "开放科学",
+        "引文指标",
+        "学术出版",
+        "在线使用统计",
+        "链接解析器（Link Resolver）",
+        "科研数据管理",
+        "开放获取"
+      ]
+    }
+  },
+  {
+    "id": "cs.DM",
+    "name_cn": "离散数学",
+    "description_cn": "涵盖组合数学、图论和概率应用，大致包括ACM主题分类G.2和G.3的内容。",
+    "profile": {
+      "profile_summary": "cs.DM（离散数学）分类聚焦于组合数学、图论以及概率在计算机科学中的应用，致力于研究离散结构的性质、算法及其复杂性。该领域关注图的结构与优化、布尔网络与逻辑系统、组合对象的枚举与排序、随机数生成机制，以及在不确定性条件下的调度与决策问题。其核心目标是发展理论工具以建模和分析复杂离散系统，并解决在计算、通信、运筹和人工智能等领域中出现的结构性与算法性挑战。",
+      "core_topics": [
+        "图论与图算法",
+        "组合结构与Gray码",
+        "布尔网络与逻辑系统",
+        "随机性与伪随机数生成",
+        "不确定性下的优化与调度"
+      ],
+      "common_methodologies": [
+        "图结构分析与特征值分析",
+        "随机规划与两阶段优化模型",
+        "多项式时间算法与复杂性证明",
+        "线性化与混合整数规划",
+        "模拟与数值实验"
+      ],
+      "interdisciplinary_connections": [
+        "理论计算机科学",
+        "运筹学与管理科学",
+        "人工智能与逻辑推理"
+      ],
+      "key_terminologies": [
+        "图论",
+        "组合数学",
+        "布尔网络",
+        "高效支配集",
+        "Gray码",
+        "随机规划",
+        "超图",
+        "本征求解",
+        "NP完全性",
+        "伪随机数生成器"
+      ]
+    }
+  },
+  {
+    "id": "cs.DS",
+    "name_cn": "数据结构与算法",
+    "description_cn": "涵盖数据结构与算法分析，大致包括ACM学科分类E.1、E.2、F.2.1和F.2.2中的内容。",
+    "profile": {
+      "profile_summary": "数据结构与算法（cs.DS）分类聚焦于设计、分析和优化用于高效存储和处理数据的算法与数据结构，涵盖从基础理论到大规模实际应用的广泛问题。该领域致力于解决计算效率、资源消耗和可扩展性等核心挑战，研究内容包括图算法、动态数据结构、近似与在线算法、分布式与局部计算模型，以及面向大数据的压缩与索引技术，目标是在理论保证下实现高性能的算法解决方案。",
+      "core_topics": [
+        "图算法与图数据结构",
+        "动态与可持久化数据结构",
+        "近似与在线算法设计",
+        "子模函数优化",
+        "大规模数据处理中的高效数据结构"
+      ],
+      "common_methodologies": [
+        "贪心算法与局部搜索",
+        "随机化与概率性数据结构",
+        "分布式与局部计算模型（如LCA、LEDP）",
+        "多项式时间近似方案（PTAS）与误差分析",
+        "复杂度下界证明与条件性硬度假设"
+      ],
+      "interdisciplinary_connections": [
+        "机器学习（如LSH、近邻搜索）",
+        "数据库系统（如Bloom过滤器在查询优化中的应用）",
+        "生物信息学（如后缀数组在基因序列分析中的使用）"
+      ],
+      "key_terminologies": [
+        "后缀数组",
+        "差分隐私",
+        "子模函数",
+        "拟阵约束",
+        "动态时间规整",
+        "Bloom过滤器",
+        "最大匹配",
+        "边定向",
+        "PageRank",
+        "敏感性 oracle"
+      ]
+    }
+  },
+  {
+    "id": "cs.ET",
+    "name_cn": "新兴技术",
+    "description_cn": "涵盖基于硅基CMOS技术以外的信息处理（计算、通信、传感）和生物化学分析方法，例如纳米电子、光子、自旋、超导、机械、生物化学及量子技术（此列表非穷尽）。感兴趣的主题包括：（1）新兴技术的基本单元，其可扩展性及在更大系统中的应用，包括与传统技术的集成；（2）新型器件与系统的建模、设计与优化；（3）新兴技术的计算模型、算法设计与编程方法。",
+    "profile": {
+      "profile_summary": "cs.ET（新兴技术）专注于探索超越传统硅基CMOS的信息处理技术，涵盖计算、通信、传感和生物化学分析等多个方面。该领域致力于开发基于纳米电子、光子、自旋、超导、机械、生物化学及量子等原理的新型器件与系统，重点研究其基本单元的可扩展性、与传统技术的集成能力、新型计算模型与算法设计，以及在人工智能、物联网和边缘计算等场景中的高效能应用。其核心目标是突破现有冯·诺依曼架构的瓶颈，推动低功耗、高能效、高并行性的下一代计算范式发展。",
+      "core_topics": [
+        "存内计算与非易失性存储器加速器设计",
+        "基于新型物理机制的模拟与混合信号计算（如自旋电子学、铁电器件）",
+        "神经形态与脉冲神经网络的硬件实现与在线学习",
+        "可重构智能表面与卫星通信中的新兴无线技术",
+        "分子通信与基于粒子传输的信息编码机制"
+      ],
+      "common_methodologies": [
+        "器件-电路协同设计与仿真（如FeFET、MTJ、ECRAM建模）",
+        "基于FPGA或专用芯片的硬件原型实现与测试",
+        "使用NeuroSim等框架进行神经网络加速器的系统级评估",
+        "优化理论与凸松弛方法在通信资源分配中的应用",
+        "抽象计算模型构建（如tile displacement、timescale choreography）"
+      ],
+      "interdisciplinary_connections": [
+        "量子计算与信息安全（量子侧信道攻击）",
+        "生物分子工程与纳米技术（DNA纳米结构、磁性纳米粒子通信）",
+        "神经科学与类脑计算（神经元动力学启发的在线学习机制）"
+      ],
+      "key_terminologies": [
+        "Compute-in-Memory (CiM)",
+        "Ferroelectric FET (FeFET)",
+        "Reconfigurable Intelligent Surface (RIS)",
+        "Spin-Orbit Torque (SOT)",
+        "Molecular Communication (MC)",
+        "Spiking Neural Network (SNN)",
+        "Non-volatile Memory (NVM)",
+        "Short Term Plasticity (STP)",
+        "Neuromorphic Computing",
+        "Time-Scale Dynamics"
+      ]
+    }
+  },
+  {
+    "id": "cs.FL",
+    "name_cn": "形式语言与自动机理论",
+    "description_cn": "涵盖自动机理论、形式语言理论、语法及字组合数学。大致对应ACM学科分类F.1.1和F.4.3。涉及计算复杂性的论文请投至cs.CC；涉及逻辑的论文请投至cs.LO。",
+    "profile": {
+      "profile_summary": "形式语言与自动机理论（cs.FL）致力于研究自动机模型、形式语言的语法结构及其数学性质，涵盖从有限自动机、树自动机到细胞自动机等多种计算模型的理论分析。该领域关注语言识别、语言复杂性、自动机学习与等价性问题，同时探索自动机在并发系统、心理建模、聚类算法和超性质等跨学科场景中的应用。其核心目标是深化对计算过程的形式化理解，并为语言推断、系统验证和复杂系统建模提供理论基础。",
+      "core_topics": [
+        "自动机理论与状态复杂性分析",
+        "形式语言的代数与逻辑刻画",
+        "自动机学习与查询算法",
+        "并发与异步系统中的自动机模型",
+        "树自动机与高阶语言结构"
+      ],
+      "common_methodologies": [
+        "非确定性与确定性有限自动机建模",
+        "成员查询与等价查询的主动学习框架",
+        "状态复杂性与操作复杂性分析",
+        "代数结构（如语法幺半群、矩阵表示）的应用",
+        "递归序列与线性代数方法在可判定性问题中的使用"
+      ],
+      "interdisciplinary_connections": [
+        "计算语言学：通过形式语法与依赖树结构研究自然语言的句法现象，如交叉串行依赖",
+        "心理学建模：利用自动机形式化心理理论，实现理论的精确化与可验证性",
+        "信息安全性与形式验证：借助超语言与超性质表达系统级安全策略"
+      ],
+      "key_terminologies": [
+        "有限自动机（Finite Automata）",
+        "形式语言（Formal Language）",
+        "语法幺半群（Syntactic Monoid）",
+        "主动学习（Active Learning）",
+        "树自动机（Tree Automata）",
+        "状态复杂性（State Complexity）",
+        "细胞自动机（Cellular Automata）",
+        "正则语言（Regular Language）",
+        "超语言（Hyperlanguage）",
+        "可判定性（Decidability）"
+      ]
+    }
+  },
+  {
+    "id": "cs.GL",
+    "name_cn": "综合文献",
+    "description_cn": "涵盖导论性内容、综述性资料、未来趋势预测、人物传记以及各类计算机科学相关杂项内容。大致包括ACM学科分类A类的全部内容，但不包含会议录（会议录将列于相应学科领域内）。",
+    "profile": {
+      "profile_summary": "cs.GL（综合文献）是一个涵盖计算机科学领域导论性、综述性、历史性及方法论性内容的综合性分类，旨在提供对学科发展脉络、关键人物、未来趋势以及研究范式的宏观洞察。其核心目标是通过回顾历史、梳理思想演变、总结研究成果和指导学术实践，促进对计算机科学整体发展的理解与反思，服务于教育、研究方法指导以及跨学科对话。",
+      "core_topics": [
+        "计算机科学史与思想史",
+        "人工智能与机器学习的社会伦理问题",
+        "科研方法论与学术写作指南",
+        "国家或地区性科研发展综述",
+        "技术发展趋势与未来展望"
+      ],
+      "common_methodologies": [
+        "文献综述与历史分析",
+        "定性与定量混合研究方法",
+        "传记式与多主体访谈分析",
+        "数据挖掘与特征频率分析（如FP-Growth算法）",
+        "哲学思辨与概念分析"
+      ],
+      "interdisciplinary_connections": [
+        "科学史与科学哲学",
+        "科技伦理与法律（特别是数据隐私与AI治理）",
+        "教育学与学术写作研究"
+      ],
+      "key_terminologies": [
+        "symbolic computation",
+        "digital ethics",
+        "right to be forgotten",
+        "research methodology",
+        "computational complexity",
+        "machine learning",
+        "Turing Award",
+        "AI consciousness",
+        "Moore's Law",
+        "program committee"
+      ]
+    }
+  },
+  {
+    "id": "cs.GR",
+    "name_cn": "图形",
+    "description_cn": "涵盖计算机图形学的各个方面，大致包括ACM主题分类I.3的全部内容，但I.3.5可能以计算几何为主要主题领域。",
+    "profile": {
+      "profile_summary": "cs.GR（图形）分类聚焦于计算机图形学的理论、算法与系统实现，涵盖从几何建模、渲染技术到可视化和人机交互的广泛内容。其核心目标是开发高效、精确且直观的算法与框架，用于三维几何处理、动态仿真、真实感与非真实感渲染、虚拟/增强现实中的交互式建模以及大规模科学数据的可视化呈现，尤其关注几何一致性、实时性能、跨维度建模与用户感知体验的优化。",
+      "core_topics": [
+        "几何建模与表面重建",
+        "实时渲染与全局光照",
+        "虚拟与增强现实中的交互式内容创建",
+        "物理仿真与可微分模拟",
+        "科学可视化与并行渲染"
+      ],
+      "common_methodologies": [
+        "网格处理与拓扑同步算法",
+        "基于球谐函数的光照投影",
+        "等值面提取与体素重建技术",
+        "可微分物理模拟框架",
+        "基于向量场与形状映射的图像合成"
+      ],
+      "interdisciplinary_connections": [
+        "计算几何",
+        "人机交互",
+        "高性能计算"
+      ],
+      "key_terminologies": [
+        "mesh decimation",
+        "ANARI",
+        "Front2VOF",
+        "spherical harmonics",
+        "order-independent transparency",
+        "redirected walking",
+        "iso-surface extraction",
+        "position-based dynamics",
+        "compositing",
+        "environment navigation incompatibility"
+      ]
+    }
+  },
+  {
+    "id": "cs.GT",
+    "name_cn": "计算机科学与博弈论",
+    "description_cn": "涵盖计算机科学与博弈论交叉领域的所有理论与应用方面，包括机制设计、博弈中的学习（可能与机器学习有重叠）、博弈中智能体建模的基础（可能与多智能体系统有重叠）、协调、以及针对非合作计算环境的规范与形式化方法。该领域还包括博弈论在电子商务等领域的应用。",
+    "profile": {
+      "profile_summary": "计算机科学与博弈论（cs.GT）致力于研究博弈论在计算环境中的理论与应用，重点关注多智能体系统中的策略行为、机制设计、均衡计算及其效率。该领域旨在设计激励相容的机制，优化社会福利，并分析在非合作、分布式或不确定环境下的决策过程，涵盖从拍卖、投票到资源分配和学习动态等多个应用场景。",
+      "core_topics": [
+        "机制设计与激励相容性",
+        "纳什均衡的计算与近似",
+        "公平分配与公平性代价分析",
+        "分布式与多智能体博弈",
+        "策略行为与操纵性分析"
+      ],
+      "common_methodologies": [
+        "梯度下降与优化算法",
+        "近似机制设计",
+        "社会成本与最大成本的最坏情况分析",
+        "概率约束与一致性检验",
+        "数值模拟与实验博弈分析"
+      ],
+      "interdisciplinary_connections": [
+        "人工智能（特别是多智能体系统与强化学习）",
+        "经济学（尤其是拍卖理论与市场设计）",
+        "理论计算机科学（复杂性、算法设计与图论）"
+      ],
+      "key_terminologies": [
+        "Nash Equilibrium (纳什均衡)",
+        "mechanism design (机制设计)",
+        "strategyproofness (策略免疫性)",
+        "price of fairness (公平代价)",
+        "social welfare (社会福利)",
+        "Bayesian Nash Equilibrium (贝叶斯纳什均衡)",
+        "prophet inequality (先知不等式)",
+        "distortion (扭曲度)",
+        "coarse correlated equilibrium (粗相关均衡)",
+        "envy-freeness (无嫉妒性)"
+      ]
+    }
+  },
+  {
+    "id": "cs.HC",
+    "name_cn": "人机交互",
+    "description_cn": "涵盖人因工程、用户界面和协同计算。大致包括ACM主题分类H.1.2和H.5的全部内容，但H.5.1除外，其更可能以多媒体为主要主题领域。",
+    "profile": {
+      "profile_summary": "人机交互（cs.HC）致力于研究人类与计算系统之间的交互机制，旨在通过设计、评估和实现用户界面与交互技术来提升用户体验、效率与福祉。该领域关注从个体用户的心理与行为到群体协作的广泛议题，涵盖自动化辅助分析、情感计算、隐私保护、可访问性设计以及沉浸式交互环境等多个方向，强调技术的人本化与情境适应性。",
+      "core_topics": [
+        "用户界面设计与交互技术",
+        "人-AI协作与对话系统",
+        "沉浸式交互（虚拟现实与增强现实）",
+        "用户行为建模与体验评估",
+        "隐私保护与个性化智能系统"
+      ],
+      "common_methodologies": [
+        "用户研究与实验评估（如用户调查、可用性测试）",
+        "设计型研究（Design-Based Research, DBR）",
+        "基于传感器的数据采集与多模态融合",
+        "自动化推理链与生成式AI应用",
+        "可视化分析工具开发与案例研究"
+      ],
+      "interdisciplinary_connections": [
+        "心理学（认知科学、情感计算）",
+        "健康信息学（远程医疗、老年护理、心理健康）",
+        "社会计算（在线社区、众包协作）"
+      ],
+      "key_terminologies": [
+        "人机交互",
+        "用户界面",
+        "协同计算",
+        "用户体验",
+        "沉浸式虚拟现实",
+        "生成式AI",
+        "情感计算",
+        "可穿戴传感器",
+        "隐私保护",
+        "自动化推理链"
+      ]
+    }
+  },
+  {
+    "id": "cs.IR",
+    "name_cn": "信息检索",
+    "description_cn": "涵盖索引、词典、检索、内容与分析，大致包括ACM主题分类H.3.0、H.3.1、H.3.2、H.3.3和H.3.4中的内容。",
+    "profile": {
+      "profile_summary": "信息检索（cs.IR）致力于研究如何高效地从大规模数据中获取相关、准确且多样化的信息，涵盖索引、检索、内容分析及推荐系统等核心任务。该领域当前聚焦于利用大型语言模型（LLM）、知识图谱和序列建模技术提升检索与推荐系统的性能，同时关注公平性、可解释性、冷启动、数据稀疏性、多语言支持和系统可扩展性等现实挑战，目标是构建智能、鲁棒且可实际部署的信息服务系统。",
+      "core_topics": [
+        "基于大型语言模型的检索与推荐",
+        "知识图谱增强的检索与生成",
+        "序列化与会话式推荐系统",
+        "推荐系统的公平性与效用权衡",
+        "信息检索的离线评估与测试集构建"
+      ],
+      "common_methodologies": [
+        "检索增强生成（Retrieval-Augmented Generation, RAG）",
+        "知识蒸馏与多教师模型集成",
+        "预训练与零样本迁移学习",
+        "因果推断与偏差缓解",
+        "随机游走与图结构建模"
+      ],
+      "interdisciplinary_connections": [
+        "自然语言处理（NLP）：在文本理解、生成、核心ference解析和多语言处理方面深度融合",
+        "机器学习（尤其是强化学习与多目标优化）：用于推荐策略学习与公平-效用权衡建模",
+        "知识工程与图数据库：通过知识图谱实现结构化知识的检索与融合"
+      ],
+      "key_terminologies": [
+        "信息检索（Information Retrieval）",
+        "推荐系统（Recommender Systems）",
+        "大型语言模型（Large Language Models, LLMs）",
+        "检索增强生成（Retrieval-Augmented Generation, RAG）",
+        "知识图谱（Knowledge Graph, KG）",
+        "序列推荐（Sequential Recommendation）",
+        "冷启动问题（Cold-start Problem）",
+        "公平性-效用权衡（Fairness-Utility Trade-off）",
+        "离线评估（Offline Evaluation）",
+        "多领域推荐（Multi-domain Recommendation）"
+      ]
+    }
+  },
+  {
+    "id": "cs.IT",
+    "name_cn": "信息论",
+    "description_cn": "涵盖信息论与编码的理论及实验方面，包括ACM主题分类E.4的内容，并与H.1.1有交叉。",
+    "profile": {
+      "profile_summary": "信息论（cs.IT）分类聚焦于信息的量化、传输、编码与处理的理论与应用研究，涵盖从经典香农信息论到现代通信系统中的编码设计、信道容量分析、信号处理及信息度量等核心问题。该领域致力于探索通信系统的性能极限，发展高效的编码与解码算法，并结合新兴技术如智能反射面、6G通信、物联网与时变信道环境，推动信息传输的可靠性、时效性与安全性。近年来，研究趋势逐渐扩展至与人工智能、统计几何、量子通信及控制理论的深度融合。",
+      "core_topics": [
+        "信道容量与信息传输极限分析",
+        "纠错编码与局部可恢复码设计",
+        "集成感知与通信系统的性能权衡",
+        "序列设计与信号波形优化",
+        "信息年龄与信息新鲜度的资源管理"
+      ],
+      "common_methodologies": [
+        "大偏差理论与信息几何分析",
+        "贝叶斯估计与Cramér-Rao界分析",
+        "有限域上的函数构造与代数编码",
+        "递归解码与组合优化算法",
+        "基于图模型的路由与资源分配"
+      ],
+      "interdisciplinary_connections": [
+        "人工智能与机器学习（用于智能无线环境建模与优化）",
+        "量子信息与量子密钥分发（实现信息论安全通信）",
+        "控制理论与状态估计（如车辆跟踪与Kalman滤波）"
+      ],
+      "key_terminologies": [
+        "信息论",
+        "香农熵",
+        "信道容量",
+        "线性码",
+        "局部可恢复码（LRC）",
+        "最大可恢复码（MR Code）",
+        "Golay互补阵列",
+        "零相关区（ZCZ）",
+        "信息年龄（Age of Information, AoI）",
+        "智能反射面（Intelligent Reflecting Surface, IRS）"
+      ]
+    }
+  },
+  {
+    "id": "cs.LG",
+    "name_cn": "机器学习",
+    "description_cn": "涵盖机器学习研究各个方面的论文（包括监督学习、无监督学习、强化学习、_bandit_问题等），以及鲁棒性、可解释性、公平性和方法论。cs.LG 也适合作为机器学习方法应用的主要分类。",
+    "profile": {
+      "profile_summary": "cs.LG（机器学习）分类聚焦于机器学习理论、方法及其应用的广泛研究，涵盖监督、无监督与强化学习等范式，并深入探讨模型的鲁棒性、可解释性、公平性与方法论。该领域致力于开发新型学习算法、优化模型性能与效率，并推动其在图神经网络、联邦学习、大型语言模型等前沿场景中的应用，同时关注实际部署中的数据隐私、资源约束与动态环境适应等挑战。",
+      "core_topics": [
+        "图神经网络与图表示学习",
+        "联邦学习与隐私保护机器学习",
+        "强化学习与安全策略优化",
+        "自动化机器学习与模型集成",
+        "大型语言模型的资源效率优化"
+      ],
+      "common_methodologies": [
+        "深度神经网络（包括GCN、KAN、ReLU网络）",
+        "自监督与对比学习",
+        "模型蒸馏与知识迁移",
+        "对抗训练与鲁棒优化",
+        "随机搜索与进化算法（如遗传算法）"
+      ],
+      "interdisciplinary_connections": [
+        "自然语言处理（特别是大型语言模型与AutoML的应用）",
+        "计算机视觉（如图神经网络在视觉场景图生成中的应用）",
+        "数据安全与隐私（如联邦学习中的模型反演攻击研究）"
+      ],
+      "key_terminologies": [
+        "Federated Learning",
+        "Graph Neural Networks",
+        "Reinforcement Learning",
+        "Model Pruning",
+        "Self-Distillation",
+        "NTK (Neural Tangent Kernel)",
+        "Metric Elicitation",
+        "Resource Efficiency",
+        "Adversarial Training",
+        "AutoML"
+      ]
+    }
+  },
+  {
+    "id": "cs.LO",
+    "name_cn": "计算机科学中的逻辑",
+    "description_cn": "涵盖计算机科学中的逻辑学各个方面，包括有限模型论、程序逻辑、模态逻辑和程序验证。编程语言语义学应以编程语言为主要学科领域。大致包含ACM学科分类D.2.4、F.3.1、F.4.0、F.4.1和F.4.2的内容；F.4.3（形式语言）中的部分内容也可能适用于此，但计算复杂性通常是更合适的学科领域。",
+    "profile": {
+      "profile_summary": "计算机科学中的逻辑（cs.LO）专注于逻辑学在计算系统中的理论与应用，涵盖程序验证、形式化方法、模型检测、程序语义和自动推理等领域。该分类致力于通过逻辑工具对计算过程进行建模、分析与验证，确保软件与系统的正确性，并推动逻辑系统在编程语言、分布式系统和自动化证明中的实际应用。",
+      "core_topics": [
+        "程序验证与形式化方法",
+        "逻辑系统与证明理论",
+        "模型检测与自动推理",
+        "语法与语义中的绑定结构",
+        "参数化系统与符号分析"
+      ],
+      "common_methodologies": [
+        "SAT/SMT求解与可满足性推理",
+        "重写逻辑与符号执行",
+        "证明助手与交互式定理证明（如Lean、Agda、Isabelle/HOL）",
+        "事件结构与并发语义建模",
+        "图变换与临界对分析"
+      ],
+      "interdisciplinary_connections": [
+        "数学逻辑（特别是模型论与证明论）",
+        "编程语言理论（类型系统、λ演算、语义学）",
+        "形式化验证与硬件/软件系统工程"
+      ],
+      "key_terminologies": [
+        "程序验证",
+        "SMT求解",
+        "λ演算",
+        "形式语义",
+        "模型检测",
+        "重写逻辑",
+        "归纳类型",
+        "事件结构",
+        "插值算法",
+        "合流性"
+      ]
+    }
+  },
+  {
+    "id": "cs.MA",
+    "name_cn": "多智能体系统",
+    "description_cn": "涵盖多智能体系统、分布式人工智能、智能代理、协同交互及实际应用，大致对应ACM学科分类I.2.11。",
+    "profile": {
+      "profile_summary": "多智能体系统（cs.MA）致力于研究多个自主智能体之间的协同、通信、决策与学习机制，旨在构建能够适应动态、不确定环境的分布式智能系统。该领域关注智能体间的协作与竞争策略、去中心化控制、任务调度与资源分配、以及基于强化学习和语言模型的智能代理架构，广泛应用于边缘计算、自动驾驶、网络安全、社会模拟等现实场景。",
+      "core_topics": [
+        "多智能体强化学习与协同决策",
+        "智能体间通信机制与信息共享",
+        "去中心化任务调度与资源管理",
+        "基于大语言模型的多智能体系统",
+        "多智能体谈判与博弈策略"
+      ],
+      "common_methodologies": [
+        "多智能体强化学习（MARL）",
+        "基于代理的建模与仿真（ABM）",
+        "BDI（信念-欲望-意图）智能体架构",
+        "对比学习与注意力机制",
+        "分布式优化与博弈论方法"
+      ],
+      "interdisciplinary_connections": [
+        "边缘与云计算（Fog/Cloud Computing）",
+        "网络安全与主动防御（Cybersecurity）",
+        "社会计算与人类行为建模（Social Computing）"
+      ],
+      "key_terminologies": [
+        "多智能体系统（Multi-Agent System）",
+        "去中心化执行（Decentralized Execution）",
+        "任务调度（Task Scheduling）",
+        "智能体通信（Agent Communication）",
+        "大语言模型代理（LLM Agent）",
+        "强化学习（Reinforcement Learning）",
+        "资源分配（Resource Allocation）",
+        "欺骗性防御（Deception-based Defense）",
+        "部分可观测性（Partial Observability）",
+        "协商协议（Negotiation Protocol）"
+      ]
+    }
+  },
+  {
+    "id": "cs.MM",
+    "name_cn": "多媒体",
+    "description_cn": "大致包含ACM主题分类H.5.1中的内容。",
+    "profile": {
+      "profile_summary": "cs.MM（多媒体）分类聚焦于多媒体内容的生成、传输、处理与用户体验优化，涵盖视频流、音频-视觉融合、推荐系统、图像隐写及沉浸式技术等多个方面。该领域致力于通过算法创新和系统设计提升多媒体服务质量，特别是在无线网络、边缘计算和生成式AI等复杂环境下，实现高质量、低延迟、安全且个性化的多媒体体验。",
+      "core_topics": [
+        "自适应视频流与质量体验（QoE）优化",
+        "多模态内容理解与推荐系统",
+        "多媒体安全与内容真实性检测",
+        "高效视频编码与传输机制",
+        "沉浸式媒体与扩展现实（XR）系统架构"
+      ],
+      "common_methodologies": [
+        "深度强化学习（DRL）与元强化学习（Meta-RL）",
+        "对比学习与扩散模型（Diffusion Models）",
+        "Siamese网络与度量学习",
+        "跨层优化与联合编码-缓存设计",
+        "Transformer架构与多模态融合"
+      ],
+      "interdisciplinary_connections": [
+        "计算机网络（特别是无线网络与边缘计算）",
+        "人工智能与机器学习（包括生成式AI与联邦学习）",
+        "人机交互与感知建模（如XR与QoE主观评估）"
+      ],
+      "key_terminologies": [
+        "Quality of Experience (QoE)",
+        "Adaptive Video Streaming",
+        "Multimodal Recommendation",
+        "DeepFake Detection",
+        "Contrastive Learning",
+        "Generative AI (GAI)",
+        "Federated Learning",
+        "Extended Reality (XR)",
+        "HEVC/H.265 Encoding",
+        "Steganography"
+      ]
+    }
+  },
+  {
+    "id": "cs.MS",
+    "name_cn": "数学软件",
+    "description_cn": "大致包含ACM主题分类G.4中的内容。",
+    "profile": {
+      "profile_summary": "cs.MS（数学软件）分类聚焦于开发、实现和优化用于数学计算的软件工具与算法，旨在提升数值计算、符号计算、线性代数、稀疏矩阵处理、自动微分、可重复性环境构建等数学相关任务的效率、准确性与可用性。该领域不仅关注算法层面的创新，还强调软件工程实践，包括高效库的设计、跨平台可移植性、与科学计算生态的集成以及研究结果的可复现性。",
+      "core_topics": [
+        "数值线性代数与高性能计算库",
+        "稀疏矩阵与结构化矩阵的高效算法",
+        "科学计算软件框架与工具箱开发",
+        "数学计算中的可重复性与软件环境封装",
+        "特殊数学结构的编程实现与优化"
+      ],
+      "common_methodologies": [
+        "模板元编程与表达式优化",
+        "递归公式与结构化算法设计",
+        "基于BLAS/LAPACK的底层优化",
+        "自动微分与编译器辅助技术",
+        "容器化与沙箱化软件运行环境"
+      ],
+      "interdisciplinary_connections": [
+        "计算数学与数值分析",
+        "计算机代数与符号计算",
+        "机器学习与数据同化"
+      ],
+      "key_terminologies": [
+        "sparse Cholesky factorization",
+        "automatic differentiation",
+        "level-3 BLAS",
+        "inverse iteration",
+        "circulant matrix",
+        "hypergraph",
+        "finite element spaces",
+        "template metaprogramming",
+        "reproducibility",
+        "numerical linear algebra"
+      ]
+    }
+  },
+  {
+    "id": "cs.NA",
+    "name_cn": "数值分析",
+    "description_cn": "cs.NA 是 math.NA 的别名，大致包含 ACM 主题分类 G.1 中的内容。",
+    "profile": {
+      "profile_summary": "数值分析（cs.NA）专注于设计、分析和实现用于求解数学模型和科学计算问题的高效、稳定且精确的数值算法。该领域涵盖偏微分方程、积分方程、线性与非线性系统、优化及反问题的数值求解方法，强调算法的收敛性、误差估计、能量稳定性、结构保持性以及计算效率，致力于在理论严谨性与实际可扩展性之间取得平衡。",
+      "core_topics": [
+        "偏微分方程的数值求解",
+        "结构保持与能量稳定的数值格式",
+        "稀疏线性系统的高效迭代求解",
+        "高精度数值积分与正交多项式方法",
+        "反问题与数据驱动建模的正则化技术"
+      ],
+      "common_methodologies": [
+        "有限元方法（FEM）",
+        "有限体积法（FVM）",
+        "Krylov子空间迭代法",
+        "Runge-Kutta时间积分",
+        "高斯型数值积分与正交多项式构造"
+      ],
+      "interdisciplinary_connections": [
+        "计算物理学（如交通流模型、固态去润湿模拟）",
+        "机器学习与数据科学（如深度学习用于PDE发现、RKHS正则化）",
+        "地球科学与几何建模（如球面三角积分在地球数学中的应用）"
+      ],
+      "key_terminologies": [
+        "能量稳定性",
+        "误差分析",
+        "结构保持算法",
+        "Schwarz函数",
+        "Krylov子空间",
+        "Galerkin方法",
+        "非局部模型",
+        "正交多项式",
+        "反问题",
+        "自适应正则化"
+      ]
+    }
+  },
+  {
+    "id": "cs.NE",
+    "name_cn": "神经与进化计算",
+    "description_cn": "涵盖神经网络、联结主义、遗传算法、人工生命和自适应行为，大致包括ACM主题分类C.1.3、I.2.6、I.5中的部分内容。",
+    "profile": {
+      "profile_summary": "cs.NE（神经与进化计算）分类聚焦于结合神经网络与进化计算方法，解决复杂优化、学习与自适应问题。其核心目标是开发能够高效搜索、优化并泛化于多样化问题的智能算法，尤其关注在高维、多目标、动态或约束条件下寻找鲁棒、可行且多样化解的计算框架。该领域融合联结主义与进化机制，推动算法在结构设计、参数优化、特征选择及硬件协同训练等方面的自动化与性能提升。",
+      "core_topics": [
+        "进化算法与多目标优化",
+        "神经网络训练与架构搜索",
+        "群体智能与优化算法加速",
+        "鲁棒优化与动态环境下的多峰搜索",
+        "基于进化的特征选择与问题实例生成"
+      ],
+      "common_methodologies": [
+        "遗传算法与协同进化",
+        "群体智能优化（如烟花算法、灰狼优化器）",
+        "生成对抗网络（GAN）用于解空间建模",
+        "代理模型与高效评估技术",
+        "硬件在环训练与GPU并行加速"
+      ],
+      "interdisciplinary_connections": [
+        "机器学习（特别是深度学习与自动机器学习）",
+        "生物启发计算与人工生命",
+        "计算机体系结构与神经形态计算"
+      ],
+      "key_terminologies": [
+        "进化算法",
+        "多目标优化",
+        "神经架构搜索",
+        "群体智能",
+        "代理模型",
+        "协同进化",
+        "鲁棒解",
+        "特征选择",
+        "Pareto前沿",
+        "硬件在环训练"
+      ]
+    }
+  },
+  {
+    "id": "cs.NI",
+    "name_cn": "网络与互联网架构",
+    "description_cn": "涵盖计算机通信网络的各个方面，包括网络架构与设计、网络协议以及互联网络标准（如TCP/IP）。还包括与互联网架构和性能直接相关的主题，例如Web缓存。大致包含ACM主题分类C.2的全部内容，但C.2.4除外，该部分更可能属于分布式、并行与集群计算为主要主题的领域。",
+    "profile": {
+      "profile_summary": "网络与互联网架构（cs.NI）专注于计算机通信网络的架构设计、协议优化和互联网性能提升，致力于解决现代网络系统中的资源分配、延迟控制、服务质量保障和可扩展性等核心问题。该领域涵盖从底层传输协议到上层应用感知调度的广泛研究，重点包括无线网络增强、软件定义网络、网络功能虚拟化、多接入边缘计算以及面向新兴应用（如VR、AR、IoT、无人机通信）的定制化网络解决方案，目标是构建高效、可靠、智能且适应动态环境的通信基础设施。",
+      "core_topics": [
+        "无线网络架构与无人机通信增强",
+        "网络切片与资源调度优化",
+        "边缘计算与移动性管理",
+        "绿色与能量中立型物联网网络",
+        "基于SDN/SRv6的可编程网络架构"
+      ],
+      "common_methodologies": [
+        "软件定义网络（SDN）与网络功能虚拟化（NFV）",
+        "强化学习与多智能体学习用于资源调度",
+        "凸优化与非线性规划求解网络性能问题",
+        "随机几何建模与点过程分析网络覆盖",
+        "数据驱动的实时网络控制与xApp开发"
+      ],
+      "interdisciplinary_connections": [
+        "人工智能与机器学习（用于智能调度、语义通信与预测）",
+        "物联网与嵌入式系统（面向低功耗、延迟敏感应用）",
+        "计算机视觉与大语言模型（在车载网络中实现语义通信）"
+      ],
+      "key_terminologies": [
+        "RAN切片",
+        "多路径传输控制协议（MPTCP）",
+        "服务功能链（SFC）",
+        "反射智能表面（RIS）",
+        "能量中立操作（ENO）",
+        "开放无线接入网（ORAN）",
+        "段路由IPv6（SRv6）",
+        "边缘计算（MEC）",
+        "意图驱动网络",
+        "Deterministic Network Calculus（DNC）"
+      ]
+    }
+  },
+  {
+    "id": "cs.OH",
+    "name_cn": "其他计算机科学",
+    "description_cn": "这是用于无法归类文件的分类。",
+    "profile": {
+      "profile_summary": "cs.OH（其他计算机科学）是一个容纳无法归入现有计算机科学子类的多样化研究的分类，其核心目标是为跨领域、新兴或非主流的计算机科学主题提供发表空间。该分类涵盖了从集成电路设计、软件测试框架、物联网系统到过程优化、科研方法论和科技社会影响等多个方向，体现出高度的异质性和应用导向，旨在支持那些在传统分类中难以定位但具有创新性和实用价值的研究工作。",
+      "core_topics": [
+        "集成电路与硬件设计自动化",
+        "软件测试与开发工具链",
+        "物联网与嵌入式系统应用",
+        "业务流程分析与优化",
+        "科研方法论与设计科学有效性"
+      ],
+      "common_methodologies": [
+        "混合变量优化算法",
+        "动态时间规整（DTW）与机器学习分类",
+        "Petri网建模与仿真",
+        "文献综述与框架比较分析",
+        "开源工具链与自动化集成"
+      ],
+      "interdisciplinary_connections": [
+        "电子工程与微电子设计",
+        "运筹学与位置分析",
+        "健康管理与可穿戴设备技术"
+      ],
+      "key_terminologies": [
+        "GDSII",
+        "Selenium WebDriver",
+        "JUnit 5",
+        "Petri Nets",
+        "Design Science Research (DSR)",
+        "Process Mining",
+        "Dynamic Time Warping (DTW)",
+        "Inertial Measurement Unit (IMU)",
+        "Bluetooth Health Device Profile",
+        "One-Time Pad"
+      ]
+    }
+  },
+  {
+    "id": "cs.OS",
+    "name_cn": "操作系统",
+    "description_cn": "大致包含ACM主题分类D.4.1、D.4.2、D.4.3、D.4.4、D.4.5、D.4.7和D.4.9中的内容。",
+    "profile": {
+      "profile_summary": "cs.OS（操作系统）分类聚焦于现代操作系统的设计、实现与优化，旨在应对多核架构、分布式资源管理、新型硬件（如CXL内存、持久内存、MPU/MPK）以及云计算环境下的性能、可扩展性、安全性和资源利用率挑战。该领域的研究致力于通过创新的系统架构、内存管理、文件系统设计和同步机制，提升操作系统的效率、可靠性和适应性，特别是在高并发、实时和资源受限场景中。",
+      "core_topics": [
+        "可扩展与高性能操作系统设计",
+        "内存管理与分层内存系统",
+        "文件系统优化与存储语义创新",
+        "虚拟化与资源隔离机制",
+        "实时系统与同步协议"
+      ],
+      "common_methodologies": [
+        "系统原型实现与内核级修改",
+        "基于硬件特性的系统优化（如MPK、CXL、MPU）",
+        "微基准测试与真实应用性能评估",
+        "编译时分析与运行时动态调度",
+        "日志结构化与数据聚合策略"
+      ],
+      "interdisciplinary_connections": [
+        "计算机体系结构（如NUMA、CXL、多核处理器）",
+        "云计算与分布式系统（如虚拟机调度、云平台资源管理）",
+        "嵌入式系统与物联网（如微控制器仿真、低功耗设备支持）"
+      ],
+      "key_terminologies": [
+        "page migration",
+        "memory tiering",
+        "TLB shootdown",
+        "file system aging",
+        "unikernel",
+        "protection keys (MPK)",
+        "CXL memory",
+        "NUMA systems",
+        "synchronization protocols",
+        "byte-granular access"
+      ]
+    }
+  },
+  {
+    "id": "cs.PF",
+    "name_cn": "性能",
+    "description_cn": "涵盖性能测量与评估、排队论和仿真，大致包括ACM主题分类D.4.8和K.6.2中的内容。",
+    "profile": {
+      "profile_summary": "cs.PF（性能）分类聚焦于计算机系统性能的测量、建模、评估与优化，涵盖从底层硬件架构到上层应用负载的全栈性能分析。其核心目标是通过理论建模、仿真、实测与算法设计，提升系统的响应时间、资源利用率、可扩展性与服务质量，广泛应用于边缘计算、机器学习训练、分布式系统、网络队列管理及大规模仿真等场景。",
+      "core_topics": [
+        "系统性能建模与评估",
+        "资源分配与调度优化",
+        "排队论与负载均衡",
+        "端到端延迟与服务质量优化",
+        "大规模系统仿真与性能预测"
+      ],
+      "common_methodologies": [
+        "排队网络模型（Queueing Network Models）",
+        "离散事件仿真与混合仿真",
+        "均值场近似与腔过程分析",
+        "性能剖析与运行时监控",
+        "分层分析与多级建模"
+      ],
+      "interdisciplinary_connections": [
+        "计算机网络（如负载均衡、主动队列管理）",
+        "机器学习系统（如ML训练性能、LLM工作负载分析）",
+        "软件工程与程序分析（如自动化性能插桩、编译辅助优化）"
+      ],
+      "key_terminologies": [
+        "性能评估",
+        "延迟敏感",
+        "资源分配",
+        "排队论",
+        "仿真可扩展性",
+        "服务纪律",
+        "统一内存",
+        "响应时间",
+        "工作负载表征",
+        "主动队列管理"
+      ]
+    }
+  },
+  {
+    "id": "cs.PL",
+    "name_cn": "编程语言",
+    "description_cn": "涵盖编程语言语义、语言特性以及编程方法（如面向对象编程、函数式编程、逻辑编程）。还包括面向编程语言的编译器相关内容；其他编译器内容可能更适合归入体系结构（AR）。大致包含ACM学科分类D.1和D.3中的内容。",
+    "profile": {
+      "profile_summary": "cs.PL（编程语言）分类聚焦于编程语言的语义、语言特性、编程范式以及相关编译器技术，旨在提升程序的正确性、安全性、性能和可验证性。该领域不仅研究语言设计本身，还涵盖语言在安全分析、形式化验证、并发控制、资源优化和人机交互学习等方面的应用，强调通过类型系统、中间表示、符号执行和程序变换等手段实现对程序行为的精确建模与推理。",
+      "core_topics": [
+        "编程语言语义与类型系统设计",
+        "程序分析与变换的正确性与精度",
+        "形式化方法在程序验证中的应用",
+        "编程语言与编译器的协同设计",
+        "特定领域语言与运行时支持机制"
+      ],
+      "common_methodologies": [
+        "形式化语义建模（如类型系统、操作语义）",
+        "符号执行与静态分析",
+        "中间表示（IR）与多级编译框架",
+        "程序变换的保持性与反射性证明",
+        "基于模型的程序验证（如Hoare逻辑、定理证明）"
+      ],
+      "interdisciplinary_connections": [
+        "软件工程（程序测试、缺陷检测、自动化修复）",
+        "安全与密码学（侧信道分析、智能合约安全）",
+        "人工智能与机器学习（大语言模型用于代码生成）"
+      ],
+      "key_terminologies": [
+        "透明变换（transparency）",
+        "超性质（hyperproperties）",
+        "会话类型（session types）",
+        "所有权类型（ownership types）",
+        "符号执行（symbolic execution）",
+        "中间表示（intermediate representation, IR）",
+        "类型安全（type safety）",
+        "死锁检测（deadlock detection）",
+        "信念编程（belief programming）",
+        "概率编程（probabilistic programming）"
+      ]
+    }
+  },
+  {
+    "id": "cs.RO",
+    "name_cn": "机器人技术",
+    "description_cn": "大致包含ACM主题分类I.2.9中的内容。",
+    "profile": {
+      "profile_summary": "机器人技术（cs.RO）致力于研究机器人系统的感知、规划、控制与交互能力，旨在实现机器人在复杂、动态和非结构化环境中的自主运行与高效人机协作。该领域涵盖从底层硬件设计到高层智能决策的广泛研究，核心目标是提升机器人在现实场景中的适应性、鲁棒性和智能化水平，应用于服务、医疗、农业、航空航天及工业自动化等多个实际领域。",
+      "core_topics": [
+        "机器人感知与状态估计（如SLAM、定位）",
+        "人机交互与多模态融合",
+        "运动规划与自主导航",
+        "机器人控制与执行器优化",
+        "无人机系统与空中机器人应用"
+      ],
+      "common_methodologies": [
+        "粒子滤波与蒙特卡洛定位",
+        "视觉-惯性融合SLAM算法",
+        "大语言模型（LLM）在机器人指令生成中的应用",
+        "基于优化的运动规划与模型预测控制（MPC）",
+        "深度学习与神经网络（CNN/GNN）用于环境理解与决策"
+      ],
+      "interdisciplinary_connections": [
+        "人工智能（AI）与机器学习（特别是强化学习与语义理解）",
+        "计算机视觉（用于目标检测、场景重建与动态特征识别）",
+        "生物医学工程（在康复外骨骼与医疗机器人中的应用）"
+      ],
+      "key_terminologies": [
+        "SLAM",
+        "Human-Robot Interaction (HRI)",
+        "Monte Carlo Localization",
+        "Visual-Inertial Fusion",
+        "Model Predictive Control (MPC)",
+        "Unmanned Aerial Vehicle (UAV)",
+        "Exoskeleton",
+        "Large Language Model (LLM)",
+        "Tendon-Driven Robotic Manipulator",
+        "Simultaneous Localization and Mapping"
+      ]
+    }
+  },
+  {
+    "id": "cs.SC",
+    "name_cn": "符号计算",
+    "description_cn": "大致包含ACM主题分类I.1中的内容。",
+    "profile": {
+      "profile_summary": "符号计算（cs.SC）专注于开发和应用形式化算法来精确处理数学表达式和代数结构，其核心目标是通过符号方法解决代数、组合、微分和几何问题。该领域强调算法的构造性、正确性和复杂性分析，广泛涉及多项式、特殊函数、递推关系、积分与求和恒等式、理想成员判定以及参数化曲线的拓扑结构等问题，致力于实现数学推理的自动化与计算机代数系统的高效实现。",
+      "core_topics": [
+        "超几何函数与q-超几何函数的可创造望远镜算法",
+        "多项式与有理函数的符号积分与求和",
+        "参数化曲线的几何与拓扑计算",
+        "高阶交互与信息论中的符号化建模",
+        "线性差分系统与D-有限函数的解法"
+      ],
+      "common_methodologies": [
+        "创造性望远镜（Creative Telescoping）算法",
+        "Gröbner基与模论方法",
+        "稀疏回归与符号-数值混合计算",
+        "递归矩阵算法与分块计算",
+        "根隔离与实根分类算法"
+      ],
+      "interdisciplinary_connections": [
+        "计算机代数系统与编程语言设计",
+        "计算生物学与神经科学中的复杂系统建模",
+        "理论物理中的微分方程与对称性分析"
+      ],
+      "key_terminologies": [
+        "creative telescoping",
+        "D-module",
+        "hypergeometric term",
+        "q-shift",
+        "joint entropy",
+        "parametric curve topology",
+        "cofactor representation",
+        "Gaussian copula",
+        "LCLM (Least Common Left Multiple)",
+        "mixed trigonometric-polynomial"
+      ]
+    }
+  },
+  {
+    "id": "cs.SD",
+    "name_cn": "声音",
+    "description_cn": "涵盖声音计算及声音作为信息通道的各个方面，包括声音模型、分析与合成、音频用户界面、数据声化、计算机音乐和声音信号处理。涉及ACM主题分类H.5.5，并与H.1.2、H.5.1、H.5.2、I.2.7、I.5.4、I.6.3、J.5、K.4.2相关。",
+    "profile": {
+      "profile_summary": "cs.SD（声音）分类聚焦于声音的计算处理及其作为信息载体的应用，涵盖从语音识别、音频信号处理到音乐分析与合成的广泛研究。该领域致力于开发先进的算法与模型，以理解和生成语音与音乐信号，同时探索声音在人机交互、情感识别、隐私保护和环境感知中的作用。核心目标包括提升音频处理的准确性、鲁棒性和可解释性，并推动跨模态、多任务和实际场景下的应用创新。",
+      "core_topics": [
+        "语音识别与关键词检测",
+        "音乐信号分析与生成",
+        "音频情感与说话人识别",
+        "声音在交互系统与感知中的应用",
+        "音频隐私与安全"
+      ],
+      "common_methodologies": [
+        "自监督学习与预训练模型（如HuBert, BEST-RQ）",
+        "Transformer架构与多尺度特征聚合",
+        "稀疏与参数化信号处理方法（如SPA, VSRSPA）",
+        "跨模态融合与对比学习",
+        "知识迁移与边缘计算中的隐私保护框架"
+      ],
+      "interdisciplinary_connections": [
+        "计算机音乐与音乐信息检索",
+        "人机交互与普适计算",
+        "声学工程与水下信号处理"
+      ],
+      "key_terminologies": [
+        "自监督学习",
+        "方向到达估计（DOA）",
+        "音高不确定性",
+        "多模态融合",
+        "语音情感识别（SER）",
+        "代码转换语音识别（CSSR）",
+        "声学边界学习",
+        "声化（sonification）",
+        "x-vector",
+        "非自回归解码器（NAR）"
+      ]
+    }
+  },
+  {
+    "id": "cs.SE",
+    "name_cn": "软件工程",
+    "description_cn": "涵盖设计工具、软件度量、测试与调试、编程环境等内容。大致包括ACM主题分类D.2中的所有材料，但D.2.4（程序验证）应主要归入计算机科学中的逻辑学。",
+    "profile": {
+      "profile_summary": "软件工程（cs.SE）分类聚焦于软件系统的开发、维护与质量保障，致力于通过工具、方法和流程的创新提升软件的可靠性、可维护性和开发效率。该领域研究涵盖从需求分析、设计、测试、调试到代码重构和自动化工具链的全生命周期问题，强调实践导向的技术解决方案，尤其关注技术债务管理、测试优化、程序验证、代码复用以及开发者行为对软件质量的影响。",
+      "core_topics": [
+        "软件测试与验证",
+        "代码质量与技术债务管理",
+        "开发环境与工具支持",
+        "程序分析与缺陷检测",
+        "软件维护与重构"
+      ],
+      "common_methodologies": [
+        "实验研究与用户评估",
+        "差分测试与多目标优化",
+        "动态推理与静态验证结合",
+        "自然语言处理与迁移学习",
+        "元学习与领域自适应模型"
+      ],
+      "interdisciplinary_connections": [
+        "人工智能（特别是深度学习在代码搜索与生成中的应用）",
+        "人机交互（开发者行为分析与编程教育）",
+        "形式化方法与逻辑学（程序不变量与语义建模）"
+      ],
+      "key_terminologies": [
+        "Self-Admitted Technical Debt (SATD)",
+        "Operational Acceptance Testing (OAT)",
+        "differential testing",
+        "program invariants",
+        "code refactoring",
+        "axiomatic semantics",
+        "adaptive fine-tuning",
+        "semantic matching",
+        "neuron coverage",
+        "meta-learning"
+      ]
+    }
+  },
+  {
+    "id": "cs.SI",
+    "name_cn": "社交与信息网络",
+    "description_cn": "涵盖社会与信息网络的设计、分析与建模，包括其在在线信息获取、通信与交互中的应用，以及作为数据集在探索相关及其他领域问题中的作用，涉及与社会科学和生物科学的关联。此类网络的分析与建模包括ACM主题分类F.2、G.2、G.3、H.2和I.2中的主题；计算领域的应用包括H.3、H.4和H.5中的主题；计算与其他学科交叉领域的应用包括J.1至J.7中的主题。关于计算机通信系统与网络协议（如TCP/IP）的论文通常更适合归入网络与互联网架构（cs.NI）类别。",
+    "profile": {
+      "profile_summary": "该分类聚焦于社会与信息网络的结构、动态与功能的建模与分析，旨在理解复杂网络中的信息传播、用户行为、社会影响与安全风险，并开发用于网络表示、推理与应用的计算方法。研究目标包括揭示网络中的关键节点、识别异常行为（如虚假信息、社交机器人）、支持可解释推荐与学术问答，并探讨网络在政治、公共卫生与环境正义等现实场景中的作用。",
+      "core_topics": [
+        "社交网络中的信息传播与虚假信息检测",
+        "网络表示学习与图嵌入技术",
+        "在线平台的内容治理与极端言论分析",
+        "基于图结构的可解释人工智能与推理系统",
+        "社会网络中的风险识别与异常行为检测"
+      ],
+      "common_methodologies": [
+        "图神经网络（GNN）与异构图建模",
+        "网络嵌入与随机游走算法",
+        "基于注意力机制的序列建模",
+        "大规模文本内容分析与机器学习分类",
+        "中心性度量与关键节点识别算法"
+      ],
+      "interdisciplinary_connections": [
+        "社会科学（如政治传播、社会心理学）",
+        "公共卫生与流行病学",
+        "环境科学与公共政策"
+      ],
+      "key_terminologies": [
+        "heterogeneous graph",
+        "network embedding",
+        "social bot",
+        "information operations",
+        "risk propagation",
+        "centrality measure",
+        "toxic content",
+        "inductive inference",
+        "explainable recommendation",
+        "hate speech detection"
+      ]
+    }
+  },
+  {
+    "id": "cs.SY",
+    "name_cn": "系统与控制",
+    "description_cn": "cs.SY 是 eess.SY 的别名。本部分涵盖自动控制系统的理论与实验研究，涉及控制系统的分析与设计方法，采用建模、仿真和优化等工具。具体研究领域包括非线性控制、分布式控制、自适应控制、随机控制、鲁棒控制，以及混合系统和离散事件系统。应用领域包括汽车与航空航天控制系统、网络控制、生物系统、多智能体与协同控制、机器人、强化学习、传感器网络、信息物理系统与能源相关系统的控制，以及计算系统的控制。",
+    "profile": {
+      "profile_summary": "系统与控制（cs.SY）分类聚焦于自动控制系统的理论与应用研究，涵盖从建模、分析、设计到优化的完整控制流程。其核心目标是开发高效、安全、鲁棒且适应复杂环境的控制策略，广泛应用于交通流调控、无人机系统、智能交通、能源系统、机器人及信息物理系统等领域。研究强调在不确定性、非线性、分布式和多智能体环境下实现性能优化与安全保障的平衡，同时融合学习算法与传统控制理论，推动智能化、自适应和协同控制的发展。",
+      "core_topics": [
+        "非线性与鲁棒控制",
+        "分布式与多智能体协同控制",
+        "事件触发与自适应控制",
+        "安全增强的强化学习控制",
+        "城市交通与能源系统的优化控制"
+      ],
+      "common_methodologies": [
+        "李雅普诺夫稳定性分析与控制李雅普诺夫函数",
+        "事件触发控制（ETC）与自触发控制（STC）",
+        "模型预测控制与时间变化优化",
+        "随机优化与混合整数线性规划（MILP）",
+        "控制屏障函数与安全过滤机制"
+      ],
+      "interdisciplinary_connections": [
+        "人工智能与机器学习（特别是强化学习在控制中的应用）",
+        "电力系统与智能电网（如可再生能源调度与电动汽车灵活性管理）",
+        "机器人学与自主系统（如无人机编队、自动驾驶车辆控制）"
+      ],
+      "key_terminologies": [
+        "事件触发控制（Event-Triggered Control）",
+        "控制屏障函数（Control Barrier Function）",
+        "李雅普诺夫函数（Lyapunov Function）",
+        "分布式控制（Distributed Control）",
+        "多智能体系统（Multi-Agent System）",
+        "模型预测控制（Model Predictive Control）",
+        "随机优化（Stochastic Optimization）",
+        "区域吸引力（Region of Attraction）",
+        "混合整数线性规划（Mixed Integer Linear Programming）",
+        "信息物理系统（Cyber-Physical Systems）"
+      ]
+    }
+  },
+  {
+    "id": "econ.EM",
+    "name_cn": "计量经济学",
+    "description_cn": "计量经济学理论、微观计量经济学、宏观计量经济学、通过新方法发现的经济关系的实证内容、统计推断在经济数据应用中的方法论问题。",
+    "profile": {
+      "profile_summary": "计量经济学（econ.EM）致力于发展和应用统计与计量方法，以识别和估计经济关系中的因果效应和结构性参数。该领域关注在现实数据复杂性（如非随机处理、缺失数据、非平稳性、高维变量和模型不确定性）下，如何通过创新的理论框架和实证技术进行有效的推断。研究目标包括解决内生性、选择偏差、测量误差等问题，并在微观经济决策、宏观经济动态、政策评估和金融市场建模中实现稳健、可解释的量化分析。",
+      "core_topics": [
+        "因果推断与处理效应估计",
+        "非参数与半参数模型识别",
+        "时间序列动态建模与预测",
+        "面板数据与聚类依赖下的统计推断",
+        "缺失数据机制与多重阶段数据处理"
+      ],
+      "common_methodologies": [
+        "工具变量法（Instrumental Variables, IV）",
+        "贝叶斯推断与收缩先验（Shrinkage Priors）",
+        "分位数自回归（Quantile Autoregression, QAR）",
+        "主成分分析与因子模型（Factor Models）",
+        "双重稳健估计（Double Robust Estimation）"
+      ],
+      "interdisciplinary_connections": [
+        "机器学习（特别是高维回归、神经网络在参数估计中的应用）",
+        "金融计量学（如波动率建模、投机泡沫检测）",
+        "健康经济学与社会科学（如政策评估、调查数据中的报告偏差）"
+      ],
+      "key_terminologies": [
+        "instrumental variables (IV)",
+        "nonparametric identification",
+        "difference-in-differences",
+        "counterfactual estimation",
+        "endogeneity",
+        "sparsity",
+        "local stationarity",
+        "quantile autoregression",
+        "double robustness",
+        "partial identification"
+      ]
+    }
+  },
+  {
+    "id": "econ.GN",
+    "name_cn": "经济学概论",
+    "description_cn": "对经济学的一般方法论、应用及实证研究的贡献。"
+  },
+  {
+    "id": "econ.TH",
+    "name_cn": "理论经济学",
+    "description_cn": "涵盖契约理论、决策理论、博弈论、一般均衡、增长理论、学习与演化、宏观经济学、市场与机制设计以及社会选择理论的学术贡献。"
+  },
+  {
+    "id": "eess.AS",
+    "name_cn": "音频与语音处理",
+    "description_cn": "音频、语音和语言信号的处理理论与方法及其应用。包括此类信号的分析、合成、增强、变换、分类与解释，以及相关信号处理系统的设计、开发与评估。欢迎机器学习和模式分析在上述任一领域的应用。感兴趣的具体主题包括：听觉建模与助听设备；声学波束成形与声源定位；声学场景分类；说话人分离；主动噪声控制与回声消除；信号增强；去混响；生物声学；音乐信号的分析、合成与修改；音乐信息检索；多媒体音频及音视频联合处理；口语与书面语言的建模、分段、标注、解析、理解与翻译；文本挖掘；语音产生、感知与心理声学；语音分析、合成、感知建模与编码；鲁棒语音识别；说话人识别与特征分析；深度学习、在线学习和图模型在语音、音频和语言信号中的应用；以及从系统架构到快速算法的实现问题。"
+  },
+  {
+    "id": "eess.IV",
+    "name_cn": "图像与视频处理",
+    "description_cn": "图像、视频及多维信号在各类应用中的生成、采集、处理、传输、分析与显示的理论、算法与架构。研究主题包括：图像与视频的数学、统计及感知建模与表示；线性与非线性滤波、去模糊、增强、复原及从退化、低分辨率或断层数据中的重建；无损与有损压缩及编码；分割、配准与识别；图像渲染、可视化与打印；计算成像，包括超声、断层及磁共振成像；以及图像与视频的分析、合成、存储、搜索与检索。",
+    "profile": {
+      "profile_summary": "eess.IV（图像与视频处理）专注于图像、视频及多维信号的生成、采集、处理、分析与显示，涵盖从底层增强与复原到高层语义理解的全链条技术。其核心目标是发展先进的理论、算法与架构，以解决实际应用中信号质量退化、信息压缩传输效率低、特征提取困难等问题，尤其在医学成像、编码优化和复杂环境视觉感知等场景中具有重要意义。",
+      "core_topics": [
+        "医学图像中的血管分割与病理关联分析",
+        "图像压缩预处理中的色彩子采样优化",
+        "水下图像的颜色校正与细节增强",
+        "基于深度学习的图像复原与重建",
+        "多尺度结构建模与特征提取"
+      ],
+      "common_methodologies": [
+        "卷积神经网络（CNN）",
+        "多尺度血管增强技术",
+        "基于图像形成模型的物理先验建模",
+        "概率图生成与后处理融合方法",
+        "代码本优化与重插值算法"
+      ],
+      "interdisciplinary_connections": [
+        "生物医学工程（如视网膜血管分析用于疾病诊断）",
+        "计算机视觉（如关键点匹配、图像识别）",
+        "通信与编码理论（如图像压缩与传输优化）"
+      ],
+      "key_terminologies": [
+        "血管扭曲度（vascular tortuosity）",
+        "Matthew's Correlation Coefficient",
+        "chroma subsampling",
+        "coordinate-inconsistency (CI)",
+        "upsampling process-inconsistency (UPI)",
+        "reduced codebook and re-interpolation (RCRI)",
+        "underwater image enhancement",
+        "image formation model",
+        "multi-scale vessel enhancement",
+        "PSNR 和 SSIM"
+      ]
+    }
+  },
+  {
+    "id": "eess.SP",
+    "name_cn": "信号处理",
+    "description_cn": "信号与数据分析的理论、算法、性能分析及应用，包括物理建模、处理、检测与参数估计、学习、挖掘、检索及信息提取。\"信号\"涵盖语音、音频、声呐、雷达、地球物理、生理、（生物）医学、图像、视频以及多模态的自然与人工信号，包括通信信号与数据。感兴趣的主题包括：统计信号处理、谱估计与系统辨识；滤波器设计、自适应滤波/随机学习；（压缩）采样、感知及变换域方法（含快速算法）；面向机器学习的信号处理及用于信号处理应用的机器学习；网络内与图信号处理；用于信号处理应用的凸与非凸优化方法；雷达、声呐与传感器阵列波束成形及测向；通信信号处理；低功耗、多核及片上系统信号处理；面向电力网、物联网等信息物理系统的感知、通信、分析与优化。",
+    "profile": {
+      "profile_summary": "eess.SP（信号处理）分类聚焦于信号与数据的理论、算法、性能分析及应用，涵盖从物理建模到信息提取的全过程。其核心目标是开发高效、鲁棒的信号处理方法，以应对现代通信、感知、生物医学和多模态系统中的复杂挑战，特别是在高维、非线性、动态和资源受限环境下的信号获取、变换、检测、估计与优化问题。",
+      "core_topics": [
+        "无线通信中的智能表面辅助信号处理与波束成形设计",
+        "稀疏信号恢复与压缩感知算法",
+        "雷达与通信一体化系统中的联合波束成形与安全传输",
+        "图信号处理与动态网络拓扑学习",
+        "面向机器学习的信号处理及深度学习在信号优化中的应用"
+      ],
+      "common_methodologies": [
+        "交替优化与块坐标下降法",
+        "凸与非凸优化技术（如半定松弛、SCA、CCCP）",
+        "贪婪类稀疏恢复算法（如OMP及其变体）",
+        "深度学习与强化学习模型",
+        "基于Cramér-Rao界和Fisher信息矩阵的性能分析"
+      ],
+      "interdisciplinary_connections": [
+        "通信工程（特别是5G/6G、NOMA、毫米波通信）",
+        "机器学习与人工智能（包括图神经网络、深度强化学习）",
+        "生物医学工程（如fMRI信号分析与生理信号处理）"
+      ],
+      "key_terminologies": [
+        "波束成形（Beamforming）",
+        "可重构智能表面（Reconfigurable Intelligent Surface, RIS）",
+        "正交匹配追踪（Orthogonal Matching Pursuit, OMP）",
+        "Cramér-Rao界（Cramer-Rao Bound, CRB）",
+        "混合预编码（Hybrid Precoding）",
+        "图信号处理（Graph Signal Processing, GSP）",
+        "非正交多址接入（Non-Orthogonal Multiple Access, NOMA）",
+        "压缩感知（Compressed Sensing）",
+        "集成感知与通信（Integrated Sensing and Communications, ISAC）",
+        "频谱效率（Spectral Efficiency）"
+      ]
+    }
+  },
+  {
+    "id": "eess.SY",
+    "name_cn": "系统与控制",
+    "description_cn": "本部分涵盖自动控制系统的理论与实验研究，重点在于运用建模、仿真和优化工具进行控制系统分析与设计的方法。具体研究领域包括非线性控制、分布式控制、自适应控制、随机控制、鲁棒控制，以及混合系统与离散事件系统。应用领域包括汽车与航空航天控制系统、网络控制、生物系统、多智能体与协同控制、机器人、强化学习、传感器网络、信息物理系统与能源相关系统的控制，以及计算系统的控制。",
+    "profile": {
+      "profile_summary": "eess.SY（系统与控制）分类聚焦于自动控制系统的理论与应用研究，致力于通过建模、仿真与优化方法实现复杂动态系统的分析与设计。该领域涵盖从经典控制理论到现代智能控制的广泛主题，重点解决非线性、不确定性、分布式协同与安全性等挑战，广泛应用于交通、航空航天、能源系统、机器人和信息物理系统等现实场景，目标是实现高效、安全、鲁棒且社会兼容的自动化控制。",
+      "core_topics": [
+        "非线性与自适应控制",
+        "分布式与多智能体协同控制",
+        "事件触发与安全增强控制",
+        "交通与城市空中交通管理中的优化控制",
+        "基于学习的控制与系统安全验证"
+      ],
+      "common_methodologies": [
+        "李雅普诺夫稳定性分析与控制李雅普诺夫函数",
+        "事件触发控制（ETC）与自触发控制（STC）",
+        "最优控制与多目标优化（包括MILP、SOPF）",
+        "强化学习与学习型控制结合安全过滤机制",
+        "偏微分方程（PDE）建模与背步法（backstepping）控制设计"
+      ],
+      "interdisciplinary_connections": [
+        "计算机科学（特别是强化学习、人工智能在控制中的应用）",
+        "电气工程与能源系统（如智能电网、可再生能源调度）",
+        "交通运输工程（交通流控制、自动驾驶车辆行为建模）"
+      ],
+      "key_terminologies": [
+        "事件触发控制（Event-Triggered Control）",
+        "控制屏障函数（Control Barrier Functions）",
+        "李雅普诺夫函数（Lyapunov Function）",
+        "多智能体系统（Multi-Agent Systems）",
+        "强化学习（Reinforcement Learning）",
+        "分布式优化（Distributed Optimization）",
+        "随机混合整数线性规划（Stochastic MILP）",
+        "区域吸引力（Region of Attraction）",
+        "时间变化优化（Time-Varying Optimization）",
+        "信息物理系统（Cyber-Physical Systems）"
+      ]
+    }
+  },
+  {
+    "id": "math.AC",
+    "name_cn": "交换代数",
+    "description_cn": "交换环、模、理想、同调代数、计算方面、不变量理论、与代数几何和组合数学的联系",
+    "profile": {
+      "profile_summary": "交换代数（math.AC）主要研究交换环及其模的代数结构，关注理想、同调性质、不变量以及计算方法。该领域的核心目标是理解环与模的内在结构，探索其在奇点理论、代数几何和组合数学中的应用，尤其侧重于理想分解、同调维数、闭包操作、Frobenius映射相关不变量以及各类特殊理想和模的性质。研究常通过抽象代数工具揭示代数对象的深层分类与行为。",
+      "core_topics": [
+        "理想与模的结构理论（如S-主分解、迹理想、导子、Ulrich模）",
+        "同调代数与有限维性质（如投射维数、内射维数、Tor刚性）",
+        "Frobenius映射与正特征环的奇点理论（如Frobenius Betti数、F-深度、F-闭包）",
+        "原子性与因子分解结构（如半群的原子性质、弹性、ω-素性）",
+        "环的构造与分类（如完全交环的极限、GCD整环的完美化）"
+      ],
+      "common_methodologies": [
+        "同调代数方法（Ext, Tor, 内射/投射分解）",
+        "Frobenius映射与紧闭包技术",
+        "局部上同调与深度类不变量分析",
+        "构造性证明与反例构造（如极限构造、显式计算）",
+        "对偶理论与闭包-内部操作框架"
+      ],
+      "interdisciplinary_connections": [
+        "代数几何（通过环的几何解释，如奇点、Cohen-Macaulay性）",
+        "组合数学（通过半群环、数值半群及其因子化性质）",
+        "数论（在混合特征赋值环、p进结构中的应用）"
+      ],
+      "key_terminologies": [
+        "交换环",
+        "模",
+        "理想",
+        "同调代数",
+        "Frobenius映射",
+        "Cohen-Macaulay环",
+        "紧闭包",
+        "Ulrich模",
+        "S-主分解",
+        "Frobenius Betti数"
+      ]
+    }
+  },
+  {
+    "id": "math.AG",
+    "name_cn": "代数几何",
+    "description_cn": "代数簇、叠、层、概形、模空间、复几何、量子上同调",
+    "profile": {
+      "profile_summary": "代数几何（math.AG）致力于研究代数簇、概形、层、叠和模空间等几何对象的代数与几何性质，关注其分类、奇点结构、上同调理论以及模空间的构造与行为。该领域不仅探索经典几何问题，还深入涉及导出范畴、稳定性条件、双有理几何和量子上同调等现代理论，旨在揭示几何结构背后的代数不变量与范畴对称性。",
+      "core_topics": [
+        "模空间与稳定层的构造及其几何性质",
+        "奇点分类与双有理几何中的极小模型纲领（MMP）",
+        "导出范畴与稳定性条件（如Bridgeland稳定性）",
+        "代数曲线与曲面的上同调理论及零维圈研究",
+        "几何不变量理论与自由排列、行列式构型"
+      ],
+      "common_methodologies": [
+        "层论与上同调方法（包括对数Hodge上同调）",
+        "导出范畴与Kuznetsov分解技术",
+        "双有理几何中的极小模型程序（MMP）",
+        "模空间构造中的良好模空间（good moduli space）理论",
+        "稳定性条件与半正交分解分析"
+      ],
+      "interdisciplinary_connections": [
+        "数学物理（特别是镜像对称与量子上同调）",
+        "数论（通过算术几何与模形式关联）",
+        "代数拓扑（通过上同调理论与周期映射）"
+      ],
+      "key_terminologies": [
+        "概形",
+        "模空间",
+        "稳定性条件",
+        "导出范畴",
+        "半正交分解",
+        "奇点",
+        "上同调",
+        "层",
+        "双有理几何",
+        "零维圈"
+      ]
+    }
+  },
+  {
+    "id": "math.AP",
+    "name_cn": "偏微分方程分析",
+    "description_cn": "存在性与唯一性、边界条件、线性与非线性算子、稳定性、孤子理论、可积偏微分方程、守恒律、定性动力学",
+    "profile": {
+      "profile_summary": "偏微分方程分析（math.AP）专注于研究各类偏微分方程的定性与定量行为，核心目标包括解的存在性、唯一性、稳定性、正则性以及长期动力学行为。该领域广泛探讨线性和非线性算子作用下的演化方程与椭圆型方程，涉及守恒律、孤子理论、可积系统等结构特性，并深入研究边界效应、奇异极限、能量耗散机制及非线性相互作用对解结构的影响，尤其关注物理流体力学、量子力学和数学物理中的模型方程。",
+      "core_topics": [
+        "非线性偏微分方程的稳定性与渐近行为",
+        "守恒律与流体力学中的激波、边界层问题",
+        "分数阶与非局部算子相关的变分与正则性理论",
+        "具有临界或超临界非线性的椭圆型与抛物型方程",
+        "逆问题与非线性响应算子的数学分析"
+      ],
+      "common_methodologies": [
+        "变分法与约束极小化方法",
+        "粘性消失与渐近稳定性分析",
+        "Sobolev空间与函数空间估计技术",
+        "Pohozaev恒等式与能量方法",
+        "粘性解与完全非线性椭圆方程的正则性理论"
+      ],
+      "interdisciplinary_connections": [
+        "流体力学（Navier-Stokes方程、Boussinesq系统、Prandtl边界层理论）",
+        "数学物理（Schrodinger方程、Chern-Simons-Schrodinger系统、波动物理）",
+        "几何分析与动力系统（孤子、行波解、轨道稳定性）"
+      ],
+      "key_terminologies": [
+        "存在性与唯一性",
+        "渐近稳定性",
+        "增强耗散",
+        "分数阶拉普拉斯算子",
+        "归一化解",
+        "孤子与行波解",
+        "粘性激波",
+        "反问题与势函数重构",
+        "超临界增长",
+        "边界正则性"
+      ]
+    }
+  },
+  {
+    "id": "math.AT",
+    "name_cn": "代数拓扑",
+    "description_cn": "同伦论、同调代数、流形的代数处理",
+    "profile": {
+      "profile_summary": "代数拓扑（math.AT）致力于通过代数工具研究拓扑空间的结构与性质，核心目标是利用同伦论、同调代数和流形的代数刻画来揭示空间的全局拓扑特征。该领域不仅发展抽象的理论框架，如稳定同伦论、谱序列与上同调运算，还广泛探索其在几何、物理和计算系统中的应用，尤其关注拓扑不变量的构造、分类与计算，以及代数结构在拓扑对象上的作用机制。",
+      "core_topics": [
+        "同伦论与稳定同伦范畴",
+        "流形与配置空间的拓扑性质",
+        "上同调理论与代数结构（如Steenrod代数）",
+        "等变拓扑与全局谱理论",
+        "拓扑机械系统与离散几何的代数建模"
+      ],
+      "common_methodologies": [
+        "同调与上同调代数（包括导出函子与谱序列）",
+        "cosheaf与sheaf上同调方法",
+        "配置空间与映射空间的模型构造",
+        "Steenrod代数与hit问题的模处理",
+        "Poincaré对偶与Massey积等高阶不变量分析"
+      ],
+      "interdisciplinary_connections": [
+        "数学物理（特别是弦拓扑与量子场论中的代数结构）",
+        "计算几何与机器人学（如折纸机构的拓扑建模）",
+        "代数几何（通过模空间与群作用的上同调研究）"
+      ],
+      "key_terminologies": [
+        "homotopy theory",
+        "cohomology ring",
+        "Steenrod algebra",
+        "configuration space",
+        "equivariant topology",
+        "Poincaré duality",
+        "Massey product",
+        "cosheaf homology",
+        "Bott manifold",
+        "Lazard ring"
+      ]
+    }
+  },
+  {
+    "id": "math.CA",
+    "name_cn": "经典分析与常微分方程",
+    "description_cn": "特殊函数、正交多项式、调和分析、常微分方程、微分关系、变分法、逼近论、级数展开、渐近分析",
+    "profile": {
+      "profile_summary": "该分类聚焦于经典分析与常微分方程领域的理论研究，涵盖调和分析、特殊函数、正交多项式、变分法、逼近论、渐近分析以及常微分方程的对称性与解的结构。其核心目标是通过精细的分析工具研究函数空间中的算子有界性、能量最小化问题、特殊函数的推广与性质、微分方程的系数特征，以及在几何与代数结构下的多线性形式与积分估计，推动对连续与离散系统中基本分析对象的理解。",
+      "core_topics": [
+        "调和分析中的极大算子与Fourier积分算子的有界性",
+        "特殊函数及其在Dunkl算子、M-级数框架下的推广",
+        "Riesz与Coulomb能量最小化问题及平衡测度理论",
+        "常微分方程的对称性代数与系数刻画",
+        "渐近分析与局部极限定理在整数格点上的推广"
+      ],
+      "common_methodologies": [
+        "Fourier分析与谱理论",
+        "测度论与位势理论中的平衡测度和扫除法（balayage）",
+        "稀疏支配估计（sparse domination）与加权不等式技术",
+        "渐近展开与振荡积分分析（如Van der Corput引理）",
+        "Kronecker积与和在矩阵复合物构造中的应用"
+      ],
+      "interdisciplinary_connections": [
+        "数学物理（如能量最小化与场论模型）",
+        "代数与表示论（如Dunkl算子与对称多项式）",
+        "概率论与随机过程（如局部极限定理与复值卷积）"
+      ],
+      "key_terminologies": [
+        "调和分析",
+        "Fourier维度",
+        "Riesz能量",
+        "Sheffer-Dunkl多项式",
+        "稀疏算子",
+        "加权不等式",
+        "局部极限定理",
+        "平衡测度",
+        "渐近展开",
+        "Kronecker积"
+      ]
+    }
+  },
+  {
+    "id": "math.CO",
+    "name_cn": "组合数学",
+    "description_cn": "离散数学、图论、计数、组合优化、拉姆齐理论、组合博弈论",
+    "profile": {
+      "profile_summary": "组合数学（math.CO）是一个专注于离散结构及其性质的数学分支，核心研究内容包括图论、计数理论、组合优化、极值组合、代数组合以及组合结构的算法与几何嵌入。该领域致力于研究离散对象的构造、枚举、极值性质和内在对称性，目标是揭示组合结构的规律性，解决存在性、最优性与结构性问题，并为计算机科学、运筹学和代数等领域提供理论基础。",
+      "core_topics": [
+        "极值图论与子图嵌入",
+        "图的染色、覆盖与分解",
+        "度量与结构参数（如度量维数、hull数）",
+        "排列与模式避免",
+        "代数组合与对称函数"
+      ],
+      "common_methodologies": [
+        "吸收法（absorption method）",
+        "正则性方法（regularity method）",
+        "极值构造与渐近分析",
+        "生成函数与递推关系",
+        "混合整数线性规划"
+      ],
+      "interdisciplinary_connections": [
+        "理论计算机科学（算法设计与复杂性）",
+        "离散几何与拓扑",
+        "代数图论与表示论"
+      ],
+      "key_terminologies": [
+        "Hajnal--Szemerédi定理",
+        "transversal Hamilton cycle",
+        "quadratic embedding constant",
+        "crossing number",
+        "metric dimension",
+        "P_3-hull number",
+        "strongly regular graph",
+        "discriminantal arrangement",
+        "signed derangements",
+        "quasi-random hypergraphs"
+      ]
+    }
+  },
+  {
+    "id": "math.CT",
+    "name_cn": "范畴论",
+    "description_cn": "enriched范畴、拓扑斯、阿贝尔范畴、幺半范畴、同调代数",
+    "profile": {
+      "profile_summary": "范畴论（math.CT）致力于通过高度抽象的数学结构研究各类数学对象之间的关系与共性，其核心目标是发展统一的语言和工具来形式化数学构造与变换。该领域聚焦于范畴的内部结构、高维范畴、丰富化与内部化机制，以及与其他数学分支（如代数、拓扑、逻辑）的深层联系。研究内容涵盖从基本的自然变换、伴随函子到复杂的六操作、同调代数、模型范畴和纤维化结构，强调形式化、公理化和结构性推理。",
+      "core_topics": [
+        "丰富化范畴与内部化理论",
+        "高维范畴与双范畴、三范畴结构",
+        "伴随函子、Kan扩张与形式范畴论",
+        "阿贝尔范畴、同调代数与精确范畴",
+        "纤维化、内部范畴与多范畴理论"
+      ],
+      "common_methodologies": [
+        "使用表面图（surface diagram）进行高维组合的可视化与推理",
+        "通过Kan扩张与单子（monad）理论处理泛构造",
+        "利用纤维化（fibration）与格罗滕迪克构造建模依赖结构",
+        "基于双范畴、伪代数与内部范畴的高阶抽象建模",
+        "应用拓扑斯与量词代数进行逻辑与语义建模"
+      ],
+      "interdisciplinary_connections": [
+        "代数几何：通过阿贝尔范畴、层论与拓扑斯研究几何对象的范畴化结构",
+        "理论计算机科学：与程序语义、类型论和范畴逻辑的深度融合，如DisCoCat与FibLang",
+        "数据科学与信息动力学：将范畴论用于网络扩散、加权格与信息流建模"
+      ],
+      "key_terminologies": [
+        "丰富化范畴（enriched category）",
+        "伴随函子（adjunction）",
+        "Kan扩张（Kan extension）",
+        "阿贝尔范畴（abelian category）",
+        "拓扑斯（topos）",
+        "内部范畴（internal category）",
+        "纤维化（fibration）",
+        "单子（monad）",
+        "双范畴（bicategory）",
+        "同调代数（homological algebra）"
+      ]
+    }
+  },
+  {
+    "id": "math.CV",
+    "name_cn": "复变函数",
+    "description_cn": "全纯函数、自守群作用与形式、拟凸性、复几何、解析空间、解析层",
+    "profile": {
+      "profile_summary": "math.CV（复变函数）分类聚焦于复分析中的全纯函数及其在多复变数、复几何和解析空间中的推广，研究内容涵盖值分布理论、拟凸性、解析层、自守形式以及全纯映射的几何与代数性质。该领域旨在通过分析、几何与拓扑工具揭示复结构的深层特性，探索全纯与亚纯函数的动力学行为、唯一性、逼近性质及其在代数簇、Stein流形和边界几何中的应用。",
+      "core_topics": [
+        "全纯函数与亚纯函数的值分布理论",
+        "强拟凸域与复几何中的边界行为",
+        "复流形上的全纯映射与嵌入问题",
+        "微分-差分方程与函数方程的解析解",
+        "复分析中的不等式与极值问题"
+      ],
+      "common_methodologies": [
+        "Nevanlinna理论与非积分亏量关系",
+        "微分次序与亚纯函数的唯一性分析",
+        "Stokes型积分公式与Borel-Pompeiu表示",
+        "q-模拟算子与逼近理论",
+        "Fourier分析与测度结构刻画"
+      ],
+      "interdisciplinary_connections": [
+        "代数几何（通过全纯映射与代数簇的研究）",
+        "复微分几何（涉及Kähler几何与Bergman核）",
+        "数学物理（如Fueter算子与四元数分析的应用）"
+      ],
+      "key_terminologies": [
+        "全纯函数",
+        "拟凸性",
+        "Nevanlinna理论",
+        "Bergman核",
+        "Stein流形",
+        "亚纯函数",
+        "Schwarzian导数",
+        "Hankel行列式",
+        "q-算子",
+        "解析层"
+      ]
+    }
+  },
+  {
+    "id": "math.DG",
+    "name_cn": "微分几何",
+    "description_cn": "复几何、接触几何、黎曼几何、伪黎曼几何与芬斯勒几何、相对论、规范理论、全局分析",
+    "profile": {
+      "profile_summary": "微分几何（math.DG）致力于研究流形上的几何结构及其全局与局部性质，涵盖黎曼几何、复几何、芬斯勒几何、规范理论和相对论等多个方向。该领域关注曲率、联络、测地线、等参超曲面、凯勒结构、几何流（如Kähler-Ricci流）、几何分类问题以及在对称性与拓扑约束下的流形构造。核心目标包括理解几何对象的分类、对称性、极值性质及其在数学物理中的应用，尤其注重通过分析、拓扑和代数工具揭示几何结构的深层规律。",
+      "core_topics": [
+        "复几何与非凯勒流形的结构研究",
+        "等参超曲面与调和流形的几何分类",
+        "几何流（如Kähler-Ricci流）与稳定性理论",
+        "辛与余辛几何中的子流形与映射",
+        "芬斯勒几何与喷流的完备性问题"
+      ],
+      "common_methodologies": [
+        "几何测度论与豪斯多夫维数分析",
+        "曲率张量分析与里奇张量计算",
+        "喷流与测地线的参数化方法",
+        "代数整体方法（如Ambrose-Singer定理）",
+        "形变与极限构造（如horosphere极限）"
+      ],
+      "interdisciplinary_connections": [
+        "数学物理（特别是广义相对论与规范场论）",
+        "拓扑学（流形分类与同伦理论）",
+        "复分析与代数几何（全纯结构与向量丛）"
+      ],
+      "key_terminologies": [
+        "Kähler manifold",
+        "isoparametric hypersurface",
+        "Ricci soliton",
+        "Chern connection",
+        "geodesic completeness",
+        "Hausdorff dimension",
+        "symplectic geometry",
+        "Finsler metric",
+        "holomorphic sectional curvature",
+        "ADM mass"
+      ]
+    }
+  },
+  {
+    "id": "math.DS",
+    "name_cn": "动力系统",
+    "description_cn": "微分方程与流的动力学、力学、经典少体问题、迭代、复动力学、时滞微分方程",
+    "profile": {
+      "profile_summary": "动力系统（math.DS）分类聚焦于微分方程、映射迭代和流的长期行为研究，旨在理解系统的稳定性、混沌、周期性与遍历性等动态特性。该领域涵盖从经典力学中的哈密顿系统到抽象的拓扑与符号动力系统，研究对象包括连续与离散时间系统、确定性与随机扰动系统，核心目标是揭示复杂动态背后的结构规律，如轨道的可预测性、不变集的几何与测度性质，以及系统在参数变化下的演化行为。",
+      "core_topics": [
+        "混沌与符号动力系统中的拓扑结构（如 horseshoe 理论与子移位）",
+        "哈密顿系统与接触动力系统的变分方法及渐近轨道",
+        "部分双曲与刚性动力系统的全局结构与共轭分类",
+        "动力系统的测度理论性质（如混合性、遍历性与不变测度）",
+        "复动力系统与分形几何中外部射线的近抛物几何行为"
+      ],
+      "common_methodologies": [
+        "符号动力学与子移位模型的构造与分析",
+        "变分法与哈密顿-雅可比方程在轨道构造中的应用",
+        "重正化与Lavaurs映射在复动力系统中的几何控制",
+        "Bratteli-Vershik系统与区间交换变换的动态建模",
+        "耦合方法与随机分析在势能景观研究中的概率框架"
+      ],
+      "interdisciplinary_connections": [
+        "微分几何与辛几何（通过哈密顿和接触系统）",
+        "数论与遍历理论（通过格空间上的对角群作用与等分布问题）",
+        "统计物理与机器学习（通过势能景观与神经网络损失函数的动态分析）"
+      ],
+      "key_terminologies": [
+        "shadowing property",
+        "topological horseshoe",
+        "contact Hamiltonian system",
+        "partially hyperbolic action",
+        "Nehari manifold",
+        "external rays",
+        "invariant measure",
+        "symbolic dynamics",
+        "almost automorphy",
+        "Bratteli-Vershik system"
+      ]
+    }
+  },
+  {
+    "id": "math.FA",
+    "name_cn": "泛函分析",
+    "description_cn": "巴拿赫空间、函数空间、实变函数、积分变换、分布理论、测度论",
+    "profile": {
+      "profile_summary": "泛函分析（math.FA）致力于研究无限维向量空间及其上的线性算子，重点关注巴拿赫空间、希尔伯特空间、函数空间的结构与性质，以及测度论、分布理论和积分变换等基础工具。该领域不仅深入探讨空间的几何与拓扑特性，如凸性、嵌入性、框架理论和算子谱性质，还广泛涉及非线性映射、不动点理论、矩问题和信号处理中的数学基础，旨在为分析学、算子理论和数学物理提供坚实的理论框架。",
+      "core_topics": [
+        "巴拿赫空间与希尔伯特空间的几何结构",
+        "算子理论与算子不等式",
+        "函数空间与广义框架（如Gabor框架、连续g-框架）",
+        "测度论与矩问题",
+        "凸性与不等式理论"
+      ],
+      "common_methodologies": [
+        "泛函分析中的对偶性与表示定理",
+        "算子半群与谱理论分析",
+        "Hankel矩阵与矩问题求解",
+        "弱L^p范数与极限行为分析",
+        "扰动理论与稳定性分析"
+      ],
+      "interdisciplinary_connections": [
+        "调和分析（如Gabor框架与信号处理）",
+        "概率论与随机分析（如随机赋范模与Orlicz空间）",
+        "数学物理（如量子力学中的算子理论）"
+      ],
+      "key_terminologies": [
+        "巴拿赫空间",
+        "希尔伯特空间",
+        "算子范数",
+        "数值半径",
+        "Gabor框架",
+        "测度论",
+        "分布理论",
+        "凸函数",
+        "Wold型分解",
+        "Orlicz空间"
+      ]
+    }
+  },
+  {
+    "id": "math.GM",
+    "name_cn": "通用数学",
+    "description_cn": "具有普遍意义的数学内容，及其他未涵盖的主题",
+    "profile": {
+      "profile_summary": "通用数学（math.GM）分类涵盖了具有普遍意义的数学研究内容，以及未被其他特定数学分支明确涵盖的主题。该领域致力于探索基础性、跨领域的数学问题，包括数论、组合数学、逼近理论、微分方程求解、模糊数学、计算复杂性、多项式恒等式与特殊函数积分等。研究目标通常在于提出新颖的数学构造、发展统一的求解方法、揭示数论结构特性，或通过初等或综合手段解决长期存在的猜想与难题，强调理论的普适性与方法的创新性。",
+      "core_topics": [
+        "数论中的特殊方程与序列结构",
+        "逼近理论与广义算子构造",
+        "组合几何与NP难问题的结构分析",
+        "模糊集与多准则决策模型",
+        "微分方程与代数方程的新型求解方法"
+      ],
+      "common_methodologies": [
+        "初等数论与p进赋值分析",
+        "构造性算法与计算机辅助搜索",
+        "算子矩量与逼近误差估计",
+        "模糊数上的聚合算子与序关系定义",
+        "积分变换与特殊函数恒等式推导"
+      ],
+      "interdisciplinary_connections": [
+        "计算机科学（算法设计与复杂性理论）",
+        "工程与控制理论（模糊系统与决策建模）",
+        "物理学（特殊函数在数学物理中的应用）"
+      ],
+      "key_terminologies": [
+        "primitive roots",
+        "Bernstein-Kantorovich operators",
+        "P vs. NP",
+        "perfect cuboid",
+        "covering trail",
+        "picture fuzzy numbers",
+        "triangular norms",
+        "admissible order",
+        "associated Legendre polynomials",
+        "Hurwitz-Lerch zeta function"
+      ]
+    }
+  },
+  {
+    "id": "math.GN",
+    "name_cn": "一般拓扑学",
+    "description_cn": "连续统理论、点集拓扑、具有代数结构的空间、基础理论、维数理论、局部与整体性质",
+    "profile": {
+      "profile_summary": "一般拓扑学（math.GN）致力于研究拓扑空间的基本结构与性质，涵盖点集拓扑、连续性、紧性、分离性、维数理论以及拓扑代数结构等基础理论。该领域关注空间的局部与整体特性，探索拓扑构造的抽象化与推广，如通过理想收敛、闭图性质、Tukey序、Khalimsky空间等工具研究空间的内在结构，并深入分析拓扑空间在不同公理系统（如ZF）下的行为。其研究目标在于建立拓扑对象之间的映射关系、分类体系与对偶理论，同时探讨拓扑与其他数学分支（如代数、测度论、逻辑）的深层联系。",
+      "core_topics": [
+        "点集拓扑与分离性质",
+        "拓扑空间的紧性与覆盖性质",
+        "理想收敛与广义序列理论",
+        "拓扑代数结构与群作用",
+        "点自由拓扑与框架理论"
+      ],
+      "common_methodologies": [
+        "使用Tukey序分析紧覆盖结构",
+        "通过理想和滤子研究收敛性",
+        "构造反例与独立性证明（在ZF系统下）",
+        "应用图论方法解决度量延拓问题",
+        "利用函数空间与极值截面分析连续性"
+      ],
+      "interdisciplinary_connections": [
+        "数理逻辑与集合论（特别是ZF框架下的选择公理影响）",
+        "泛函分析（弱收敛、Cauchy序列的推广）",
+        "代数拓扑与离散拓扑（如Khalimsky空间与Pervin空间）"
+      ],
+      "key_terminologies": [
+        "Hausdorff空间",
+        "局部紧性",
+        "理想收敛（I-convergence）",
+        "Tukey序",
+        "Khalimsky拓扑",
+        "Pervin空间",
+        "Frith框架",
+        "分离公理（如正规性、可数链条件）",
+        "可度量化",
+        "超空间（hyperspace）"
+      ]
+    }
+  },
+  {
+    "id": "math.GR",
+    "name_cn": "群论",
+    "description_cn": "有限群、拓扑群、表示论、上同调、分类与结构",
+    "profile": {
+      "profile_summary": "群论（math.GR）作为数学的核心分支，致力于研究群的结构、分类及其表示，重点关注有限群、拓扑群、群的上同调理论以及群的生成与分解性质。该领域旨在通过代数、拓扑和几何方法揭示群的内在对称性，解决群的分类问题，并探索其在表示论、几何群论和代数拓扑中的深层应用。代表性研究包括有限群的特征标理论、局部紧群的结构分析、群作用下的动力系统以及群与代数结构（如半群、群环）之间的相互作用。",
+      "core_topics": [
+        "有限群的结构与分类",
+        "群表示论与特征标理论",
+        "拓扑群与局部紧群的结构分析",
+        "群的上同调与代数不变量",
+        "半群与逆半群的代数性质"
+      ],
+      "common_methodologies": [
+        "群扩张与中心扩张的构造",
+        "特征标表与不可约表示分析",
+        "Krohn-Rhodes分解与半群复杂度计算",
+        "拓扑动力系统与全群构造",
+        "Sylow子群与σ-可解群的覆盖系统分析"
+      ],
+      "interdisciplinary_connections": [
+        "代数拓扑：通过群的上同调和同伦理论研究拓扑空间的对称性",
+        "表示论与数学物理：有限群和李型群的表示在量子场论和粒子物理中的应用",
+        "算子代数与动力系统：拓扑全群与C*-代数、轨道等价关系的联系"
+      ],
+      "key_terminologies": [
+        "p-Brauer字符",
+        "vanishing element",
+        "局部紧全群",
+        "正规化单位群",
+        "σ-可解群",
+        "Krohn-Rhodes复杂度",
+        "Ore条件",
+        "双环面图",
+        "非交换图",
+        "伪实群"
+      ]
+    }
+  },
+  {
+    "id": "math.GT",
+    "name_cn": "几何拓扑学",
+    "description_cn": "流形、轨形、多面体、胞腔复形、叶状结构、几何结构",
+    "profile": {
+      "profile_summary": "几何拓扑学（math.GT）专注于流形、胞腔复形、叶状结构和几何结构的拓扑性质及其相互关系，研究对象涵盖从经典纽结理论到高维流形的几何与拓扑不变量。该领域致力于理解空间在连续变形下的不变性质，尤其关注低维流形（如3-和4-维）的结构分类、纽结与链环的不变量构造、流形间的映射性质以及几何化猜想的应用。核心目标包括发展新的拓扑不变量、揭示流形的内在几何结构，并通过代数与分析工具解决嵌入、覆盖、纤维化等深层问题。",
+      "core_topics": [
+        "纽结与链环的拓扑不变量（如Jones型多项式、Kauffman括号）",
+        "低维流形（特别是3-和4-维）的结构与分类",
+        "流形上的纤维化、覆叠空间与Dehn手术",
+        "双曲几何结构与Coxeter多面体的组合构造",
+        "表面链（surface-links）与虚拟纽结的推广理论"
+      ],
+      "common_methodologies": [
+        "Heegaard Floer同调理论",
+        "辫群与T-链构造中的Dehn填充技术",
+        "Möbius反演公式在随机双曲曲面中的应用",
+        "标记图图（marked graph diagrams）与magmas代数结构建模",
+        "纽结迹（knot traces）与4-维手柄体分析"
+      ],
+      "interdisciplinary_connections": [
+        "代数拓扑：通过同调理论（如同调、上同调、Floer理论）研究流形与纽结",
+        "数学物理：纽结多项式与量子不变量在拓扑量子场论中的应用",
+        "动力系统：表面同胚的动态行为与流形纤维化的联系"
+      ],
+      "key_terminologies": [
+        "流形（manifold）",
+        "纽结迹（knot trace）",
+        "Kauffman括号（Kauffman bracket）",
+        "Dehn手术（Dehn surgery）",
+        "双曲结构（hyperbolic structure）",
+        "纤维化（fibering）",
+        "桥数（bridge number）",
+        "L-空间（L-space）",
+        "Coxeter多面体（Coxeter polytope）",
+        "表面链（surface-link）"
+      ]
+    }
+  },
+  {
+    "id": "math.HO",
+    "name_cn": "历史与概述",
+    "description_cn": "数学传记、数学哲学、数学教育、趣味数学、数学传播、数学伦理",
+    "profile": {
+      "profile_summary": "math.HO（历史与概述）分类聚焦于数学的哲学基础、历史发展、教育实践、传播方式以及数学文化中的伦理与社会问题。该领域旨在通过历史分析、哲学思辨、教学实验和跨学科对话，探讨数学的本质、演变及其在社会和教育中的角色，服务于对数学更深层次的理解与普及。",
+      "core_topics": [
+        "数学史与人物传记",
+        "数学哲学与基础问题",
+        "数学教育方法与教学创新",
+        "数学传播与公众理解",
+        "数学中的社会公平与伦理问题"
+      ],
+      "common_methodologies": [
+        "历史文献分析与考证",
+        "哲学概念分析与理论建构",
+        "教学实验设计与教育数据统计分析",
+        "跨学科理论类比与概念映射",
+        "批判性评论与逻辑论证分析"
+      ],
+      "interdisciplinary_connections": [
+        "哲学（尤其是科学哲学与德国古典哲学）",
+        "教育学（特别是STEM教育与认知心理学）",
+        "科学史与科学传播"
+      ],
+      "key_terminologies": [
+        "infinitesimals",
+        "Leibnizian calculus",
+        "working memory",
+        "variational calculus",
+        "isoperimetric theorem",
+        "topology",
+        "Hegel's Logic",
+        "mathematical proving",
+        "complex numbers",
+        "radian"
+      ]
+    }
+  },
+  {
+    "id": "math.IT",
+    "name_cn": "信息论",
+    "description_cn": "math.IT 是 cs.IT 的别名，涵盖信息论与编码的理论和实验方面。",
+    "profile": {
+      "profile_summary": "信息论（math.IT）是一个专注于信息的量化、传输、存储和处理的理论基础的科研领域。该分类涵盖了从经典香农信息论到现代通信系统中的编码、检测、估计和安全等广泛主题。其核心目标是探索信息传输的极限、设计高效的编码方案、优化通信系统的性能，并将信息论原理应用于新兴技术如6G、智能反射面、物联网和集成感知与通信系统。研究既包括严格的数学推导与界分析，也涉及实际系统设计与算法实现。",
+      "core_topics": [
+        "信道容量与信息传输极限分析",
+        "纠错编码与局部可恢复码设计",
+        "集成感知与通信系统的性能权衡",
+        "序列设计与信号波形优化",
+        "信息新鲜度（Age of Information）与资源调度"
+      ],
+      "common_methodologies": [
+        "大偏差理论与信息几何",
+        "贝叶斯估计与Cramér-Rao界分析",
+        "有限域上的函数构造与代数编码",
+        "递归解码与组合优化算法",
+        "图模型与NP难问题的近似求解"
+      ],
+      "interdisciplinary_connections": [
+        "无线通信与网络（特别是6G、MIMO、背向散射通信）",
+        "人工智能与机器学习（用于信道建模、资源分配和智能反射面控制）",
+        "密码学与信息安全（基于物理层的安全密钥共享）"
+      ],
+      "key_terminologies": [
+        "Shannon熵",
+        "局部可恢复码（LRC）",
+        "贝叶斯Cramér-Rao界（BCRB）",
+        "零相关区序列（ZCZ/ZAZ）",
+        "Golay互补阵列集（GCAS）",
+        "智能反射面（IRS/RIS）",
+        "信息新鲜度（Age of Information, AoI）",
+        "最大可恢复码（MR Code）",
+        "信道互易性（Channel Reciprocity）",
+        "背向散射通信（Backscatter Communication）"
+      ]
+    }
+  },
+  {
+    "id": "math.KT",
+    "name_cn": "K理论与同调论",
+    "description_cn": "代数与拓扑K理论，及其与拓扑学、交换代数和算子代数的关系"
+  },
+  {
+    "id": "math.LO",
+    "name_cn": "逻辑",
+    "description_cn": "逻辑、集合论、点集拓扑、形式数学",
+    "profile": {
+      "profile_summary": "math.LO（逻辑）分类聚焦于数理逻辑及其在集合论、模型论、可计算性理论和形式化数学中的应用。该领域致力于研究逻辑系统的形式结构、推理规则的性质、数学对象的可定义性与可计算性，以及集合论模型的构造与一致性问题。其核心目标包括理解逻辑连接词的代数语义、探索无穷基数上的组合行为、分析形式系统的表达与证明能力，并通过模型构造技术研究不同公理系统的相对一致性。",
+      "core_topics": [
+        "非经典逻辑与代数语义",
+        "集合论与大基数强迫方法",
+        "模型论与可定义性",
+        "反向数学与可计算性理论",
+        "形式化推理与自动证明系统"
+      ],
+      "common_methodologies": [
+        "Brouwerian 半格与相对伪补结构",
+        "力迫法（Forcing）与混合支撑迭代",
+        "模型表示定理（如 Stone 表示）",
+        "量词消去与实闭域计算（QEPCAD）",
+        "反向数学中的弱存在性原理分析"
+      ],
+      "interdisciplinary_connections": [
+        "计算机科学 - 形式验证与自动推理",
+        "代数学 - 半群、格与代数结构",
+        "拓扑学 - 点集拓扑与Borel图"
+      ],
+      "key_terminologies": [
+        "intuitionistic logic",
+        "Brouwerian semilattice",
+        "pseudocomplement",
+        "stationary sequence",
+        "forcing extension",
+        "Singular Cardinal Hypothesis",
+        "o-minimal structure",
+        "definable group",
+        "weak Kőnig's lemma",
+        "quantifier elimination"
+      ]
+    }
+  },
+  {
+    "id": "math.MG",
+    "name_cn": "度量几何",
+    "description_cn": "欧几里得几何、双曲几何、离散几何、凸几何、粗几何、黎曼几何中的比较、对称空间",
+    "profile": {
+      "profile_summary": "度量几何（math.MG）专注于研究在不同几何空间中度量结构的性质与不等式，涵盖欧几里得、双曲、球面及非光滑空间中的凸性、对称性、填充、覆盖、等周问题和几何不等式的稳定性。该领域旨在通过分析度量空间中的形状、距离和体积关系，揭示几何对象的内在结构，并探索在变换（如球极化）或约束（如密度、离散性）下的不变性与极值性质。",
+      "core_topics": [
+        "凸几何与等周不等式",
+        "离散几何与点集嵌入",
+        "度量空间中的几何不等式及其稳定性",
+        "球极化与度量变形下的性质保持",
+        "空间填充与覆盖问题"
+      ],
+      "common_methodologies": [
+        "几何不等式的极值分析与稳定性证明",
+        "离散子群与Johnson-Lindenstrauss型降维技术",
+        "内在Lipschitz/Hölder截面与扩展定理",
+        "比较几何与曲率条件下的分析",
+        "组合几何与Hölder不等式的离散变体"
+      ],
+      "interdisciplinary_connections": [
+        "泛函分析（特别是Banach空间与度量嵌入）",
+        "几何测度论与变分问题",
+        "理论计算机科学（高维数据降维与近似算法）"
+      ],
+      "key_terminologies": [
+        "opaque set",
+        "sphericalization",
+        "Poincaré inequality",
+        "lattice packing",
+        "magnitude function",
+        "cevian lines",
+        "prox-regularity",
+        "intrinsic Lipschitz section",
+        "systolic inequality",
+        "log-concave density"
+      ]
+    }
+  },
+  {
+    "id": "math.MP",
+    "name_cn": "数学物理",
+    "description_cn": "math.MP 是 math-ph 的别名。该类别文章主要关注数学在物理问题中的应用研究、相关数学方法的开发，或现有物理理论的数学严格表述。投稿至 math-ph 的内容应对以物理为导向的数学家和以数学为导向的物理学家均有吸引力；若投稿主要面向理论物理学家或数学家，则建议分别投至相应的物理或数学类别。",
+    "profile": {
+      "profile_summary": "数学物理（math.MP）是一个致力于数学与物理交叉研究的领域，重点关注物理问题中的数学结构、方法的严格化以及数学工具在物理理论中的应用。该分类下的研究旨在为以数学为导向的物理学家和以物理为导向的数学家提供共同语言，强调理论的严谨性与物理意义的结合，涵盖量子系统、可积模型、动力系统、随机矩阵、波传播和凝聚态理论等多个方向。",
+      "core_topics": [
+        "可积系统与Yang-Baxter方程",
+        "量子多体系统与玻色-爱因斯坦凝聚",
+        "偏微分方程与非线性波动力学",
+        "随机矩阵理论及其在物理中的应用",
+        "动力系统与哈密顿力学的几何结构"
+      ],
+      "common_methodologies": [
+        "谱理论与特征函数局域化分析（如Agmon方法）",
+        "Wigner函数与量子输运模型",
+        "李群与李代数在动力系统中的对称性分析",
+        "Yang-Baxter代数与R矩阵构造",
+        "大偏差理论与统计力学极限分析"
+      ],
+      "interdisciplinary_connections": [
+        "凝聚态物理",
+        "量子信息与量子场论",
+        "应用数学（特别是偏微分方程与动力系统）"
+      ],
+      "key_terminologies": [
+        "Yang-Baxter方程",
+        "R矩阵",
+        "玻色-爱因斯坦凝聚（BEC）",
+        "Wigner方程",
+        "紧子解（compacton）",
+        "大偏差原理",
+        "哈密顿动力系统",
+        "随机矩阵",
+        "超对称与形变李代数",
+        "景观函数（landscape function）"
+      ]
+    }
+  },
+  {
+    "id": "math.NA",
+    "name_cn": "数值分析",
+    "description_cn": "分析与代数问题的数值算法，科学计算",
+    "profile": {
+      "profile_summary": "数值分析（math.NA）致力于研究求解数学分析与代数问题的高效、稳定且精确的数值算法，涵盖偏微分方程、积分方程、优化与反问题等模型的离散化方法与计算实现。该领域强调算法的收敛性、稳定性、误差分析及结构保持性（如能量守恒、体积守恒），并推动科学计算中大规模、复杂、多尺度问题的高效数值求解。",
+      "core_topics": [
+        "偏微分方程的数值解法",
+        "结构保持数值格式设计",
+        "反问题与不适定问题的正则化方法",
+        "高效迭代线性求解器",
+        "高精度数值积分与插值"
+      ],
+      "common_methodologies": [
+        "有限元方法（FEM）",
+        "有限体积法",
+        "Runge-Kutta 时间积分",
+        "Krylov 子空间方法",
+        "高斯型数值积分"
+      ],
+      "interdisciplinary_connections": [
+        "计算物理学",
+        "机器学习与数据科学",
+        "地球科学与几何建模"
+      ],
+      "key_terminologies": [
+        "能量稳定性",
+        "误差分析",
+        "结构保持算法",
+        "非局部模型",
+        "Schwarz函数",
+        "正交多项式",
+        "稀疏线性系统",
+        "核方法（RKHS）",
+        "降维模型（Reduced Basis）",
+        "Chebyshev多项式"
+      ]
+    }
+  },
+  {
+    "id": "math.NT",
+    "name_cn": "数论",
+    "description_cn": "素数、丢番图方程、解析数论、代数数论、算术几何、伽罗瓦理论",
+    "profile": {
+      "profile_summary": "数论（math.NT）是一个核心数学分支，致力于研究整数的深刻结构性质，特别是素数分布、丢番图方程的可解性、数论函数的行为以及代数与几何结构在数论中的体现。该领域不仅关注经典问题如素数和模形式，还深入探索L-函数、伽罗瓦表示、椭圆曲线、模曲线及其算术性质，旨在揭示数论对象之间的深层联系，并通过解析、代数与组合方法解决长期猜想与结构性问题。",
+      "core_topics": [
+        "L-函数与自守形式的算术性质",
+        "椭圆曲线与模曲线的有理点及Selmer群",
+        "数论函数与和函数的分布及均值行为",
+        "代数数域的结构与单生成性问题",
+        "丢番图逼近与组合数论中的游戏策略"
+      ],
+      "common_methodologies": [
+        "傅里叶分析与周期zeta函数技术",
+        "伽罗瓦表示与模性假设下的L-函数分析",
+        "代数几何方法在模空间与雅可比簇上的应用",
+        "解析数论中的渐近估计与矩方法",
+        "算法实现与计算数论验证猜想"
+      ],
+      "interdisciplinary_connections": [
+        "代数几何：通过算术几何、模空间和椭圆曲线研究数论对象",
+        "表示论：借助自守表示和Hecke算子理解L-函数结构",
+        "理论计算机科学：利用数论构造算法并分析其复杂度"
+      ],
+      "key_terminologies": [
+        "L-函数",
+        "伽罗瓦表示",
+        "椭圆曲线",
+        "模形式",
+        "Selmer群",
+        "丢番图逼近",
+        "代数数域",
+        "Dedekind和",
+        "素数分布",
+        "自守形式"
+      ]
+    }
+  },
+  {
+    "id": "math.OA",
+    "name_cn": "算子代数",
+    "description_cn": "希尔伯特空间上的算子代数、C^*-代数、冯·诺依曼代数、非交换几何",
+    "profile": {
+      "profile_summary": "算子代数（math.OA）主要研究希尔伯特空间上的算子结构及其代数性质，核心目标是理解C^*-代数、冯·诺依曼代数和非交换几何中的代数与拓扑结构。该领域致力于揭示算子代数的分类、表示、理想结构、模性质以及与群作用、群胚、图代数和量子结构的深层联系，同时探索其在非交换拓扑、量子测量理论和数学物理中的应用。",
+      "core_topics": [
+        "C^*-代数与冯·诺依曼代数的结构与分类",
+        "群作用与交叉积代数的严格外性及谱隙性质",
+        "非交换几何中的量子度量空间与量子粗结构",
+        "Hilbert模、JB^*-三元系与M-理想理论",
+        "图代数、Cuntz-Pimsner代数及其对称性与表示分类"
+      ],
+      "common_methodologies": [
+        "K-理论与Connes-Chern特征计算",
+        "Morita等价与稳定同构分析",
+        "连续选择定理在算子代数中的应用",
+        "投影的近似中心性与Murray-von Neumann等价分析",
+        "通过群胚与支持扩张构造新型C^*-代数"
+      ],
+      "interdisciplinary_connections": [
+        "非交换几何：通过量子空间、谱三元组和C^*-代数实现几何概念的非交换推广",
+        "数学物理：与量子力学测量问题、Fermi系统对称态及Bogoljubov作用的联系",
+        "拓扑动力系统：通过群作用在紧空间上的极小性与交叉积C^*-代数的简单性建立联系"
+      ],
+      "key_terminologies": [
+        "C^*-代数",
+        "冯·诺依曼代数",
+        "Hilbert A-模",
+        "K-理论",
+        "Morita等价",
+        "Cuntz-Pimsner代数",
+        "群胚C^*-代数",
+        "M-理想",
+        "严格外性",
+        "量子粗结构"
+      ]
+    }
+  },
+  {
+    "id": "math.OC",
+    "name_cn": "优化与控制",
+    "description_cn": "运筹学、线性规划、控制理论、系统理论、最优控制、博弈论",
+    "profile": {
+      "profile_summary": "优化与控制（math.OC）分类聚焦于运筹学、线性规划、最优控制、系统理论及博弈论等领域的理论与应用研究，致力于解决复杂系统中的决策、控制与优化问题。该领域既关注基础优化算法的设计与收敛性分析，也强调在不确定性、非线性、分布式及动态环境下的建模与控制策略，目标是发展高效、鲁棒且可解释的数学方法以应对理论与实际中的挑战。",
+      "core_topics": [
+        "线性与非线性规划算法设计与分析",
+        "最优控制与随机系统控制",
+        "分布式与多智能体优化",
+        "混合整数非线性规划（MINLP）与全局优化",
+        "博弈论与均场博弈中的均衡分析"
+      ],
+      "common_methodologies": [
+        "对偶梯度方法（如PDHG）与近端算法",
+        "半定规划与凸松弛（如SOS、原子范数最小化）",
+        "样本平均近似（SAA）与机会约束优化",
+        "滑动模式与回推控制（backstepping）",
+        "整数规划与Benders分解等精确求解框架"
+      ],
+      "interdisciplinary_connections": [
+        "机器学习（如可解释性分析、SHAP、学习-优化联合框架）",
+        "控制系统工程（如PID控制、边界控制、热方程稳定性）",
+        "网络科学与社会影响建模（如影响力最大化、图拓扑优化）"
+      ],
+      "key_terminologies": [
+        "线性规划（Linear Programming）",
+        "最优控制（Optimal Control）",
+        "凸松弛（Convex Relaxation）",
+        "半定规划（Semidefinite Programming）",
+        "混合整数非线性规划（MINLP）",
+        "分布式优化（Decentralized Optimization）",
+        "样本平均近似（Sample Average Approximation）",
+        "均场博弈（Mean Field Games）",
+        "总变差距离（Total Variation Distance）",
+        "Benders分解（Benders Decomposition）"
+      ]
+    }
+  },
+  {
+    "id": "math.PR",
+    "name_cn": "概率",
+    "description_cn": "概率与随机过程的理论及应用：例如中心极限定理、大偏差理论、随机微分方程、统计力学模型、排队论",
+    "profile": {
+      "profile_summary": "math.PR（概率）分类聚焦于概率论与随机过程的理论发展及其在多个科学领域的应用。该领域致力于研究随机现象的宏观规律与极限行为，涵盖中心极限定理、大偏差原理、随机微分方程、排队论和统计力学模型等核心内容。研究目标包括揭示复杂随机系统在极限状态下的普适性结构（如KPZ固定点、Airy过程），建立随机过程的精确估计（如大偏差、集中不等式），并发展适用于非独立、非平稳或高维随机结构的数学工具与逼近方法。",
+      "core_topics": [
+        "随机过程的极限行为与普适性类",
+        "大偏差原理及其在多尺度系统中的应用",
+        "随机微分方程与粗糙路径理论",
+        "马尔可夫链与排队系统的渐近分析",
+        "随机矩阵与确定性点过程的高斯极限"
+      ],
+      "common_methodologies": [
+        "大偏差理论与变分框架",
+        "中心极限定理与强律的推广",
+        "Kipnis-Varadhan型鞅逼近",
+        "控制粗糙路径与解映射连续性分析",
+        "截断逼近与平均化原理（如Khasminskii方法）"
+      ],
+      "interdisciplinary_connections": [
+        "统计物理（如KPZ方程、Airy过程与表面增长模型）",
+        "随机矩阵理论与高维统计",
+        "偏微分方程数值解中的随机算法（如Picard方法）"
+      ],
+      "key_terminologies": [
+        "大偏差原理（Large deviation principle）",
+        "中心极限定理（Central limit theorem）",
+        "KPZ固定点（KPZ fixed point）",
+        "Airy过程（Airy process）",
+        "McKean-Vlasov系统（McKean-Vlasov system）",
+        "随机微分方程（Stochastic differential equation）",
+        "粗糙路径（Rough path）",
+        "马尔可夫链（Markov chain）",
+        "确定性点过程（Determinantal point process）",
+        "q-高斯分布（q-Gaussian distribution）"
+      ]
+    }
+  },
+  {
+    "id": "math.QA",
+    "name_cn": "量子代数",
+    "description_cn": "量子群、 skein 理论、操作代数与图示代数、量子场论",
+    "profile": {
+      "profile_summary": "量子代数（math.QA）是一个高度抽象且与数学物理深度交织的领域，致力于研究量子群、Yang-Baxter方程、顶点算子代数、张量范畴、超Yangian代数等代数结构及其在低维拓扑、共形场论和可积系统中的应用。该分类的核心目标是揭示非交换代数结构的对称性、分类不可约对象、构建量子不变量，并通过代数方法理解量子场论和拓扑量子计算中的数学基础。",
+      "core_topics": [
+        "量子群与Yang-Baxter方程的集合论解",
+        "有限张量范畴与融合范畴的结构与重构",
+        "顶点算子代数及其生成元与模结构",
+        "超Yangian与量子Berezinian的代数构造",
+        "非交换几何中的量子度量与曲率理论"
+      ],
+      "common_methodologies": [
+        "PBW基与根向量的代数构造方法",
+        "图示代数与环面范畴的图形化计算",
+        "Frobenius-Perron维数在非代数闭域上的推广",
+        "Whittaker模与不变量理论的李代数方法",
+        "共形形变与非交换微分计算中的Levi-Civita联络"
+      ],
+      "interdisciplinary_connections": [
+        "数学物理（特别是拓扑量子场论与可积系统）",
+        "表示论（包括李代数、Hopf代数与有限群表示）",
+        "非交换几何与量子引力中的离散几何模型"
+      ],
+      "key_terminologies": [
+        "量子群",
+        "Yang-Baxter方程",
+        "顶点算子代数",
+        "融合范畴",
+        "超Yangian",
+        "Frobenius-Perron维数",
+        "Whittaker模",
+        "Levi-Civita联络",
+        "模不变矩阵",
+        "非交换微分计算"
+      ]
+    }
+  },
+  {
+    "id": "math.RA",
+    "name_cn": "环与代数",
+    "description_cn": "非交换环与代数、非结合代数、泛代数与格论、线性代数、半群",
+    "profile": {
+      "profile_summary": "环与代数（math.RA）分类聚焦于代数结构的理论研究，涵盖非交换环、非结合代数、泛代数、格论以及线性代数等多个方向。该领域致力于探索各类代数系统的结构性质、分类、表示及其相互关系，研究对象包括李代数、结合代数、非结合代数、格、张量、矩阵代数等，并关注其在对称性、谱理论、多项式映射、生成元结构和拓扑代数中的应用。核心目标是发展代数系统的统一理论框架，并揭示其在数学内部及其他领域的深层联系。",
+      "core_topics": [
+        "非结合代数与特殊代数结构（如李代数、Jordan代数、Novikov代数）",
+        "环与代数的分类及其结构分析（包括有限维代数、Weyl代数、三角化代数）",
+        "格论与子空间格、半模格的生成与表示",
+        "代数上的谱理论与拓扑代数结构",
+        "多项式映射、张量与矩阵代数的保持问题"
+      ],
+      "common_methodologies": [
+        "代数结构的分类与同构判定",
+        "计算代数方法（使用Mathematica、Maple等工具进行推导）",
+        "谱理论在拓扑代数中的应用",
+        "格的构造与子结构分析（如子空间格、扭积）",
+        "张量与多项式映射的代数刻画"
+      ],
+      "interdisciplinary_connections": [
+        "数学物理（通过李代数、Poisson代数与量子力学的联系）",
+        "计算机代数与形式化验证（利用符号计算研究代数结构）",
+        "泛函分析（在拓扑代数、Fréchet空间上的算子理论中的交叉）"
+      ],
+      "key_terminologies": [
+        "非结合代数",
+        "Poisson n-Lie代数",
+        "强正半定张量",
+        "子空间格",
+        "谱理论",
+        "Weyl代数",
+        "保守代数",
+        "格论",
+        "双同态Poisson代数",
+        "生成元空间"
+      ]
+    }
+  },
+  {
+    "id": "math.RT",
+    "name_cn": "表示论",
+    "description_cn": "代数与群的线性表示、李理论、结合代数、多重线性代数",
+    "profile": {
+      "profile_summary": "表示论（math.RT）主要研究代数结构（如群、李代数、结合代数）的线性表示，旨在通过向量空间上的作用来揭示代数对象的结构与性质。该领域关注表示的分类、不可约性、扩张、诱导与限制，以及表示在几何、组合与数论中的应用。核心目标包括理解表示的内部结构、构造自然基底、研究不变量与对偶性，并通过共形场论、微分算子、Hecke代数等工具连接代数、几何与分析。",
+      "core_topics": [
+        "李群与李代数的表示理论",
+        "表示的分类与不可约性分析",
+        "Hecke代数与Iwahori-Hecke代数的结构与表示",
+        "共形李代数与Verma模的结构研究",
+        "几何表示论与旗簇上线丛的上同调"
+      ],
+      "common_methodologies": [
+        "使用生成元与关系进行代数结构的表示与分类",
+        "通过上同调理论研究表示的几何实现",
+        "利用组合方法（如晶体基、Light Leaves）构造表示的基底",
+        "应用Harish-Chandra特征展开与Whittaker模型分析p进群表示",
+        "借助对称函数、超几何函数与特殊函数计算Clebsch-Gordan系数"
+      ],
+      "interdisciplinary_connections": [
+        "代数几何：通过旗簇、线丛上同调与几何构造连接表示结构",
+        "数学物理：在共形场论与顶点算子代数中研究无限维李代数表示",
+        "数论：通过Langlands纲领、p进群表示与自守形式建立联系"
+      ],
+      "key_terminologies": [
+        "表示论",
+        "李代数",
+        "Hecke代数",
+        "Verma模",
+        "不可约表示",
+        "Clebsch-Gordan系数",
+        "Iwahori-Hecke代数",
+        "共形李代数",
+        "Steinberg表示",
+        "Langlands参数"
+      ]
+    }
+  },
+  {
+    "id": "math.SG",
+    "name_cn": "辛几何",
+    "description_cn": "哈密顿系统、辛流、经典可积系统",
+    "profile": {
+      "profile_summary": "辛几何（math.SG）主要研究哈密顿系统、辛流形结构及其几何与拓扑性质，重点关注辛流形上的群作用、拉格朗日子流形、接触几何中的瞬子与勒让德子流形、以及与可积系统相关的动力学行为。该领域致力于通过几何分析、伪全纯曲线理论和Floer型同调方法，揭示辛和接触结构中的刚性现象、对称性、不变量构造及其在经典力学和数学物理中的应用。",
+      "core_topics": [
+        "哈密顿群作用与辛流形边界结构",
+        "拉格朗日与勒让德子流形的Floer理论及同调构造",
+        "接触几何中的瞬子方程与边界条件分析",
+        "辛填充、 Weinstein流形与高维拓扑实现",
+        "辛与接触不变量的构造及其在嵌入问题中的应用"
+      ],
+      "common_methodologies": [
+        "伪全纯曲线与Gromov-Witten理论",
+        "Floer同调与Hamiltonian扰动方法",
+        "Kuranishi结构与模空间的全局分析",
+        "Chekanov-Eliashberg微分代数与联系同调",
+        "指数公式与先验估计的椭圆正则性分析"
+      ],
+      "interdisciplinary_connections": [
+        "数学物理（特别是经典力学与可积系统）",
+        "代数拓扑（通过同调理论与模空间结构）",
+        "微分几何与低维拓扑（特别是在3-和4维流形中的应用）"
+      ],
+      "key_terminologies": [
+        "辛流形",
+        "哈密顿系统",
+        "拉格朗日子流形",
+        "勒让德子流形",
+        "接触瞬子",
+        "Reeb轨道",
+        "Gromov-Witten不变量",
+        "Fukaya范畴",
+        "辛填充",
+        "伪全纯曲线"
+      ]
+    }
+  },
+  {
+    "id": "math.SP",
+    "name_cn": "谱理论",
+    "description_cn": "薛定谔算子、流形上的算子、一般微分算子、数值研究、积分算子、离散模型、共振、非自伴算子、随机算子/矩阵",
+    "profile": {
+      "profile_summary": "谱理论（math.SP）主要研究各类算子（如微分算子、差分算子、积分算子、矩阵等）的谱性质，包括特征值、特征函数、谱类型（离散谱、连续谱、奇异连续谱、伪谱等）及其渐近行为。该领域关注自伴与非自伴算子、随机与确定性模型、连续与离散系统的谱分析，致力于理解谱结构与算子系数、边界条件、几何背景之间的关系，并发展逆谱问题、谱估计、谱包含集计算等理论与方法，目标是揭示物理与几何系统中能量分布、动力学行为与稳定性等深层规律。",
+      "core_topics": [
+        "自伴与非自伴算子的谱分析",
+        "离散与连续系统的谱结构与渐近性",
+        "逆谱问题与谱唯一性",
+        "谱包含集与伪谱的数值计算",
+        "图上算子与量子图的谱性质"
+      ],
+      "common_methodologies": [
+        "WKB近似与Bohr-Sommerfeld量子化",
+        "谱减法（Spectral Decimation）",
+        "散射理论与S矩阵分析",
+        "正交多项式与Schur补方法",
+        "拓扑度理论与全局延拓方法"
+      ],
+      "interdisciplinary_connections": [
+        "数学物理（特别是量子力学与薛定谔算子）",
+        "微分几何（流形上的算子与谱几何）",
+        "动力系统与遍历理论（拟周期与随机算子）"
+      ],
+      "key_terminologies": [
+        "谱（Spectrum）",
+        "伪谱（Pseudospectrum）",
+        "特征函数系完备性（Completeness of eigenfunction system）",
+        "Weyl系数（Weyl coefficient）",
+        "奇异连续谱（Singular continuous spectrum）",
+        "Jacobi矩阵（Jacobi matrix）",
+        "量子图（Quantum graph）",
+        "Bohr-Sommerfeld展开（Bohr-Sommerfeld expansion）",
+        "谱减法（Spectral decimation）",
+        "非自伴算子（Non-self-adjoint operator）"
+      ]
+    }
+  },
+  {
+    "id": "math.ST",
+    "name_cn": "统计学理论",
+    "description_cn": "应用统计、计算统计与理论统计：例如统计推断、回归分析、时间序列、多变量分析、数据分析、马尔可夫链蒙特卡洛方法、实验设计、案例研究",
+    "profile": {
+      "profile_summary": "统计学理论（math.ST）专注于统计推断、模型估计与检验的数学基础，致力于发展严谨的理论框架以支持数据分析、参数估计、假设检验和模型选择。该领域涵盖高维数据、复杂依赖结构、非标准观测环境下的统计方法研究，强调方法的渐近性质、最优性、稳健性与计算可行性，目标是为现代统计学习、因果推断、时间序列分析和贝叶斯推断等提供坚实的理论支撑。",
+      "core_topics": [
+        "高维统计推断与变量选择",
+        "统计学习理论与误差评估",
+        "非参数与半参数模型估计",
+        "时间序列与纵向数据分析",
+        "实验设计与协变量平衡"
+      ],
+      "common_methodologies": [
+        "最大似然估计与最小化核Stein差异",
+        "交叉验证与平滑惩罚方法",
+        "U-统计量与不完全U-统计量",
+        "LASSO类稀疏建模与迭代阈值算法",
+        "马尔可夫链蒙特卡洛与Gibbs采样"
+      ],
+      "interdisciplinary_connections": [
+        "机器学习理论",
+        "信息论与高维概率",
+        "计量经济学与金融风险管理"
+      ],
+      "key_terminologies": [
+        "Stein算子",
+        "最小化核Stein差异（MKSDE）",
+        "交叉验证稳定性（SCV）",
+        "不完全U-统计量",
+        "几何遍历性",
+        "高维稀疏回归",
+        "协变量平衡",
+        "条件在险价值（CoVaR）",
+        "有效秩",
+        "各向同性回归估计"
+      ]
+    }
+  },
+  {
+    "id": "astro-ph.CO",
+    "name_cn": "宇宙学与河外天体物理学",
+    "description_cn": "早期宇宙现象学、宇宙微波背景、宇宙学参数、原初元素丰度、河外距离尺度、宇宙大尺度结构。星系群、超星系团、空洞、星系际介质。粒子天体物理学：暗能量、暗物质、重子生成、轻子生成、暴胀模型、再加热、磁单极子、弱相互作用大质量粒子（WIMPs）、宇宙弦、原初黑洞、宇宙学引力辐射",
+    "profile": {
+      "profile_summary": "宇宙学与河外天体物理学（astro-ph.CO）致力于研究宇宙的大尺度结构、早期宇宙演化以及宇宙学基本参数的精确测量。该领域聚焦于宇宙微波背景、暗物质与暗能量、星系形成与分布、引力透镜效应、再加热过程及原初黑洞等前沿问题，旨在通过观测数据与理论模型的结合，揭示宇宙的起源、演化机制与终极命运。近年来，深度学习、模拟仿真和新型统计方法被广泛应用于提升参数约束能力，解决如哈勃常数张力等关键科学难题。",
+      "core_topics": [
+        "宇宙学参数的精确测定与张力问题（如Hubble张力）",
+        "大尺度结构形成与演化（包括星系团、空洞、宇宙网）",
+        "暗物质与暗能量的理论建模及观测探针",
+        "早期宇宙物理过程（如暴胀、再加热、原初核合成）",
+        "弱引力透镜与星系巡天中的非高斯信息提取"
+      ],
+      "common_methodologies": [
+        "基于N体与流体动力学的宇宙学数值模拟（如AbacusSummit、Magneticum）",
+        "贝叶斯联合数据分析与马尔可夫链蒙特卡洛（MCMC）参数推断",
+        "深度学习与神经网络在红移估计、速度重建和图像分析中的应用",
+        "高阶统计量与拓扑分析（如Minkowski泛函、星let ℓ1-范数、球谐分解）",
+        "弱引力透镜与运动学透镜（Kinematic Lensing）的观测建模"
+      ],
+      "interdisciplinary_connections": [
+        "粒子物理学：通过WIMPs、磁单极子、重子生成等机制探索暗物质本质",
+        "天体物理学中的高能过程：X射线谱分析、kSZ效应探测与星系团物理",
+        "计算机科学与人工智能：深度学习模型用于光谱红移预测、图像处理与模拟代理建模"
+      ],
+      "key_terminologies": [
+        "Cosmic Microwave Background (CMB)",
+        "Large-Scale Structure (LSS)",
+        "Dark Energy",
+        "Dark Matter",
+        "Reheating Temperature",
+        "Weak Gravitational Lensing",
+        "Hubble Constant Tension",
+        "Intrinsic Alignments (IA)",
+        "Neutrino Mass Constraints",
+        "Primordial Black Holes (PBH)"
+      ]
+    }
+  },
+  {
+    "id": "astro-ph.EP",
+    "name_cn": "地球与行星天体物理学",
+    "description_cn": "行星际介质、行星物理、行星天体生物学、系外行星、彗星、小行星、陨石，太阳系结构与形成",
+    "profile": {
+      "profile_summary": "地球与行星天体物理学（astro-ph.EP）专注于研究太阳系内外的行星系统，涵盖行星、彗星、小行星、系外行星及其形成与演化过程。该领域旨在通过观测与建模揭示行星系统的结构、动力学、大气成分、物理特性以及宜居性潜力，尤其关注行星与恒星、星周盘、星际介质之间的相互作用，探索行星系统起源、演化路径及天体生物学意义。",
+      "core_topics": [
+        "系外行星大气特征与化学成分分析",
+        "行星系统动力学与轨道演化",
+        "彗星与小行星的物理性质及起源研究",
+        "太阳系形成与早期演化过程",
+        "行星形成环境中的尘埃与气体相互作用"
+      ],
+      "common_methodologies": [
+        "凌星测光与发射光谱观测（如HST、JWST、TESS、CHEOPS）",
+        "N体动力学模拟与轨道稳定性分析",
+        "大气反演模型（如TauREx3）与光谱拟合",
+        "同位素与化学丰度建模",
+        "地面与空间望远镜的光谱与测光数据分析"
+      ],
+      "interdisciplinary_connections": [
+        "天体化学：研究行星与彗星中分子、同位素组成及其形成环境",
+        "行星科学：结合地质与物理模型理解行星内部结构与表面过程",
+        "天体生物学：探索宜居行星与生命前体物质的分布"
+      ],
+      "key_terminologies": [
+        "系外行星（exoplanet）",
+        "凌星（transit）",
+        "大气反演（atmospheric retrieval）",
+        "JWST传输光谱（JWST transmission spectrum）",
+        "雪线（snowline）",
+        "光化学霾（photochemical haze）",
+        "均方运动共振（mean motion resonance, MMR）",
+        "CO2/H2O丰度比",
+        "金属丰度（metallicity）",
+        "行星系统稳定性（planetary system stability）"
+      ]
+    }
+  },
+  {
+    "id": "astro-ph.GA",
+    "name_cn": "星系天体物理学",
+    "description_cn": "与星系或银河系相关的现象。星团、HII区和行星状星云、星际介质、原子与分子云、尘埃。恒星群体。银河系结构、形成与动力学。星系核、核球、盘面、晕。活动星系核、超大质量黑洞、类星体。引力透镜系统。银河系及其组成部分。",
+    "profile": {
+      "profile_summary": "星系天体物理学（astro-ph.GA）专注于研究银河系及外部星系的结构、形成、演化及其内部物理过程。该领域涵盖从星际介质、恒星群体、星团到星系核、超大质量黑洞和活动星系核等多尺度现象，致力于理解星系的动力学、化学演化、恒星形成历史以及星系间相互作用。研究目标包括揭示星系结构的起源（如旋臂、晕、核球）、探索星系演化中的反馈机制（如外流、风）、追溯星系并合历史，并通过观测与模拟结合的方式探究星系与其周围环境的相互作用。",
+      "core_topics": [
+        "星系结构与动力学（如银河系与M31的旋臂、晕、子结构）",
+        "恒星形成与分子云物理（包括外流、致密团块、原恒星反馈）",
+        "星系演化与并合历史（如矮星系VPOS结构、潮汐尾、星系相互作用）",
+        "星际介质与尘埃物理（包括PAHs、H2、CO发射、HI/OH吸收）",
+        "超大质量黑洞与高红移星系演化（黑洞增长机制、宁静星系尺寸演化）"
+      ],
+      "common_methodologies": [
+        "高分辨率光谱与成像观测（如JWST、Gaia、ALMA、APEX、VLT）",
+        "多波段测光与红外观测（用于分离恒星种群、探测尘埃与气体）",
+        "天体测量与自行分析（Gaia数据用于轨道与运动学建模）",
+        "数值模拟与轨道叠加模型（如MHD模拟、Schwarzschild方法）",
+        "吸收线与发射线光谱分析（用于探测气体成分、温度、动力学）"
+      ],
+      "interdisciplinary_connections": [
+        "宇宙学（通过高红移星系与DLA系统研究早期宇宙结构形成）",
+        "恒星天体物理学（研究恒星形成过程、原恒星外流与反馈机制）",
+        "粒子物理与暗物质研究（通过矮星系动力学建模约束暗物质分布）"
+      ],
+      "key_terminologies": [
+        "星系晕（stellar halo）",
+        "星际介质（interstellar medium, ISM）",
+        "多环芳烃（polycyclic aromatic hydrocarbons, PAHs）",
+        "有效半径（effective radius, Re）",
+        "自行（proper motion）",
+        "超大质量黑洞（supermassive black hole, SMBH）",
+        "阻尼莱曼α系统（damped Lyman-alpha system, DLA）",
+        "分子外流（molecular outflow）",
+        "星族合成（stellar population）",
+        "引力透镜（gravitational lensing）"
+      ]
+    }
+  },
+  {
+    "id": "astro-ph.HE",
+    "name_cn": "高能天体物理现象",
+    "description_cn": "宇宙射线的产生、加速、传播与探测。伽马射线天文学与伽马暴、X射线、带电粒子、超新星及其他爆发现象、恒星遗迹与吸积系统、喷流、微类星体、中子星、脉冲星、黑洞",
+    "profile": {
+      "profile_summary": "高能天体物理现象（astro-ph.HE）专注于研究宇宙中极端能量过程和致密天体的物理机制，涵盖从宇宙射线、伽马射线暴、X射线爆发，到黑洞、中子星、脉冲星、活动星系核喷流等高能天体的观测与理论建模。该领域旨在揭示高能粒子的加速与传播机制、致密天体的状态方程与磁层结构、喷流动力学以及引力波事件对应的电磁对应体，结合多信使观测与理论模拟，探索极端引力和磁场环境下的物理规律。",
+      "core_topics": [
+        "伽马射线暴与喷流物理",
+        "中子星与脉冲星的结构及演化",
+        "活动星系核与黑洞喷流的变异性",
+        "宇宙射线与高能粒子的起源和传播",
+        "致密天体并合事件的多信使观测"
+      ],
+      "common_methodologies": [
+        "多波段时间域观测与光变曲线分析",
+        "X射线和伽马射线光谱与偏振测量",
+        "广义相对论磁流体动力学（GRMHD）数值模拟",
+        "机器学习用于暂现源分类",
+        "粒子加速与辐射机制的理论建模"
+      ],
+      "interdisciplinary_connections": [
+        "引力波天文学",
+        "粒子天体物理",
+        "等离子体物理"
+      ],
+      "key_terminologies": [
+        "伽马射线暴（GRB）",
+        "中子星",
+        "黑洞吸积盘",
+        "喷流（jet）",
+        "脉冲星",
+        "宇宙射线",
+        "潮汐撕裂事件（TDE）",
+        "磁囚禁盘（MAD）",
+        "偏振测量（polarimetry）",
+        "质量间隙天体（mass gap object）"
+      ]
+    }
+  },
+  {
+    "id": "astro-ph.IM",
+    "name_cn": "天体物理仪器与方法",
+    "description_cn": "探测器与望远镜设计，实验方案，实验室天体物理学，数据分析方法，统计方法，软件与数据库设计",
+    "profile": {
+      "profile_summary": "astro-ph.IM（天体物理仪器与方法）专注于天文学观测和数据分析所需的技术与工具的开发、设计与优化。该领域涵盖从望远镜、探测器、光学系统等硬件设计，到数据处理软件、统计方法、数据库架构等软件层面的创新，旨在提升天文观测的精度、效率和可扩展性。其核心目标是为天体物理研究提供可靠、先进的实验手段和数据基础设施，支持从地面到空间的多波段、大规模观测项目。",
+      "core_topics": [
+        "天文仪器设计与性能测试",
+        "数据处理算法与干扰消除技术",
+        "天文软件工具与数据库系统开发",
+        "观测方法与实验方案优化",
+        "仪器误差建模与校准技术"
+      ],
+      "common_methodologies": [
+        "端到端仪器仿真",
+        "光纤积分视场单元（IFU）设计",
+        "非冗余干涉测量与相位编码光学",
+        "基于Dask的并行数据处理",
+        "蒙特卡洛不确定性分析"
+      ],
+      "interdisciplinary_connections": [
+        "光学工程",
+        "计算机科学（数据科学与软件工程）",
+        "电子工程（传感器与控制系统）"
+      ],
+      "key_terminologies": [
+        "integral field unit (IFU)",
+        "aperture masking interferometry",
+        "Jewel Optics",
+        "LSDB (Large Scale Database)",
+        "HATS (Hierarchical Adaptive Tiling Scheme)",
+        "pyramid wavefront sensor",
+        "radio-frequency interference (RFI) flagging",
+        "cross-polarization",
+        "on-orbit calibration",
+        "astrometric shifts"
+      ]
+    }
+  },
+  {
+    "id": "astro-ph.SR",
+    "name_cn": "太阳与恒星天体物理学",
+    "description_cn": "白矮星、褐矮星、激变变星，恒星形成与原恒星系统，恒星天体生物学，恒星的双星与多星系统，恒星演化与结构，日冕。行星状星云的中心星。日震学、太阳中微子，恒星系统引力辐射的产生与探测。",
+    "profile": {
+      "profile_summary": "太阳与恒星天体物理学（astro-ph.SR）专注于研究太阳和各类恒星的物理性质、内部结构、大气过程、演化路径及其周围环境。该领域涵盖从恒星形成到晚期演化阶段的广泛现象，包括白矮星、褐矮星、双星系统、恒星磁活动、日冕加热、恒星振荡与脉动、元素丰度分析以及恒星和太阳的辐射与引力效应。其核心目标是通过观测、数值模拟和理论建模深入理解恒星的生命周期、能量传输机制、化学演化以及太阳系外天体系统的动力学行为。",
+      "core_topics": [
+        "恒星大气与元素丰度分析",
+        "太阳与恒星磁活动及日冕动力学",
+        "白矮星与双星系统的演化",
+        "恒星脉动、振荡与日震学",
+        "恒星形成与早期演化系统"
+      ],
+      "common_methodologies": [
+        "3D辐射流体动力学模拟与非局部热动平衡（non-LTE）光谱建模",
+        "高分辨率光谱观测与谱线分析",
+        "日震学与模式耦合成像技术",
+        "磁流体动力学（MHD）数值模拟",
+        "多波段测光与变星搜寻"
+      ],
+      "interdisciplinary_connections": [
+        "天体化学与宇宙化学：通过恒星丰度研究元素起源与核合成过程",
+        "行星科学与天体生物学：研究恒星辐射环境对行星宜居性的影响",
+        "引力波天文学：研究双星系统中致密天体并合的引力辐射"
+      ],
+      "key_terminologies": [
+        "非局部热动平衡（non-LTE）",
+        "日冕加热",
+        "磁流体动力学（MHD）",
+        "白矮星",
+        "双星系统",
+        "日震学",
+        "恒星丰度",
+        "Plasmoid介导的磁重联",
+        "衰减振荡（decayless oscillations）",
+        "过渡区"
+      ]
+    }
+  },
+  {
+    "id": "nlin.AO",
+    "name_cn": "适应性与自组织系统",
+    "description_cn": "适应性、自组织系统、统计物理、涨落系统、随机过程、相互作用粒子系统、机器学习",
+    "profile": {
+      "profile_summary": "nlin.AO（适应性与自组织系统）分类聚焦于复杂系统中由局部相互作用驱动的集体行为、同步现象与自组织机制。该领域旨在理解非线性动力学系统如何在随机性、延迟、记忆或高阶耦合等条件下自发形成有序结构，并探索这些过程在物理、生物、神经科学及社会系统中的表现与控制方法。研究目标包括揭示同步的涌现机制、分析相变行为、构建可解释的低维模型，并发展适用于多层网络、噪声环境和非光滑动力系统的理论工具。",
+      "core_topics": [
+        "耦合振荡器系统的同步与相位锁定",
+        "自组织临界性与双稳态行为",
+        "多层与高阶网络中的动力学传播",
+        "噪声与延迟对集体行为的影响",
+        "基于记忆与反馈的智能体集体运动"
+      ],
+      "common_methodologies": [
+        "Ott-Antonsen降维方法",
+        "事件驱动映射与非光滑分岔分析",
+        "傅里叶变换与谱分析技术",
+        "代理模型（agent-based modeling）与社会力模型",
+        "数值模拟结合慢流分析（slow-flow analysis）"
+      ],
+      "interdisciplinary_connections": [
+        "神经科学：用于建模神经元同步、脑电活动与癫痫发作机制",
+        "统计物理：研究相变、涨落、集体模式与非平衡态动力学",
+        "机器学习：通过网络重构与层次主题挖掘实现数据驱动建模"
+      ],
+      "key_terminologies": [
+        "同步化（synchronization）",
+        "自组织双稳性（self-organized bistability）",
+        "高阶同步（high-order p/q synchronization）",
+        "相位响应曲线（phase response curve, PRC）",
+        "延迟微分方程（delay differential equation）",
+        "Lambert W函数",
+        "非光滑分岔（non-smooth bifurcation）",
+        "多层网络（multiplex network）",
+        "振幅死亡与振荡死亡（amplitude death, oscillation death）",
+        "Farey序列与魔鬼阶梯（Farey arrangement, devil's staircase）"
+      ]
+    }
+  },
+  {
+    "id": "nlin.CD",
+    "name_cn": "混沌动力学",
+    "description_cn": "动力系统、混沌、量子混沌、拓扑动力学、循环展开、湍流、传播",
+    "profile": {
+      "profile_summary": "混沌动力学（nlin.CD）专注于非线性动力系统中复杂、不可预测行为的研究，特别是混沌现象的产生、演化与控制。该领域致力于理解系统在不同参数下的分岔、周期性与混沌之间的过渡、极端事件的出现机制，以及同步、广义同步和高维系统中周期轨道的搜索。研究目标包括揭示混沌系统的内在结构（如不变流形、分形边界）、发展预测与控制方法（如LSTM预测、变分方法），并探索其在物理、工程和生物系统中的表现与应用。",
+      "core_topics": [
+        "混沌与分岔机制",
+        "极端事件的识别与预测",
+        "同步与广义同步现象",
+        "高维与多尺度非线性系统",
+        "参数空间中的分形结构与周期级联"
+      ],
+      "common_methodologies": [
+        "Poincaré映射与相空间分析",
+        "Ott-Antonsen降维方法",
+        "变分法与周期轨道搜索",
+        "Lyapunov指数与广义Lyapunov指数计算",
+        "时间序列分析与LSTM神经网络预测"
+      ],
+      "interdisciplinary_connections": [
+        "非线性物理学",
+        "复杂网络科学",
+        "生物系统动力学"
+      ],
+      "key_terminologies": [
+        "混沌动力学",
+        "非双曲不变流形（NHIM）",
+        "广义同步",
+        "极端事件",
+        "分岔",
+        "Lyapunov指数",
+        "Poincaré映射",
+        "Kuramoto模型",
+        "多尺度熵（MSE）",
+        "频率锁定"
+      ]
+    }
+  },
+  {
+    "id": "nlin.CG",
+    "name_cn": "元胞自动机与格子气",
+    "description_cn": "计算方法、时间序列分析、信号处理、小波、格子气体",
+    "profile": {
+      "profile_summary": "nlin.CG 分类聚焦于元胞自动机与格子气系统的理论、建模与应用，旨在通过离散动力系统揭示复杂行为的生成机制。该领域不仅研究元胞自动机的基本规则空间、对称性与动力学分类，还探索其在物理、经济、交通、流行病传播等多领域的建模能力，强调从局部规则中涌现的全局复杂性，并结合计算模拟、群论分析与新兴的机器学习方法进行系统研究。",
+      "core_topics": [
+        "元胞自动机的规则空间与对称性分析",
+        "格子气与格子Boltzmann方法的动力学建模",
+        "元胞自动机在非平衡相变与复杂系统中的应用",
+        "多层交互系统中的集体行为与自组织现象",
+        "元胞自动机的可视化、仿真与计算实现"
+      ],
+      "common_methodologies": [
+        "群论与共轭类分析",
+        "马尔可夫过程与随机动力学建模",
+        "有限体积法与格子Boltzmann数值模拟",
+        "机器学习（监督与无监督）用于相变识别",
+        "计算机仿真与可视化工具（如DDLab）"
+      ],
+      "interdisciplinary_connections": [
+        "统计物理学（非平衡态、相变、熵与Gini系数）",
+        "计算经济学（财富分布、交易模型、集体行为）",
+        "流行病学与交通工程（SEIR模型、车辆排队、多车道排除过程）"
+      ],
+      "key_terminologies": [
+        "元胞自动机",
+        "格子气",
+        "规则空间",
+        "对称变换",
+        "马尔可夫过程",
+        "格子Boltzmann方法",
+        "相变",
+        "自组织",
+        "平均场分析",
+        "基序（motif）与吸引子盆地"
+      ]
+    }
+  },
+  {
+    "id": "nlin.PS",
+    "name_cn": "图案形成与孤立子",
+    "description_cn": "图样形成、相干结构、孤子",
+    "profile": {
+      "profile_summary": "nlin.PS（图案形成与孤立子）分类聚焦于非线性系统中空间和时空模式的自发形成机制，研究核心包括自组织图案、局域化结构（如孤子、脉冲、 fronts）以及相干结构的稳定性与动力学行为。该领域旨在理解在物理、生物、光学和生态等系统中，非线性相互作用与扩散、色散或传输过程如何共同导致复杂有序结构的涌现，并通过解析与数值方法揭示其分岔特性、稳定性条件及对外部扰动的响应。",
+      "core_topics": [
+        "自组织空间图案的形成与稳定性",
+        "局域化模式与同宿蛇行（homoclinic snaking）现象",
+        "多分量与高阶孤子解及其动力学",
+        "反应-扩散与传输系统中的行波与脉冲解",
+        "非线性波在复杂介质中的散射与量子反射"
+      ],
+      "common_methodologies": [
+        "反应-扩散系统建模",
+        "渐近分析与指数渐近法（exponential asymptotics）",
+        "反散射变换与Riemann-Hilbert问题",
+        "Whitham调制理论与可积近似",
+        "线性稳定性分析与数值模拟"
+      ],
+      "interdisciplinary_connections": [
+        "非线性光学与光子学",
+        "生态系统的空间自组织与气候响应",
+        "凝聚态物理与经典力学中的晶格动力学"
+      ],
+      "key_terminologies": [
+        "孤子（soliton）",
+        "同宿蛇行（homoclinic snaking）",
+        "反应-扩散系统（reaction-diffusion system）",
+        "麦克斯韦点（Maxwell point）",
+        "局域化模式（localized pattern）",
+        "Turing不稳定性",
+        "包络孤子（envelope soliton）",
+        "色散冲击波（dispersive shock wave）",
+        "量子反射（quantum reflection）",
+        "非线性薛定谔方程（nonlinear Schrödinger equation）"
+      ]
+    }
+  },
+  {
+    "id": "nlin.SI",
+    "name_cn": "完全可解与可积系统",
+    "description_cn": "精确可解系统、可积偏微分方程、可积常微分方程、Painlevé分析、可积离散映射、可解格点模型、可积量子系统",
+    "profile": {
+      "profile_summary": "nlin.SI（完全可解与可积系统）致力于研究具有精确解结构的非线性系统，涵盖连续与离散、经典与量子、有限维与无限维系统。该领域核心目标是揭示系统的可积性本质，包括对称性、守恒律、Lax对、Bäcklund变换等代数与几何结构，并发展求解非线性波（如孤子、呼吸子、怪波等）的系统方法。研究不仅关注数学结构的完整性，也探索其在物理模型中的实现与应用，近年来还融合了数据驱动与神经网络等新兴技术。",
+      "core_topics": [
+        "可积非线性偏微分方程与常微分方程的精确解构造",
+        "Lax对、零曲率条件与谱问题的代数与几何理论",
+        "高维可积系统（特别是(3+1)维）的构造与分类",
+        "非局域可积系统与非阿贝尔可积映射的代数结构",
+        "可积系统与微分几何、代数几何的相互联系"
+      ],
+      "common_methodologies": [
+        "Lax对与零曲率表示方法",
+        "达布变换与Bäcklund变换",
+        "递归算子与对称约束方法",
+        "逆散射变换与Riemann-Hilbert问题",
+        "代数几何方法与theta函数解构造"
+      ],
+      "interdisciplinary_connections": [
+        "数学物理：与量子可积系统、共形场论、可解格点模型紧密关联",
+        "微分几何：通过曲线运动、曲面形变与可积方程的几何等价性",
+        "计算数学与机器学习：利用神经网络求解可积系统的数据驱动方法"
+      ],
+      "key_terminologies": [
+        "Lax pair",
+        "integrability",
+        "soliton solution",
+        "Darboux transformation",
+        "Bäcklund transformation",
+        "zero-curvature equation",
+        "Painlevé analysis",
+        "recursion operator",
+        "algebro-geometric solution",
+        "nonlocal Hamiltonian system"
+      ]
+    }
+  },
+  {
+    "id": "q-bio.BM",
+    "name_cn": "生物分子",
+    "description_cn": "DNA、RNA、蛋白质、脂质等；分子结构与折叠动力学；分子相互作用；单分子操控。",
+    "profile": {
+      "profile_summary": "q-bio.BM（生物分子）分类聚焦于DNA、RNA、蛋白质、脂质等生物大分子的结构、功能与动态行为，研究涵盖分子折叠、相互作用、修饰及其在生命过程中的调控机制。该领域致力于通过实验与计算相结合的方法，揭示分子层面的生物学规律，并推动药物设计、疫苗开发、环境修复和纳米生物技术等应用方向的发展。",
+      "core_topics": [
+        "生物分子结构与折叠动力学",
+        "分子间相互作用与复合物建模",
+        "RNA二级结构与表观转录修饰",
+        "天然产物与小分子药物的生物活性及作用机制",
+        "蛋白质与核酸的计算设计与功能预测"
+      ],
+      "common_methodologies": [
+        "分子动力学模拟",
+        "机器学习与深度学习模型",
+        "质谱分析（LC-MS/MS, UHPLC-MS/MS）",
+        "生物信息学与计算预测算法",
+        "单分子实验与物理化学表征技术（如FTIR、SEM）"
+      ],
+      "interdisciplinary_connections": [
+        "计算生物学与人工智能",
+        "药物化学与药理学",
+        "环境微生物学与生态毒理学"
+      ],
+      "key_terminologies": [
+        "protein folding",
+        "RNA secondary structure",
+        "molecular dynamics simulation",
+        "machine learning",
+        "epitope prediction",
+        "bioavailability",
+        "mass spectrometry",
+        "peptide-MHC-TCR interaction",
+        "covalent crosslinking",
+        "nucleic acid folding"
+      ]
+    }
+  },
+  {
+    "id": "q-bio.CB",
+    "name_cn": "细胞行为",
+    "description_cn": "细胞间信号传导与相互作用；形态发生与发育；细胞凋亡；细菌接合；病毒-宿主相互作用；免疫学",
+    "profile": {
+      "profile_summary": "q-bio.CB（细胞行为）分类聚焦于细胞在生理和病理条件下的动态行为及其调控机制，涵盖细胞间信号传导、相互作用、迁移、分化、凋亡以及对外界环境的响应。该领域旨在通过实验与理论建模相结合的方式，揭示细胞行为的分子、力学与系统层面的规律，特别是在发育、免疫、癌症和纤维化等生物学过程中的作用。",
+      "core_topics": [
+        "细胞迁移与形态动力学",
+        "细胞间信号传导与表型调控",
+        "细胞分化与转分化机制",
+        "细胞对环境刺激的响应与适应",
+        "病毒-宿主相互作用与免疫细胞功能"
+      ],
+      "common_methodologies": [
+        "数学建模与偏微分方程系统",
+        "基于个体的模型与连续体模型",
+        "系统识别与弱形式PDE推断",
+        "荧光标记与活细胞成像分析",
+        "随机动力学与噪声建模"
+      ],
+      "interdisciplinary_connections": [
+        "生物物理学：研究细胞力学、应力分布与迁移中的物理规律",
+        "计算生物学：开发用于模拟细胞群体行为的算法与数值方法",
+        "免疫学：探索免疫细胞在应激与疾病状态下的功能调控"
+      ],
+      "key_terminologies": [
+        "chemotaxis",
+        "phenotypic switching",
+        "macrophage",
+        "myofibroblast",
+        "Notch-Delta signaling",
+        "T cell migration",
+        "run-and-tumble",
+        "ligand-receptor dynamics",
+        "epigenetic changes",
+        "heat shock protein 70"
+      ]
+    }
+  },
+  {
+    "id": "q-bio.GN",
+    "name_cn": "基因组学",
+    "description_cn": "DNA测序与组装；基因与基序识别；RNA编辑与可变剪接；基因组结构与过程（复制、转录、甲基化等）；突变过程。",
+    "profile": {
+      "profile_summary": "基因组学（q-bio.GN）致力于研究基因组的结构、功能与演化，涵盖DNA测序与组装、基因识别、基因组动态过程（如复制、转录、甲基化）、突变机制以及基因调控网络的构建与解析。该领域旨在通过高通量测序技术和计算模型揭示基因组内在组织规律、功能元件的调控逻辑及其在发育、疾病和进化中的作用，推动精准医学和遗传诊断的发展。",
+      "core_topics": [
+        "基因组结构与重复序列的起源和演化",
+        "基因调控网络与转录调控机制",
+        "基因组变异的功能效应与疾病关联",
+        "单细胞与空间转录组学实验设计与分析",
+        "肿瘤基因组演化与亚克隆重建"
+      ],
+      "common_methodologies": [
+        "高通量测序（如RNA-seq、全基因组测序）",
+        "机器学习与深度学习模型（如Transformer、图神经网络）",
+        "基因编辑技术（如prime editing）",
+        "压缩感知与系统重建算法",
+        "模拟与基准测试方法"
+      ],
+      "interdisciplinary_connections": [
+        "生物信息学：开发算法和工具用于基因组数据的处理、注释与可视化",
+        "计算生物学：构建基因调控网络、进化模型和动态系统模拟",
+        "临床遗传学：将基因组发现转化为罕见病和癌症的分子诊断与治疗策略"
+      ],
+      "key_terminologies": [
+        "基因组组装",
+        "卫星DNA",
+        "可变剪接",
+        "基因调控网络",
+        "拷贝数变异",
+        "单细胞转录组",
+        "prime editing",
+        "NuMT",
+        "路径富集分析",
+        "表型可塑性"
+      ]
+    }
+  },
+  {
+    "id": "q-bio.MN",
+    "name_cn": "分子网络",
+    "description_cn": "基因调控、信号转导、蛋白质组学、代谢组学、基因与酶网络",
+    "profile": {
+      "profile_summary": "分子网络（q-bio.MN）专注于在分子层面构建和分析生物系统中的复杂调控与相互作用网络，涵盖基因调控、信号转导、代谢通路以及蛋白质和RNA介导的调控机制。该领域旨在通过数学建模、信息论、统计推断和机器学习等方法揭示分子动态行为背后的系统性规律，理解细胞如何通过网络结构处理环境信息、维持稳态并响应刺激，最终服务于疾病机制解析、药物发现和合成生物学等应用目标。",
+      "core_topics": [
+        "基因调控网络与自调控机制的建模与推断",
+        "生物化学信号网络中的动态信息编码与传递",
+        "代谢通量分析与同位素标记系统的建模",
+        "基于蛋白互作网络的疾病机制与药物靶点发现",
+        "非编码RNA及多层级调控网络的系统重构"
+      ],
+      "common_methodologies": [
+        "离散状态连续时间马尔可夫链建模",
+        "随机模拟算法（SSA）与化学主方程求解",
+        "机器学习与深度学习在分子网络中的应用",
+        "Fano因子与基因表达噪声分析",
+        "互信息与信息动力学分析"
+      ],
+      "interdisciplinary_connections": [
+        "系统生物学：构建可计算、可验证的生物系统模型",
+        "生物信息学：高通量数据整合与网络推断算法开发",
+        "计算神经科学：类比神经编码的信息处理机制研究"
+      ],
+      "key_terminologies": [
+        "基因调控网络",
+        "信号转导通路",
+        "代谢通量分析",
+        "蛋白质互作网络（PPI）",
+        "自调控（autoregulation）",
+        "Fano因子",
+        "信息协同（information synergy）",
+        "化学主方程",
+        "小RNA调控（sRNA）",
+        "基因靶向评分（gene targeting score）"
+      ]
+    }
+  },
+  {
+    "id": "q-bio.NC",
+    "name_cn": "神经元与认知",
+    "description_cn": "突触、皮层、神经元动力学、神经网络、感觉运动控制、行为、注意",
+    "profile": {
+      "profile_summary": "q-bio.NC（神经元与认知）分类聚焦于神经系统在认知功能中的作用，涵盖从单个神经元、突触动力学到神经网络整体行为的多层次研究。该领域旨在揭示神经元活动如何支持记忆、感知、语言、注意和行为等高级认知过程，并探索这些机制在健康与疾病状态下的变化。近年来的研究表现出对反向传播动作电位、神经可塑性、感觉整合以及神经-免疫相互作用等新颖假说的关注，体现出该领域正朝着整合计算模型与实证生物学证据的方向发展。",
+      "core_topics": [
+        "神经元动力学与突触可塑性",
+        "记忆编码与提取的认知神经机制",
+        "感觉系统功能障碍的分子与细胞基础",
+        "神经网络中的信息处理与学习机制",
+        "认知过程的神经表征与行为关联"
+      ],
+      "common_methodologies": [
+        "尖峰神经网络建模与仿真",
+        "STDP（ spike-timing-dependent plasticity）学习规则应用",
+        "文献综述与假设驱动的理论构建",
+        "分子对接（blind docking）分析",
+        "跨尺度神经现象的整合分析"
+      ],
+      "interdisciplinary_connections": [
+        "计算神经科学",
+        "认知心理学",
+        "病毒学与神经免疫学"
+      ],
+      "key_terminologies": [
+        "backpropagated action potentials",
+        "spiking neural networks",
+        "STDP learning",
+        "neurocognitive phenomics",
+        "transient receptor potential (TRP) channels",
+        "ankylin repeat domains (ARDs)",
+        "synaptic plasticity",
+        "distributed representations",
+        "olfactory and taste disorders",
+        "neuronal reactivation"
+      ]
+    }
+  },
+  {
+    "id": "q-bio.OT",
+    "name_cn": "其他定量生物学",
+    "description_cn": "不符合其他定量生物学分类的定量生物学研究",
+    "profile": {
+      "profile_summary": "q-bio.OT（其他定量生物学）是一个包容性分类，涵盖无法归入其他特定定量生物学子类的跨学科研究。该分类聚焦于利用定量方法解决生物学、医学和公共卫生中的实际问题，涉及营养学、神经科学、数据共享、健康政策、传染病监测和理论生物学模型等多个方向。其核心目标是通过统计分析、数学建模、实验评估和系统性指南制定，推动生物医学研究的科学性、可重复性和实际应用价值。",
+      "core_topics": [
+        "维生素与代谢健康的关系研究",
+        "脑网络动力学的控制理论与神经调控策略",
+        "生物医学数据共享与FAIR原则的实践指南",
+        "动物生产性能与抗生素干预的实验评估",
+        "免疫表位预测与交叉反应性引起的自身免疫风险"
+      ],
+      "common_methodologies": [
+        "多元线性与二项逻辑回归分析",
+        "网络控制理论与最优随机跟踪控制模型",
+        "定性主题分析与访谈研究",
+        "液相色谱-串联质谱（LC-ESI-MS/MS）定量检测",
+        "生物信息学序列比对与MHC结合亲和力预测"
+      ],
+      "interdisciplinary_connections": [
+        "公共卫生与社会医学：关注弱势群体健康需求、健康决定因素及政策影响",
+        "生物信息学与计算生物学：涉及基因序列分析、表位预测和代码共享实践",
+        "系统工程与控制理论：将工程控制原理应用于脑网络动态调控"
+      ],
+      "key_terminologies": [
+        "metabolic syndrome",
+        "25(OH)D concentration",
+        "optimal stochastic tracking control",
+        "brain network dynamics",
+        "FAIR image data",
+        "code-sharing",
+        "vitamin K1 (phylloquinone)",
+        "HLA-A*24:02",
+        "adaptation energy",
+        "wastewater-based epidemiology"
+      ]
+    }
+  },
+  {
+    "id": "q-bio.PE",
+    "name_cn": "种群与进化",
+    "description_cn": "种群动态、时空与流行病学模型、动态物种形成、共同进化、生物多样性、食物网、衰老；分子进化与系统发育；定向进化；生命起源",
+    "profile": {
+      "profile_summary": "q-bio.PE（种群与进化）分类聚焦于生物种群的动态行为、物种间的进化关系及其在生态和遗传层面的相互作用。该领域旨在通过数学建模、统计推断和系统发育分析等手段，揭示种群如何响应环境变化、资源竞争、捕食压力以及遗传变异，进而影响生物多样性、生态系统稳定性、物种形成和共同进化等宏观生态与进化过程。研究目标包括理解种群存续机制、解析进化路径、量化生态网络稳定性，并探索生命起源与分子进化的深层规律。",
+      "core_topics": [
+        "种群动态与稳定性机制",
+        "生物多样性与生态系统功能",
+        "分子进化与系统发育网络重建",
+        "捕食者-猎物与消费者-资源相互作用",
+        "环境驱动的物种响应与适应性进化"
+      ],
+      "common_methodologies": [
+        "数学建模（如反应-扩散方程、Lotka-Volterra模型）",
+        "分层统计模型（如N-mixture模型）",
+        "系统发育网络推断算法",
+        "时间序列分析（如小波相干性分析）",
+        "个体基于模拟与随机过程建模"
+      ],
+      "interdisciplinary_connections": [
+        "生态学与环境科学",
+        "计算生物学与生物信息学",
+        "流行病学与公共卫生"
+      ],
+      "key_terminologies": [
+        "种群动态",
+        "生物多样性",
+        "系统发育网络",
+        "密度依赖性",
+        "表型可塑性",
+        "共同进化",
+        "稳态与非稳态推断",
+        "Allee效应",
+        "诱导防御",
+        "沃尔什系数"
+      ]
+    }
+  },
+  {
+    "id": "q-bio.QM",
+    "name_cn": "定量方法",
+    "description_cn": "所有对生物学具有价值的实验、数值、统计和数学研究贡献",
+    "profile": {
+      "profile_summary": "q-bio.QM（定量方法）分类聚焦于生物学研究中实验、数值、统计和数学方法的开发与应用，旨在通过定量手段解决复杂的生物系统问题。该领域强调模型构建、数据分析和计算仿真，以实现从分子到生态系统层面的精确刻画与预测，核心目标是提升生物医学研究的可量化性、可重复性和可解释性。",
+      "core_topics": [
+        "生物系统的数学建模与参数可识别性分析",
+        "高通量组学数据的定量整合与体外到体内外推（QIVIVE）",
+        "基于机器学习与生成模型的药物发现与分子设计",
+        "生物网络与复杂系统的拓扑数据分析（TDA）",
+        "生理信号的无监督特征提取与连续状态量化"
+      ],
+      "common_methodologies": [
+        "非线性动力学与偏微分方程建模",
+        "拓扑数据分析（Topological Data Analysis, TDA）",
+        "深度生成模型（如Transformer架构）与药效团引导生成",
+        "主成分分析（PCA）与无监督降维技术",
+        "Fisher信息矩阵与实用可识别性评估框架"
+      ],
+      "interdisciplinary_connections": [
+        "计算生物学与生物信息学：通过算法解析高维生物数据，如蛋白共富集、衰老表型预测",
+        "生物医学工程与传感器技术：开发非侵入式监测系统，如蜂巢温度、睡眠EEG、空气质量传感",
+        "药物化学与人工智能：结合药效团知识与生成AI加速新配体发现"
+      ],
+      "key_terminologies": [
+        "practical identifiability",
+        "quantitative in vitro to in vivo extrapolation (QIVIVE)",
+        "pharmacophore",
+        "topological data analysis (TDA)",
+        "frailty index (FI)",
+        "co-enrichment (CoEn)",
+        "scaffold hopping",
+        "nonlinear wave propagation",
+        "principal component analysis (PCA)",
+        "deep neural network pruning"
+      ]
+    }
+  },
+  {
+    "id": "q-bio.SC",
+    "name_cn": "亚细胞过程",
+    "description_cn": "亚细胞结构（通道、细胞器、细胞骨架、囊泡等）的组装与调控；分子马达、运输及亚细胞定位；有丝分裂与减数分裂",
+    "profile": {
+      "profile_summary": "q-bio.SC（亚细胞过程）分类聚焦于细胞内部结构与动态过程的分子机制和物理调控，涵盖亚细胞器组装、分子运输、细胞骨架动力学、有丝分裂调控以及蛋白质定位等核心问题。该领域旨在揭示细胞功能如何通过亚细胞尺度上的结构组织、力学性质和能量转换实现，并强调非平衡态动力学、主动力学和精细调控在维持细胞稳态中的关键作用。",
+      "core_topics": [
+        "亚细胞结构的动力学与组织机制",
+        "分子马达驱动的物质运输与定位",
+        "细胞器形态与能量转换中的物理原理",
+        "核糖体调控与基因表达的代谢优化",
+        "膜蛋白 trafficking 及其对细胞连接功能的影响"
+      ],
+      "common_methodologies": [
+        "数学建模与常微分方程系统分析",
+        "随机动力学模拟与化学主方程方法",
+        "CRISPR-Cas9 基因编辑与蛋白标记技术",
+        "生物信息学预测工具（如ASAFind, SignalP, TargetP）",
+        "Fokker-Planck 和反应-扩散模型用于描述噪声与振荡行为"
+      ],
+      "interdisciplinary_connections": [
+        "生物物理学：研究细胞内力、粘弹性、质子梯度等物理现象",
+        "系统生物学：整合调控网络与动态建模以理解细胞行为",
+        "计算生物学：开发模拟平台（如Mechanica）进行实时交互式建模"
+      ],
+      "key_terminologies": [
+        "亚细胞定位",
+        "分子马达",
+        "有丝分裂纺锤体",
+        "chemiosmotic 模型",
+        "局部质子梯度",
+        "核糖体种群调控",
+        "中间纤维组织",
+        "clathrin介导的内吞作用",
+        "信号肽切割位点",
+        "突触分子通信噪声"
+      ]
+    }
+  },
+  {
+    "id": "q-bio.TO",
+    "name_cn": "组织与器官",
+    "description_cn": "血管中的血流、骨骼的生物力学、电波、内分泌系统、肿瘤生长",
+    "profile": {
+      "profile_summary": "q-bio.TO（组织与器官）分类聚焦于生物组织和器官层面的生理、力学与代谢过程的建模与实验研究，旨在揭示器官功能调控机制、组织微环境动态以及器官水平的病理变化。该领域结合数学建模、生物力学、电生理学和分子生物学手段，研究涵盖心血管、神经、呼吸、肿瘤、肌肉骨骼及代谢系统等多个器官系统，目标是推动对器官功能的理解，并为疾病诊断、治疗优化和再生医学提供理论支持和技术方案。",
+      "core_topics": [
+        "器官生物力学与力学生理学",
+        "组织微环境与代谢调控",
+        "器官电生理建模与功能分析",
+        "组织工程与再生医学支架技术",
+        "发育与病理过程中组织结构的动态调控"
+      ],
+      "common_methodologies": [
+        "数学建模与动力系统分析",
+        "统计形状建模与影像分析",
+        "生理系统参数识别与敏感性分析",
+        "光动力与响应性生物材料设计",
+        "高通量组学数据特征选择与机器学习分类"
+      ],
+      "interdisciplinary_connections": [
+        "生物医学工程",
+        "计算生物学",
+        "材料科学与组织工程"
+      ],
+      "key_terminologies": [
+        "metabolic energy expenditure",
+        "cardiac digital twin",
+        "respiratory mechanics",
+        "tumor microenvironment",
+        "hypoxia",
+        "lactate metabolism",
+        "neurovascular unit",
+        "scaffolding",
+        "electrophysiology",
+        "DNA methylation"
+      ]
+    }
+  },
+  {
+    "id": "q-fin.CP",
+    "name_cn": "计算金融",
+    "description_cn": "计算方法，包括蒙特卡洛、偏微分方程、格点法及其他数值方法在金融建模中的应用",
+    "profile": {
+      "profile_summary": "计算金融（q-fin.CP）专注于将数值计算方法和计算技术应用于金融建模与决策过程，旨在解决复杂的金融问题，如衍生品定价、风险预测、投资组合优化和市场微观结构分析。该领域强调高效、稳定且可扩展的算法设计，以处理金融市场中的非线性、高维和动态特性，尤其关注在存在市场摩擦、流动性限制和不确定性条件下的模型实现与实证表现。",
+      "core_topics": [
+        "金融衍生品的数值定价与对冲",
+        "基于机器学习的风险预测与市场行为建模",
+        "投资组合优化与交易执行策略",
+        "高频金融数据处理与市场微观结构建模",
+        "考虑市场摩擦（如流动性、交易成本）的资产定价"
+      ],
+      "common_methodologies": [
+        "蒙特卡洛模拟与多层嵌套模拟",
+        "偏微分方程（PDE）数值解法（如有限差分、有限元方法）",
+        "深度学习模型（如LSTM、神经网络回归）",
+        "最优控制与动态规划（包括HJB方程求解）",
+        "元启发式优化算法（如差分进化算法）"
+      ],
+      "interdisciplinary_connections": [
+        "计算机科学（特别是数据库系统、图神经网络与高效算法设计）",
+        "应用数学（偏微分方程、随机控制、数值分析）",
+        "人工智能与机器学习（时间序列预测、注意力机制、强化学习）"
+      ],
+      "key_terminologies": [
+        "Value-at-Risk (VaR)",
+        "Credit Valuation Adjustment (CVA)",
+        "Hamilton-Jacobi-Bellman (HJB) equation",
+        "Finite Element Method (FEM)",
+        "Long Short-Term Memory (LSTM)",
+        "Monte Carlo simulation",
+        "Option pricing",
+        "Transaction costs",
+        "Market liquidity",
+        "Semi-static hedging"
+      ]
+    }
+  },
+  {
+    "id": "q-fin.EC",
+    "name_cn": "经济学",
+    "description_cn": "q-fin.EC 是 econ.GN 的别名，涵盖微观经济学、宏观经济学、国际经济学、企业理论、劳动经济学以及金融领域之外的其他经济学主题。",
+    "profile": {
+      "profile_summary": "q-fin.EC（经济学）分类聚焦于金融领域之外的广泛经济主题，涵盖微观与宏观经济学、国际经济、劳动经济、企业理论及政策分析。该领域致力于通过实证研究、实验设计和模型模拟，探讨个体、企业与政府在不同经济环境下的决策行为及其社会经济影响，尤其关注政策干预、市场设计、行为动机与可持续发展等议题。",
+      "core_topics": [
+        "行为与政策经济学",
+        "公共政策与政府响应",
+        "教育与健康经济",
+        "环境与气候经济学",
+        "技术创新与市场扩散"
+      ],
+      "common_methodologies": [
+        "实验经济学与随机对照试验",
+        "差分法（Difference-in-Differences）与断点回归（RDD）",
+        "空间显式综合评估模型",
+        "混合效应模型与回归分析",
+        "基于代理的模拟与强化学习模型"
+      ],
+      "interdisciplinary_connections": [
+        "环境科学与可持续发展",
+        "政治学与公共管理",
+        "教育学与公共卫生"
+      ],
+      "key_terminologies": [
+        "社会成本碳（Social Cost of Carbon）",
+        "父权主义政策（Paternalism）",
+        "绿色营销（Green Marketing）",
+        "算法共谋（Algorithmic Collusion）",
+        "可交易出行信用（Tradable Mobility Credits）",
+        "健康饮食篮（Healthy Diet Basket）",
+        "城市热岛效应（Urban Heat Island）",
+        "上层梯队理论（Upper Echelon Theory）",
+        "延迟决策（Waiting Period）",
+        "R&D投资与创新（R&D Investment and Innovativeness）"
+      ]
+    }
+  },
+  {
+    "id": "q-fin.GN",
+    "name_cn": "财务通则",
+    "description_cn": "金融领域通用定量方法的开发与应用",
+    "profile": {
+      "profile_summary": "q-fin.GN（财务通则）专注于金融领域中通用定量方法的开发与应用，涵盖从宏观经济增长模型到微观家庭财务规划、企业融资结构、区块链金融机制设计等多个层面。该分类致力于通过数学建模、计量分析、算法技术与跨学科理论（如博弈论、行为金融、计算机科学）相结合的方式，解决金融系统中的资源配置、风险评估、制度设计与市场动态等基础性问题，推动金融理论与实践的量化、智能化与普适化发展。",
+      "core_topics": [
+        "金融制度与机制设计",
+        "企业与家庭财务决策建模",
+        "金融科技与区块链应用",
+        "金融市场动态与风险分析",
+        "量化金融工具与政策评估"
+      ],
+      "common_methodologies": [
+        "数学建模与优化理论",
+        "计量经济学模型（如VAR模型）",
+        "博弈论与激励机制分析",
+        "机器学习与自然语言处理（如BERT、GPT）",
+        "实证数据分析与纵向研究"
+      ],
+      "interdisciplinary_connections": [
+        "计算机科学（特别是区块链、AI在金融中的应用）",
+        "行为经济学与神经经济学",
+        "运筹学与系统工程（如规模扩展模型）"
+      ],
+      "key_terminologies": [
+        "foreign direct investment (FDI)",
+        "utility maximization",
+        "game-theoretic analysis",
+        "liquidity provision",
+        "Proof of Stake (PoS)",
+        "stochastic setting",
+        "exchange ratio",
+        "behavioral finance",
+        "search volume index (SVI)",
+        "non-fungible tokens (NFT)"
+      ]
+    }
+  },
+  {
+    "id": "q-fin.MF",
+    "name_cn": "数学金融",
+    "description_cn": "金融的数学与分析方法，包括随机、概率与泛函分析，代数、几何及其他方法",
+    "profile": {
+      "profile_summary": "数学金融（q-fin.MF）专注于应用严格的数学与分析工具研究金融市场的结构、资产定价、投资组合优化及风险管理等问题。该领域致力于通过概率论、随机分析、最优控制、最优传输等高级数学方法，构建和分析金融模型，解决诸如无套利定价、市场一致性、波动率建模、衍生品估值和交易策略优化等核心问题，强调理论严谨性与实际金融应用的结合。",
+      "core_topics": [
+        "资产定价与无套利理论",
+        "投资组合优化与效用最大化",
+        "波动率建模与衍生品定价（特别是美式期权与粗糙波动率）",
+        "市场微观结构与自动做市商（AMM）动力学",
+        "利率模型与多曲线框架下的期限结构建模"
+      ],
+      "common_methodologies": [
+        "随机分析与伊藤积分",
+        "最优传输理论与Wasserstein度量",
+        "签名方法（signature methods）与深度学习结合",
+        "最优控制与动态规划",
+        "Fourier变换与COS定价方法"
+      ],
+      "interdisciplinary_connections": [
+        "机器学习与数据科学（用于参数估计、模型校准与时间序列分析）",
+        "量子概率与物理启发的金融建模（如Schrödinger类方程在资产回报中的应用）",
+        "运筹学与最优化理论（在投资组合与对冲策略中的应用）"
+      ],
+      "key_terminologies": [
+        "无套利（arbitrage-free）",
+        "最优传输（optimal transport）",
+        "效用无差异定价（utility indifference pricing）",
+        "前向绩效（forward performance）",
+        "粗糙波动率（rough volatility）",
+        "签名核（signature-kernel）",
+        "反射几何布朗运动（reflected geometric Brownian motion）",
+        "多曲线模型（multi-curve model）",
+        "超对冲（super-hedging）",
+        "量子概率（quantum probability）"
+      ]
+    }
+  },
+  {
+    "id": "q-fin.PM",
+    "name_cn": "投资组合管理",
+    "description_cn": "证券选择与优化、资本配置、投资策略及业绩衡量",
+    "profile": {
+      "profile_summary": "q-fin.PM（投资组合管理）分类聚焦于证券选择、资本配置、投资策略设计及业绩衡量的理论与实践，旨在通过优化资产配置来实现风险调整后的收益最大化。该领域融合了金融经济学、统计学与机器学习等方法，研究内容涵盖传统均值-方差模型的改进、动态与多周期优化、风险度量创新（如CVaR）、网络依赖结构建模以及利用专家信号和深度学习提升预测与决策能力，核心目标是在不确定性环境下构建高效、稳健且可解释的投资组合。",
+      "core_topics": [
+        "投资组合优化模型（如均值-方差、风险平价、CVaR）",
+        "动态与多周期资产配置策略",
+        "基于机器学习与深度学习的组合管理方法",
+        "尾部风险与不确定性建模（如ICVaR、动态生成模型）",
+        "资产间依赖结构与网络关系在组合构建中的应用"
+      ],
+      "common_methodologies": [
+        "马尔可夫链与随机因子模型",
+        "动态规划与模型预测控制（MPC）",
+        "深度神经网络（如LSTM、Attention-GRU）与强化学习（如DDPG）",
+        "卡尔曼滤波与贝叶斯估计",
+        "网络科学方法（如MTD模型、局部同配性度量）"
+      ],
+      "interdisciplinary_connections": [
+        "计算机科学（特别是机器学习与深度学习）",
+        "应用数学（随机控制、优化理论、PDE方法）",
+        "计量经济学与统计学（时间序列分析、因子建模）"
+      ],
+      "key_terminologies": [
+        "投资组合优化",
+        "风险平价",
+        "条件风险价值（CVaR）",
+        "均值-方差模型",
+        "动态资产配置",
+        "尾部风险",
+        "生成因子模型",
+        "效用最大化",
+        "网络依赖结构",
+        "深度强化学习"
+      ]
+    }
+  },
+  {
+    "id": "q-fin.PR",
+    "name_cn": "证券定价",
+    "description_cn": "金融证券、衍生品及结构化产品的估值与对冲",
+    "profile": {
+      "profile_summary": "q-fin.PR（证券定价）分类聚焦于金融证券、衍生品及结构化产品的估值与对冲理论和实践，核心目标是发展精确、高效且具有现实适用性的定价模型。该领域研究涵盖从经典Black-Scholes框架的扩展到复杂随机波动率、跳跃过程和路径依赖结构的建模，尤其关注波动率衍生品（如VIX期权）、多资产篮子期权、亚式期权等复杂产品的定价与风险敏感性分析，并致力于解决模型爆炸性、校准稳定性、计算效率等实际挑战。",
+      "core_topics": [
+        "随机波动率模型下的衍生品定价",
+        "波动率衍生品（如VIX期权）的建模与对冲",
+        "路径依赖与障碍期权的解析近似方法",
+        "多资产篮子期权与相关性结构建模",
+        "基于市场不完全信息与主观信念的资产定价"
+      ],
+      "common_methodologies": [
+        "SABR、Heston、Bergomi等随机波动率模型",
+        "矩匹配与渐近展开（如小 maturity/volatility 近似）",
+        "傅里叶变换与特征函数方法（如Fourier inversion）",
+        "深度学习与数据驱动的定价核估计",
+        "Mellin变换与解析近似技术"
+      ],
+      "interdisciplinary_connections": [
+        "应用数学（随机分析、偏微分方程、泛函分析）",
+        "机器学习与计算金融（深度学习优化、数值模拟）",
+        "环境经济学与可持续金融（碳溢价与气候风险定价）"
+      ],
+      "key_terminologies": [
+        "VIX期权",
+        "SABR模型",
+        "随机波动率",
+        "风险中性定价",
+        "特征函数",
+        "矩匹配",
+        "路径依赖期权",
+        "定价核",
+        "隐含波动率曲面",
+        "均值回归过程"
+      ]
+    }
+  },
+  {
+    "id": "q-fin.RM",
+    "name_cn": "风险管理",
+    "description_cn": "交易、银行、保险、企业及其他领域中金融风险的衡量与管理",
+    "profile": {
+      "profile_summary": "q-fin.RM（风险管理）分类聚焦于金融风险的度量、建模与管理，涵盖银行、保险、投资组合、企业及公共基础设施等多个领域的风险评估与控制。该领域致力于开发理论模型与实证方法，以应对信用风险、市场风险、操作风险及系统性风险，尤其关注压力测试、资本配置、风险测度的回测与验证、风险相关性结构以及极端事件下的风险预测。研究目标在于提升金融机构与监管机构在复杂和不确定环境下的风险决策能力。",
+      "core_topics": [
+        "金融风险测度与资本配置",
+        "信用风险与压力测试建模",
+        "保险与养老金风险管理",
+        "宏观经济变量相关性与情景分析",
+        "机器学习在风险建模中的应用与验证"
+      ],
+      "common_methodologies": [
+        "期望短缺（Expected Shortfall）与风险贡献分解",
+        "VaR与CVaR等风险测度的建模与回测",
+        "动态优化与随机控制方法",
+        "基于主成分分析与聚类的宏观经济分析",
+        "机器学习模型（如XGBoost、神经网络）与生成模型验证"
+      ],
+      "interdisciplinary_connections": [
+        "统计学与计量经济学：用于风险测度估计、生存分析与相关性建模",
+        "计算机科学与人工智能：应用于机器学习驱动的场景生成与模型验证",
+        "精算科学：涉及年金、寿险退保风险与效用最大化问题"
+      ],
+      "key_terminologies": [
+        "Expected Shortfall (ES)",
+        "Value-at-Risk (VaR)",
+        "Capital Allocation",
+        "Stress Testing",
+        "Macroeconomic Scenario",
+        "Default Probability",
+        "Surrender Risk",
+        "Diversification Quotient",
+        "Backtesting",
+        "Machine Learning Validation"
+      ]
+    }
+  },
+  {
+    "id": "q-fin.ST",
+    "name_cn": "统计金融",
+    "description_cn": "统计学、计量经济学与经济物理学分析及其在金融市场和经济数据中的应用",
+    "profile": {
+      "profile_summary": "统计金融（q-fin.ST）专注于将统计学、计量经济学和经济物理学的方法应用于金融市场与经济数据的分析，旨在揭示金融时间序列的动态特征、市场结构、风险传导机制以及外部冲击对资产价格的影响。该领域致力于开发和应用先进的统计模型与计算技术，以提高对市场行为的理解和预测能力，涵盖从高频数据建模到情绪分析、网络传染、波动率结构和投资组合韧性评估等多个前沿方向。",
+      "core_topics": [
+        "金融市场波动性建模与估计",
+        "金融网络中的风险传染与系统性风险",
+        "ESG投资与传统投资在危机时期的比较表现",
+        "基于新闻与社交媒体的情绪分析及其对市场影响",
+        "金融时间序列中的集体行为与相关性结构"
+      ],
+      "common_methodologies": [
+        "状态空间模型与卡尔曼滤波",
+        "广义自回归条件异方差模型（GARCH族）",
+        "小波分析与多尺度信号处理",
+        "生成对抗网络（GANs）与深度学习预测框架",
+        "随机矩阵理论与高维协方差矩阵分析"
+      ],
+      "interdisciplinary_connections": [
+        "经济物理学（Econophysics）：借鉴统计物理中的自旋系统、化学势、相变等概念构建金融市场模型",
+        "计算机科学与自然语言处理：利用大语言模型分析金融新闻情感并融合于预测系统",
+        "复杂系统与网络科学：研究银行间网络、股价联动结构及冲击传播机制"
+      ],
+      "key_terminologies": [
+        "Integrated Covariance Matrix",
+        "Rough Volatility",
+        "Multifractal Random Measure (MRM)",
+        "EGARCH-in-mean",
+        "Compositional Data Analysis (CoDa)",
+        "Hayashi-Yoshida Estimator",
+        "Financial Contagion",
+        "Support and Resistance Levels",
+        "Element Analysis",
+        "Log S-fBM"
+      ]
+    }
+  },
+  {
+    "id": "q-fin.TR",
+    "name_cn": "交易与市场微观结构",
+    "description_cn": "市场微观结构、流动性、交易所与拍卖机制设计、自动化交易、基于代理的建模与做市",
+    "profile": {
+      "profile_summary": "q-fin.TR（交易与市场微观结构）专注于金融市场中交易机制的建模与分析，研究核心包括市场流动性、价格形成过程、自动化交易策略、做市机制以及新兴的去中心化金融中的流动性提供模型。该领域旨在理解交易行为在微观层面如何影响市场价格动态，并为交易者、做市商和平台设计者提供优化执行策略、风险管理和市场设计的理论框架与实证支持。",
+      "core_topics": [
+        "市场微观结构与价格形成机制",
+        "算法交易与最优执行策略",
+        "做市商模型与流动性供给",
+        "去中心化交易所与自动做市商（AMM）",
+        "高频交易中的波动率估计与订单流建模"
+      ],
+      "common_methodologies": [
+        "基于博弈论的策略建模（如贝叶斯博弈、均场博弈）",
+        "动态规划与最优控制（如Almgren-Chriss模型）",
+        "复杂系统与基于代理的建模",
+        "高维时间序列分析与GARCH类波动率模型",
+        "极限订单簿（LOB）的统计物理建模与仿真"
+      ],
+      "interdisciplinary_connections": [
+        "计算机科学（强化学习、事件驱动系统、分布式账本技术）",
+        "物理学（复杂系统、相变理论、KPZ方程、多尺度动力学）",
+        "运筹学与控制理论（最优执行、反馈控制、随机优化）"
+      ],
+      "key_terminologies": [
+        "市场微观结构",
+        "流动性提供者（LP）",
+        "自动做市商（AMM）",
+        "暂时性损失（Impermanent Loss）",
+        "最优执行",
+        "实现亏损（Implementation Shortfall, IS）",
+        "目标收盘价执行（Target Close, TC）",
+        "极限订单簿（Limit Order Book, LOB）",
+        "高频交易",
+        "波动率预测"
+      ]
+    }
+  },
+  {
+    "id": "stat.AP",
+    "name_cn": "应用",
+    "description_cn": "生物学、教育学、流行病学、工程学、环境科学、医学、物理科学、质量控制、社会科学",
+    "profile": {
+      "profile_summary": "stat.AP（应用统计）分类聚焦于将统计方法应用于现实世界的复杂问题，强调方法的实用性和跨学科性。其核心目标是开发和应用统计模型来解决生物学、医学、工程学、环境科学、社会科学等领域的实际挑战，尤其关注预测、决策支持、不确定性量化以及数据驱动的政策或操作优化。研究通常结合真实数据与先进统计技术，以提供可解释、稳健且具有实际意义的结果。",
+      "core_topics": [
+        "生物统计与流行病学建模",
+        "临床试验设计与医疗决策优化",
+        "环境与公共安全事件预测",
+        "工业系统可靠性与维护规划",
+        "法医学与专家证据的统计评估"
+      ],
+      "common_methodologies": [
+        "贝叶斯建模与推断",
+        "生存分析与时间至事件预测",
+        "逆不确定性量化（IUQ）",
+        "转移学习与数据融合",
+        "分位数回归与极值分析"
+      ],
+      "interdisciplinary_connections": [
+        "公共卫生与流行病学",
+        "工程可靠性与数字孪生技术",
+        "法医学与司法科学"
+      ],
+      "key_terminologies": [
+        "compositional data analysis",
+        "individualized treatment rule",
+        "clinical equipoise",
+        "inverse uncertainty quantification",
+        "Gaussian Process",
+        "survival analysis",
+        "Bayesian kernel density estimation",
+        "likelihood ratio",
+        "non-homogeneous Poisson process",
+        "benchmark dose"
+      ]
+    }
+  },
+  {
+    "id": "stat.CO",
+    "name_cn": "计算",
+    "description_cn": "算法、仿真、可视化",
+    "profile": {
+      "profile_summary": "stat.CO（计算统计学）专注于开发和应用高效的算法、仿真技术和可视化工具，以解决复杂统计问题。该领域致力于提升大规模数据处理、高维建模和贝叶斯推断中的计算效率与可扩展性，涵盖从优化采样策略到分布式计算框架的广泛议题，目标是为现代统计分析提供稳健、快速且可解释的计算解决方案。",
+      "core_topics": [
+        "高效蒙特卡洛与马尔可夫链采样方法",
+        "大规模数据下的分布式统计计算",
+        "非参数与半参数回归中的计算建模",
+        "计算机实验设计与均匀设计构造",
+        "状态空间模型与时间序列的贝叶斯推断"
+      ],
+      "common_methodologies": [
+        "马尔可夫链蒙特卡洛（MCMC）及其变体（如粒子Gibbs、近端MCMC）",
+        "自适应算法与两阶段采样策略",
+        "多项式混沌展开与元模型构建",
+        "坐标下降与阈值接受优化算法",
+        "因子调整向量自回归（FA-VAR）建模"
+      ],
+      "interdisciplinary_connections": [
+        "机器学习：特别是在深度神经网络结构优化、非凸优化采样和贝叶斯深度学习方面",
+        "运筹学与工程系统建模：如核能蒸汽发生器堵塞模拟与维护规划中的敏感性分析",
+        "计量经济学与金融统计：涉及高维时间序列网络建模、风险预测与分布建模"
+      ],
+      "key_terminologies": [
+        "MCMC",
+        "Hamiltonian Monte Carlo",
+        "Sobol' indices",
+        "distance correlation",
+        "copulas",
+        "metamodel",
+        "composite quantile regression",
+        "state-space models",
+        "proximal algorithms",
+        "uniform design"
+      ]
+    }
+  },
+  {
+    "id": "stat.ME",
+    "name_cn": "方法论",
+    "description_cn": "设计、调查、模型选择、多重检验、多元方法、信号与图像处理、时间序列、平滑方法、空间统计、生存分析、非参数与半参数方法",
+    "profile": {
+      "profile_summary": "stat.ME（方法论）分类聚焦于统计学中各类模型与推断方法的设计、改进与理论分析，旨在解决复杂数据结构下的建模挑战。该领域致力于发展适用于高维、纵向、生存、缺失或选择性数据的稳健、高效且可解释的统计方法，涵盖变量选择、因果推断、模型选择、不确定性量化等多个核心问题，强调方法的理论性质（如一致性、渐近性）与实际应用性能的平衡。",
+      "core_topics": [
+        "高维数据建模与变量选择",
+        "纵向与聚类数据分析",
+        "生存分析与时间-to-事件模型",
+        "因果推断与多研究整合",
+        "非参数与半参数回归建模"
+      ],
+      "common_methodologies": [
+        "广义估计方程（GEE）及其加权与惩罚扩展",
+        "贝叶斯建模与先验结构设计（如spike-and-slab）",
+        "惩罚似然方法与正则化技术（如LASSO）",
+        "因子分析与潜变量模型（如CFA、SCFA）",
+        "共形推断与不确定性量化方法"
+      ],
+      "interdisciplinary_connections": [
+        "生物统计学与临床试验分析",
+        "生物信息学与基因组学数据分析",
+        "社会科学中的多层级建模与教育评估"
+      ],
+      "key_terminologies": [
+        "penalized GEE",
+        "informative cluster size",
+        "high-dimensional data",
+        "semiparametric additive hazards model",
+        "Bayesian model selection",
+        "conformal inference",
+        "false coverage-statement rate (FCR)",
+        "meta-analysis",
+        "latent factor models",
+        "survival analysis"
+      ]
+    }
+  },
+  {
+    "id": "stat.ML",
+    "name_cn": "机器学习",
+    "description_cn": "涵盖具有统计或理论基础的机器学习论文（包括监督学习、无监督学习、半监督学习、图模型、强化学习、多臂赌博机、高维推断等）",
+    "profile": {
+      "profile_summary": "stat.ML（机器学习）分类聚焦于具有统计或理论基础的机器学习方法研究，涵盖监督、无监督、半监督、强化学习等多个范式。其核心目标是发展具备理论保证、可解释性和鲁棒性的学习算法，解决分布匹配评估、因果推断、不确定性量化、高维推断等关键问题，并推动模型在真实世界复杂场景（如交通、医疗、环境建模）中的可信部署。",
+      "core_topics": [
+        "生成模型与分布匹配评估",
+        "因果推断与异质处理效应估计",
+        "非参数与高维统计学习",
+        "最优传输与图模型理论",
+        "可信机器学习（包括不确定性量化与公平性）"
+      ],
+      "common_methodologies": [
+        "随机梯度下降及其变体",
+        "谱聚类与转移算子方法",
+        "贝叶斯神经网络与高斯过程",
+        "双重稳健估计与逆倾向加权",
+        "共形预测与联邦学习框架"
+      ],
+      "interdisciplinary_connections": [
+        "统计学（非参数推断、缺失数据机制）",
+        "计算机视觉（图像生成与目标检测）",
+        "环境科学与工程（大气污染物扩散建模）"
+      ],
+      "key_terminologies": [
+        "graphon",
+        "Fréchet Inception Distance (FID)",
+        "Embedded Characteristic Score (ECS)",
+        "optimal transport (OT)",
+        "stochastic gradient descent (SGD)",
+        "conformal prediction",
+        "doubly robust learning",
+        "vector quantized variational autoencoders (VQ-VAE)",
+        "random survival forests",
+        "semi-supervised learning with informative labels"
+      ]
+    }
+  },
+  {
+    "id": "stat.OT",
+    "name_cn": "其他统计信息",
+    "description_cn": "不属于其他统计分类的统计工作",
+    "profile": {
+      "profile_summary": "stat.OT（其他统计信息）是一个包容性分类，涵盖无法归入其他具体统计子领域的多样化研究。该分类的核心目标是探索统计学在教育、政策、数据生成、方法论反思以及跨学科应用中的角色与影响，强调统计思想在现实世界问题中的哲学、实践和教学层面的扩展，关注统计方法的合理使用、解释及其在社会、技术和科学系统中的整合。",
+      "core_topics": [
+        "统计教育与课程设计",
+        "统计方法在公共政策与治理中的作用",
+        "合成数据生成与隐私保护",
+        "统计推断的哲学与解释问题",
+        "跨学科中的统计实践与挑战"
+      ],
+      "common_methodologies": [
+        "R语言与R生态系统的分析",
+        "置信区间与假设检验的理论探讨",
+        "Copula模型与多元数据模拟",
+        "控制图与统计过程控制（SPC）",
+        "定性研究与实地调查方法"
+      ],
+      "interdisciplinary_connections": [
+        "数据科学与计算机科学",
+        "公共卫生与流行病学",
+        "教育学与社会科学"
+      ],
+      "key_terminologies": [
+        "confidence interval",
+        "ex ante policy",
+        "synthetic data",
+        "data acumen",
+        "R ecosystem",
+        "CUSUM control chart",
+        "compositional data (CoDa)",
+        "bureaucratic systems",
+        "tidyverse",
+        "epistemic interpretation"
+      ]
+    }
+  },
+  {
+    "id": "stat.TH",
+    "name_cn": "统计学理论",
+    "description_cn": "stat.TH 是 math.ST 的别名。涵盖渐近理论、贝叶斯推断、决策理论、估计、基础理论、推断与检验。",
+    "profile": {
+      "profile_summary": "统计学理论（stat.TH）致力于发展和分析统计推断的基础理论，涵盖估计、检验、渐近理论、贝叶斯方法与决策理论等核心内容。该领域关注在复杂模型和高维数据下统计方法的理论性质，如一致性、收敛速度、误差界和模型选择的极限行为，旨在为现代统计学习、因果推断和高维数据分析提供坚实的数学基础。",
+      "core_topics": [
+        "高维统计推断与变量选择",
+        "渐近理论与极限分布",
+        "贝叶斯推断与后验计算的理论性质",
+        "非参数与半参数模型中的推断方法",
+        "统计误差评估与模型选择的理论基础"
+      ],
+      "common_methodologies": [
+        "最大似然估计与渐近正态性分析",
+        "U-统计量与不完全U-统计量方法",
+        "Stein方法与分布差异度量",
+        "交叉验证与平滑参数选择的理论改进",
+        "稀疏建模与阈值迭代算法的理论分析"
+      ],
+      "interdisciplinary_connections": [
+        "机器学习理论（尤其是泛化误差与过拟合机制）",
+        "信息论与高维概率（集中不等式、有效秩分析）",
+        "微分几何与流形上的统计推断"
+      ],
+      "key_terminologies": [
+        "渐近正态性",
+        "最小最大误差界",
+        "贝叶斯收缩先验",
+        "交叉验证稳定性",
+        "U-统计量",
+        "Stein差异",
+        "高维一致性",
+        "几何遍历性",
+        "尾部依赖函数",
+        "空间填充设计"
+      ]
+    }
+  }
+]
