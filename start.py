@@ -628,12 +628,6 @@ def main():
         description="ArXiv 每日论文推荐系统启动脚本 (PyEnv+NV专用 - 第一性原理版)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-第一性原理设计说明:
-  本脚本基于第一性原理重构，确保环境隔离的绝对性：
-  1. 绝不使用系统级Python或pip
-  2. 所有操作都在项目.venv虚拟环境中执行
-  3. 严格验证NV虚拟环境的激活状态
-  4. 确保PyEnv和NV的正确配置
 
 使用前提条件:
   1. 已安装PyEnv和NV

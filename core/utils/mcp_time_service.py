@@ -25,6 +25,9 @@ class MCPTimeService:
         # 加载环境变量
         load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
         
+        # 检查是否启用MCP时间服务
+        self.mcp_enabled = os.getenv("ENABLE_MCP_TIME_SERVICE", "false").lower() == "true"
+        
         # 获取配置
         self.api_key = api_key or os.getenv("DASHSCOPE_API_KEY")
         self.base_url = base_url or os.getenv("DASHSCOPE_BASE_URL")
@@ -32,8 +35,12 @@ class MCPTimeService:
         
         logger.info("MCPTimeService初始化开始")
         
+        # 如果MCP服务被禁用，直接设置client为None
+        if not self.mcp_enabled:
+            logger.info("MCP时间服务已禁用 - 将直接使用本地时间")
+            self.client = None
         # 验证配置
-        if not all([self.api_key, self.base_url, self.model]):
+        elif not all([self.api_key, self.base_url, self.model]):
             logger.warning("MCP配置不完整 - 将使用本地时间")
             self.client = None
         else:
@@ -130,11 +137,17 @@ class MCPTimeService:
             return None
     
     def get_current_time(self) -> str:
-        """获取当前时间，优先使用LLM工具调用，失败时使用本地时间。
+        """获取当前时间，根据配置决定是否使用LLM工具调用。
         
         Returns:
             当前时间字符串
         """
+        # 如果MCP服务被禁用，直接返回本地时间
+        if not self.mcp_enabled:
+            local_time = self._get_current_time()
+            logger.debug(f"MCP服务已禁用，使用本地时间: {local_time}")
+            return local_time
+        
         # 尝试通过LLM获取时间
         llm_time = self.get_time_via_llm_tool()
         
