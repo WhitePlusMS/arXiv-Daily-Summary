@@ -231,6 +231,16 @@ def display_token_usage(matcher):
 
 def main():
     """主界面函数"""
+    # 初始化session state中的用户输入和匹配状态（必须在最开始初始化）
+    if 'user_input' not in st.session_state:
+        st.session_state.user_input = ""
+    if 'is_matching' not in st.session_state:
+        st.session_state.is_matching = False
+    if 'matching_input' not in st.session_state:
+        st.session_state.matching_input = ""
+    if 'matching_username' not in st.session_state:
+        st.session_state.matching_username = ""
+    
     # 页面标题
     st.markdown('<h1 class="main-header">📚 ArXiv分类匹配器</h1>', unsafe_allow_html=True)
     st.markdown("---")
@@ -279,6 +289,8 @@ def main():
         else:
             st.info("暂无数据记录")
     
+
+    
     # 主界面布局
     st.markdown('<h2 class="sub-header">📝 输入研究信息</h2>', unsafe_allow_html=True)
         
@@ -286,12 +298,13 @@ def main():
     username = st.text_input(
         "用户名",
         placeholder="请输入您的用户名",
-        help="用于标识和保存您的匹配结果"
+        help="用于标识和保存您的匹配结果",
+        disabled=st.session_state.is_matching  # 匹配时禁用输入
     )
     
-    # 初始化session state中的用户输入
-    if 'user_input' not in st.session_state:
-        st.session_state.user_input = ""
+    # 如果正在匹配，显示警告信息
+    if st.session_state.is_matching:
+        st.warning("⚠️ 正在进行分类匹配，请等待完成后再修改输入内容")
     
     user_input = st.text_area(
         "研究内容描述",
@@ -299,11 +312,13 @@ def main():
         height=200,
         placeholder="请详细描述您的研究方向和兴趣领域...\n\n例如：\n# 个人研究兴趣\n我正在从事RAG领域的研究。具体来说，我对以下领域感兴趣：\n1. RAG（检索增强生成）\n2. LLM（大语言模型）\n3. 多模态大语言模型",
         help="支持Markdown格式，请尽可能详细地描述您的研究方向",
-        key="research_description"
+        key="research_description",
+        disabled=st.session_state.is_matching  # 匹配时禁用输入
     )
     
-    # 更新session state
-    st.session_state.user_input = user_input
+    # 更新session state（仅在非匹配状态下）
+    if not st.session_state.is_matching:
+        st.session_state.user_input = user_input
     
     # 优化按钮
     col1, col2 = st.columns([3, 1])
@@ -311,7 +326,8 @@ def main():
         optimize_clicked = st.button(
             "✨ AI优化描述",
             help="使用AI来扩展和完善您的研究描述",
-            use_container_width=True
+            use_container_width=True,
+            disabled=st.session_state.is_matching  # 匹配时禁用按钮
         )
     
     # 处理优化请求
@@ -350,71 +366,108 @@ def main():
     with st.form("matching_form"):
         st.markdown("### 🚀 开始匹配")
         submitted = st.form_submit_button(
-            "开始匹配分类",
+            "开始匹配分类" if not st.session_state.is_matching else "正在匹配中...",
             type="primary",
-            use_container_width=True
+            use_container_width=True,
+            disabled=st.session_state.is_matching  # 匹配时禁用按钮
         )
         
     # 处理表单提交
-    if submitted:
+    if submitted and not st.session_state.is_matching:
         if not username.strip():
             st.error("❌ 请输入用户名")
         elif not user_input.strip():
             st.error("❌ 请输入研究内容描述")
         else:
-            # 初始化匹配器
-            with st.spinner("🔧 初始化匹配器..."):
-                matcher = initialize_matcher()
+            # 设置匹配状态并保存当前输入
+            st.session_state.is_matching = True
+            st.session_state.matching_input = user_input
+            st.session_state.matching_username = username.strip()
+            st.rerun()  # 重新运行以更新UI状态
+    
+    # 执行匹配逻辑（在状态设置后的下一次运行中执行）
+    if st.session_state.is_matching and st.session_state.matching_input and st.session_state.matching_username:
+        # 初始化匹配器
+        with st.spinner("🔧 初始化匹配器..."):
+            matcher = initialize_matcher()
+        
+        # 检查匹配器是否初始化成功
+        if matcher is None:
+            st.warning("⚠️ 无法初始化匹配器，请检查API配置")
+            # 重置匹配状态
+            st.session_state.is_matching = False
+            st.session_state.matching_input = ""
+            st.session_state.matching_username = ""
+        else:
+            # 重置Token计数器
+            if hasattr(matcher, 'total_tokens'):
+                matcher.total_tokens = 0
+                matcher.total_input_tokens = 0
+                matcher.total_output_tokens = 0
             
-            # 检查匹配器是否初始化成功
-            if matcher is None:
-                st.warning("⚠️ 无法初始化匹配器，请检查API配置")
-            else:
-                # 重置Token计数器
-                if hasattr(matcher, 'total_tokens'):
-                    matcher.total_tokens = 0
-                    matcher.total_input_tokens = 0
-                    matcher.total_output_tokens = 0
+            # 执行匹配
+            with st.spinner("🔍 正在匹配分类，请稍候..."):
+                progress_bar = st.progress(0)
+                status_text = st.empty()
                 
-                # 执行匹配
-                with st.spinner("🔍 正在匹配分类，请稍候..."):
-                    progress_bar = st.progress(0)
-                    status_text = st.empty()
+                try:
+                    # 模拟进度更新
+                    for i in range(10):
+                        progress_bar.progress((i + 1) / 10)
+                        status_text.text(f"正在评估分类 {i*10 + 1}-{(i+1)*10}...")
                     
-                    try:
-                        # 模拟进度更新
-                        for i in range(10):
-                            progress_bar.progress((i + 1) / 10)
-                            status_text.text(f"正在评估分类 {i*10 + 1}-{(i+1)*10}...")
-                        
-                        # 执行实际匹配（启用详细评分保存）
-                        results = matcher.match_categories(user_input, top_n=top_n, save_detailed=True, username=username.strip())
-                        
-                        progress_bar.progress(1.0)
-                        status_text.text("✅ 匹配完成！")
-                        
-                        # 保存结果
-                        data_manager = MultiUserDataManager("data/users/user_categories.json")
-                        data_manager.add_user_result(username, results, user_input)
-                        data_manager.save_to_json()
-                        
-                        # 显示成功消息
-                        st.markdown(
-                            '<div class="success-message">✅ 匹配完成！结果已保存到数据库。<br>📊 全部115个分类的详细评分已保存到 data/users/detailed_scores/ 目录。</div>',
-                            unsafe_allow_html=True
-                        )
-                        
-                        # 存储结果到session state
-                        st.session_state.latest_results = results
-                        st.session_state.latest_matcher = matcher
-                        
-                        # 清除缓存以刷新数据
-                        st.cache_data.clear()
-                        
-                    except Exception as e:
-                        st.error(f"❌ 匹配过程中出现错误: {e}")
-                        progress_bar.empty()
-                        status_text.empty()
+                    # 执行实际匹配（使用保存的输入数据）
+                    results = matcher.match_categories_enhanced(
+                        st.session_state.matching_input, 
+                        top_n=top_n, 
+                        save_detailed=True, 
+                        username=st.session_state.matching_username
+                    )
+                    
+                    progress_bar.progress(1.0)
+                    status_text.text("✅ 匹配完成！")
+                    
+                    # 保存结果（使用保存的数据）
+                    data_manager = MultiUserDataManager("data/users/user_categories.json")
+                    data_manager.add_user_result(
+                        st.session_state.matching_username, 
+                        results, 
+                        st.session_state.matching_input
+                    )
+                    data_manager.save_to_json()
+                    
+                    # 显示成功消息
+                    st.markdown(
+                        '<div class="success-message">✅ 匹配完成！结果已保存到数据库。<br>📊 全部115个分类的详细评分已保存到 data/users/detailed_scores/ 目录。</div>',
+                        unsafe_allow_html=True
+                    )
+                    
+                    # 存储结果到session state
+                    st.session_state.latest_results = results
+                    st.session_state.latest_matcher = matcher
+                    
+                    # 清除缓存以刷新数据
+                    st.cache_data.clear()
+                    
+                    # 重置匹配状态
+                    st.session_state.is_matching = False
+                    st.session_state.matching_input = ""
+                    st.session_state.matching_username = ""
+                    
+                    # 刷新页面以更新UI状态
+                    st.rerun()
+                    
+                except Exception as e:
+                    st.error(f"❌ 匹配过程中出现错误: {e}")
+                    progress_bar.empty()
+                    status_text.empty()
+                    # 重置匹配状态
+                    st.session_state.is_matching = False
+                    st.session_state.matching_input = ""
+                    st.session_state.matching_username = ""
+                    
+                    # 刷新页面以更新UI状态
+                    st.rerun()
     
     # 结果展示区域
     if 'latest_results' in st.session_state:

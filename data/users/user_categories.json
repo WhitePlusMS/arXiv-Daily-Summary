@@ -53,5 +53,55 @@
     "username": "user_9",
     "category_id": "cs.CE,stat.CO,math.DS,math.NA,stat.AP",
     "user_input": "### 核心研究领域\\n气候科学与地球系统建模 (Climate Science and Earth System Modeling)\\n\\n### 具体研究兴趣\\n地球系统建模（ESM）以模拟大气、海洋、陆地和冰之间的相互作用；分析气候模型集合（如CMIP）以量化不确定性；气候变化信号的检测与归因；模拟气候变化对极端天气事件的影响；碳循环与生物地球化学建模。\\n\\n### 应用场景和目标\\n改进长期气候预测以指导政策决策；为极端天气和气候相关风险提供更好的预报；理解地球系统中的反馈机制；评估气候减缓和适应策略的有效性。\\n\\n### 相关关键词\\nClimate Modeling, Earth System Model (ESM), Climate Change, Extreme Weather, Carbon Cycle, Paleoclimatology, Geophysical Fluid Dynamics, CMIP.\\n\\n### 不感兴趣的领域\\n金融建模、量子计算、用户界面设计、市场营销。"
+  },
+  {
+    "username": "user_1_en",
+    "category_id": "cs.CL,cs.IR,cs.LG,cs.CY,cs.HC",
+    "user_input": "### 核心研究领域\\n自然语言处理 (Natural Language Processing)\\n\\n### 具体研究兴趣\\n大规模语言模型（LLMs）的可解释性与对齐技术、基于知识图谱的语义理解与推理、低资源语言的机器翻译与跨语言迁移学习、对话系统中的上下文建模与个性化生成、计算社会科学中的文本情感分析与观点挖掘。\\n\\n### 应用场景和目标\\n开发更可信、更安全的智能问答与信息检索系统；构建能够进行深度语义理解的下一代搜索引擎；赋能教育、法律、医疗等专业领域的智能文档分析工具；提升人机交互的自然性和效率。\\n\\n### 相关关键词\\nLarge Language Models, Explainable AI, Knowledge Graphs, Machine Translation, Dialogue Systems, Sentiment Analysis, Computational Social Science, Transformers, BERT, GPT.\\n\\n### 不感兴趣的领域\\n语音识别信号处理、计算机视觉、硬件加速、网络协议。"
+  },
+  {
+    "username": "user_2_en",
+    "category_id": "cs.IT,cs.LG,math.IT,math.MP,math.OA",
+    "user_input": "### 核心研究领域\\n量子计算与量子信息 (Quantum Computing & Quantum Information)\\n\\n### 具体研究兴趣\\n容错量子计算的理论与架构、新型量子纠错码的设计与分析、基于超导或离子阱系统的量子算法实现、量子机器学习（QML）及其在优化问题中的应用、黑洞信息悖论与量子引力理论的探索。\\n\\n### 应用场景和目标\\n设计并模拟能够解决经典计算机难以处理问题的量子算法（如药物发现、材料科学）；构建安全的量子通信网络；探索宇宙的基本物理规律；推动量子霸权的实现与应用。\\n\\n### 相关关键词\\nQuantum Computing, Quantum Algorithms, Shor's Algorithm, Grover's Algorithm, Quantum Error Correction, Superconducting Qubits, Ion Traps, Quantum Machine Learning, Quantum Gravity.\\n\\n### 不感兴趣的领域\\n凝聚态物理实验、高能粒子对撞机实验、天体物理观测、经典软件工程。"
+  },
+  {
+    "username": "user_3_en",
+    "category_id": "q-bio.BM,q-bio.GN,q-bio.MN,q-bio.QM,cs.LG",
+    "user_input": "### 核心研究领域\\n生物信息学与计算生物学 (Bioinformatics & Computational Biology)\\n\\n### 具体研究兴趣\\n单细胞RNA测序（scRNA-seq）数据的降维与聚类算法、基于AlphaFold等模型的蛋白质结构预测与功能注释、基因组关联分析（GWAS）中的统计方法与因果推断、药物靶点发现与虚拟筛选的计算模型、宏基因组学中的物种鉴定与功能分析。\\n\\n### 应用场景和目标\\n加速个性化医疗的实现，通过基因组信息指导疾病诊断与治疗；推动新药研发进程，降低研发成本；理解复杂疾病（如癌症、神经退行性疾病）的发病机制；揭示微生物群落与人类健康的相互作用。\\n\\n### 相关关键词\\nBioinformatics, Computational Biology, Genomics, Proteomics, scRNA-seq, Protein Structure Prediction, GWAS, Drug Discovery, Metagenomics, Systems Biology.\\n\\n### 不感兴趣的领域\\n生态学实地考察、临床医学实践、医疗设备开发、传统湿实验。"
+  },
+  {
+    "username": "user_4_en",
+    "category_id": "astro-ph.CO,astro-ph.GA,astro-ph.HE,math.DG,astro-ph.IM",
+    "user_input": "### 核心研究领域\\n天体物理学与宇宙学 (Astrophysics & Cosmology)\\n\\n### 具体研究兴趣\\n引力波天文学及其电磁对应体的多信使观测、超大质量黑洞的形成与演化、暗物质与暗能量的理论模型与观测约束、宇宙微波背景辐射（CMB）的各向异性分析、早期宇宙的相变与原初引力波。\\n\\n### 应用场景和目标\\n检验广义相对论在极端引力场下的有效性；理解星系与宇宙大尺度结构的形成；揭示宇宙的起源、组成和最终命运；为下一代空间望远镜和引力波探测器提供科学目标。\\n\\n### 相关关键词\\nGravitational Waves, Black Holes, Dark Matter, Dark Energy, Cosmology, General Relativity, CMB, Early Universe, Multi-messenger Astronomy, Neutron Stars.\\n\\n### 不感兴趣的领域\\n行星科学、太阳物理、大气科学、航空航天工程。"
+  },
+  {
+    "username": "user_5_en",
+    "category_id": "q-fin.RM,q-fin.ST,q-fin.CP,q-fin.GN,q-fin.MF",
+    "user_input": "### 核心研究领域\\n计算经济学与金融工程 (Computational Economics & Financial Engineering)\\n\\n### 具体研究兴趣\\n基于高频数据的市场微观结构建模、应用强化学习进行最优交易策略设计、金融风险的计量与管理（如VaR、Expected Shortfall）、复杂网络在系统性金融风险分析中的应用、基于文本挖掘的宏观经济预测。\\n\\n### 应用场景和目标\\n开发高效、低风险的算法交易系统；为金融机构提供更精准的风险评估与对冲工具；增强金融市场的稳定性与透明度；利用另类数据为投资决策提供新视角。\\n\\n### 相关关键词\\nAlgorithmic Trading, High-Frequency Trading, Market Microstructure, Quantitative Finance, Risk Management, Reinforcement Learning, Econophysics, Systemic Risk, Natural Language Processing.\\n\\n### 不感兴趣的领域\\n公司财务、市场营销、人力资源管理、宏观经济政策制定。"
+  },
+  {
+    "username": "user_6_en",
+    "category_id": "cs.RO,cs.SY,eess.SY,cs.AI,cs.CV",
+    "user_input": "### 核心研究领域\\n机器人学与自主系统 (Robotics and Autonomous Systems)\\n\\n### 具体研究兴趣\\n动态环境下的即时定位与地图构建（SLAM）、高维系统（如机械臂）的运动规划、人机交互与协作机器人、用于机器人控制与技能学习的强化学习、机器人领域的物体识别与场景理解的计算机视觉。\\n\\n### 应用场景和目标\\n为物流和探索开发自主移动机器人、为制造业创造安全高效的协作机器人（cobots）、为医疗保健和家庭环境构建辅助机器人、推进自动驾驶汽车技术。\\n\\n### 相关关键词\\nRobotics, Autonomous Systems, SLAM, Motion Planning, Human-Robot Interaction, Reinforcement Learning, Computer Vision, Control Theory, Mechatronics.\\n\\n### 不感兴趣的领域\\n纯理论数学、社会科学、生物信息学、材料科学。"
+  },
+  {
+    "username": "user_7_en",
+    "category_id": "cs.HC,cs.GR,cs.MM,cs.AI,cs.SE",
+    "user_input": "### 核心研究领域\\n人机交互 (Human-Computer Interaction, HCI)\\n\\n### 具体研究兴趣\\n新型用户界面（如可触摸、手势、语音）的设计与评估、无障碍与辅助技术、社会计算与计算机支持的协同工作（CSCW）、可用隐私与安全、虚拟与增强现实（VR/AR）交互技术。\\n\\n### 应用场景和目标\\n为软件和设备创造更直观、更有吸引力的用户体验；设计能够赋能残障人士的技术；理解和塑造在线社区与协作；构建人们能够实际使用的安全系统；在沉浸式环境中探索交互的新前沿。\\n\\n### 相关关键词\\nHuman-Computer Interaction, User Experience (UX), User Interface (UI) Design, Accessibility, CSCW, Usable Security, Virtual Reality, Augmented Reality, Interaction Design.\\n\\n### 不感兴趣的领域\\n底层硬件设计、网络协议、数据库优化、理论计算机科学。"
+  },
+  {
+    "username": "user_8_en",
+    "category_id": "cs.CE,cs.LG,math.NA,stat.ML,math.MP",
+    "user_input": "### 核心研究领域\\n计算材料科学 (Computational Materials Science)\\n\\n### 具体研究兴趣\\n用于预测材料属性的第一性原理计算（如密度泛函理论-DFT）、材料在应力和温度下行为的分子动力学（MD）模拟、用于加速材料发现的机器学习势函数、连接原子到连续介质尺度的多尺度建模、用于能源应用（如电池、催化剂）的新型材料的计算设计。\\n\\n### 应用场景和目标\\n加速新型高性能材料的设计与发现；理解材料的退化机制；优化制造过程；开发下一代储能与转换技术。\\n\\n### 相关关键词\\nComputational Materials Science, Density Functional Theory (DFT), Molecular Dynamics (MD), Machine Learning, Multiscale Modeling, Catalysis, Batteries, Nanomaterials.\\n\\n### 不感兴趣的领域\\n软件应用开发、工商管理、天体物理学、社会政策。"
+  },
+  {
+    "username": "user_9_en",
+    "category_id": "cs.CE,math.NA,stat.AP,cs.NA,stat.CO",
+    "user_input": "### 核心研究领域\\n气候科学与地球系统建模 (Climate Science and Earth System Modeling)\\n\\n### 具体研究兴趣\\n地球系统建模（ESM）以模拟大气、海洋、陆地和冰之间的相互作用；分析气候模型集合（如CMIP）以量化不确定性；气候变化信号的检测与归因；模拟气候变化对极端天气事件的影响；碳循环与生物地球化学建模。\\n\\n### 应用场景和目标\\n改进长期气候预测以指导政策决策；为极端天气和气候相关风险提供更好的预报；理解地球系统中的反馈机制；评估气候减缓和适应策略的有效性。\\n\\n### 相关关键词\\nClimate Modeling, Earth System Model (ESM), Climate Change, Extreme Weather, Carbon Cycle, Paleoclimatology, Geophysical Fluid Dynamics, CMIP.\\n\\n### 不感兴趣的领域\\n金融建模、量子计算、用户界面设计、市场营销。"
+  },
+  {
+    "username": "user_10_en",
+    "category_id": "cs.CE,cs.SY,eess.SY,cs.AI,cs.DC",
+    "user_input": "### 核心研究领域  \\n数字孪生\\n\\n### 具体研究兴趣  \\n包括但不限于：基于多源传感器数据的高保真建模技术（如有限元分析、拓扑建模与几何重构）、异构数据融合方法（时间序列对齐、时空插值与不确定性传播）、基于边缘-云协同架构的低延迟数据传输机制、基于深度学习的动态状态预测与故障诊断模型（如LSTM、图神经网络用于设备退化建模）、数字孪生驱动的仿真优化算法（强化学习在工艺参数调优中的应用）、可信度评估与模型校准框架（基于贝叶斯更新与误差量化）、以及面向可解释性的可视化交互设计。\\n\\n### 应用场景和目标  \\n致力于提升复杂制造系统（如智能工厂、航空航天装备、能源设施）的运行效率、可靠性与可维护性。通过构建全生命周期数字孪生体，实现从设计、生产到运维阶段的闭环反馈控制，支持预测性维护、能耗优化与人机协同决策，最终推动工业系统的智能化升级与数字化转型。\\n\\n### 相关关键词  \\n数字孪生, 工业物联网, 实时仿真, 状态估计, 数据驱动建模, 异构数据融合, 边缘计算, 深度学习, 故障预测, 可视化交互, 模型校准, 仿真优化, 智能制造, 贝叶斯推理, 图神经网络\\n\\n### 不感兴趣的领域  \\n生物医学建模, 虚拟现实游戏开发, 金融风险模拟, 社会行为仿真, 传统CAD建模"
   }
 ]
