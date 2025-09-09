@@ -13,6 +13,7 @@ import os
 import sys
 from typing import List, Dict, Any, Tuple
 from datetime import datetime
+import datetime as dt
 import pandas as pd
 from dotenv import load_dotenv
 
@@ -313,8 +314,8 @@ def main():
                             progress_bar.progress((i + 1) / 10)
                             status_text.text(f"正在评估分类 {i*10 + 1}-{(i+1)*10}...")
                         
-                        # 执行实际匹配
-                        results = matcher.match_categories(user_input, top_n=top_n)
+                        # 执行实际匹配（启用详细评分保存）
+                        results = matcher.match_categories(user_input, top_n=top_n, save_detailed=True, username=username.strip())
                         
                         progress_bar.progress(1.0)
                         status_text.text("✅ 匹配完成！")
@@ -326,7 +327,7 @@ def main():
                         
                         # 显示成功消息
                         st.markdown(
-                            '<div class="success-message">✅ 匹配完成！结果已保存到数据库。</div>',
+                            '<div class="success-message">✅ 匹配完成！结果已保存到数据库。<br>📊 全部115个分类的详细评分已保存到 data/users/detailed_scores/ 目录。</div>',
                             unsafe_allow_html=True
                         )
                         
@@ -385,6 +386,62 @@ def main():
     st.markdown("---")
     st.markdown('<h2 class="sub-header">👥 用户数据管理</h2>', unsafe_allow_html=True)
     
+    # 详细评分文件管理
+    st.markdown("### 📊 详细评分文件")
+    
+    # 获取详细评分文件列表
+    project_root = Path(__file__).parent.parent
+    detailed_scores_dir = project_root / "data" / "users" / "detailed_scores"
+    
+    if detailed_scores_dir.exists():
+        score_files = list(detailed_scores_dir.glob("*_detailed_scores.json"))
+        if score_files:
+            # 按修改时间排序（最新的在前）
+            score_files.sort(key=lambda x: x.stat().st_mtime, reverse=True)
+            
+            st.info(f"📁 找到 {len(score_files)} 个详细评分文件")
+            
+            # 显示最近的5个文件
+            for i, file_path in enumerate(score_files[:5]):
+                file_name = file_path.name
+                file_size = file_path.stat().st_size
+                file_time = dt.datetime.fromtimestamp(file_path.stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S")
+                
+                with st.expander(f"📄 {file_name} ({file_size} bytes, {file_time})"):
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        try:
+                            with open(file_path, 'r', encoding='utf-8') as f:
+                                file_content = f.read()
+                            st.download_button(
+                                label="📥 下载JSON文件",
+                                data=file_content,
+                                file_name=file_name,
+                                mime="application/json",
+                                key=f"download_btn_{i}"
+                            )
+                        except Exception as e:
+                            st.error(f"读取文件失败: {e}")
+                    
+                    with col2:
+                        if st.button(f"🗑️ 删除", key=f"delete_score_{i}"):
+                            try:
+                                file_path.unlink()
+                                st.success(f"✅ 已删除文件: {file_name}")
+                                st.rerun()
+                            except Exception as e:
+                                st.error(f"删除文件失败: {e}")
+            
+            if len(score_files) > 5:
+                st.info(f"还有 {len(score_files) - 5} 个文件未显示...")
+        else:
+            st.info("📂 暂无详细评分文件")
+    else:
+        st.info("📂 详细评分目录不存在")
+    
+    st.markdown("---")
+    
     existing_data = load_existing_data()
     if existing_data:
         # 搜索和操作栏（单栏布局）
@@ -433,13 +490,12 @@ def main():
         with col4:
             if st.button("📥 导出JSON", use_container_width=True):
                 import json
-                from datetime import datetime
                 export_data = [filtered_data[i] for i in range(len(filtered_data))]
                 json_str = json.dumps(export_data, ensure_ascii=False, indent=2)
                 st.download_button(
                     label="💾 下载JSON文件",
                     data=json_str,
-                    file_name=f"user_categories_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                    file_name=f"user_categories_{dt.datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
                     mime="application/json",
                     use_container_width=True
                 )

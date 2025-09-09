@@ -328,12 +328,68 @@ class CategoryMatcher:
         logger.warning(f"LLM调用异常(返回兜底0): {last_error}")
         return 0
     
-    def match_categories(self, user_description: str, top_n: int = 5) -> List[Tuple[str, str, int]]:
+    def save_detailed_scores(self, username: str, user_description: str, all_results: List[Tuple[str, str, int]]):
+        """保存用户的全部分类详细评分到单独的JSON文件
+        
+        Args:
+            username: 用户名
+            user_description: 用户研究方向描述
+            all_results: 全部分类的评分结果
+        """
+        # 获取项目根目录路径
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        detailed_scores_dir = os.path.join(project_root, 'data', 'users', 'detailed_scores')
+        
+        # 确保目录存在
+        os.makedirs(detailed_scores_dir, exist_ok=True)
+        
+        # 生成文件名（包含时间戳避免冲突）
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{username}_{timestamp}_detailed_scores.json"
+        filepath = os.path.join(detailed_scores_dir, filename)
+        
+        # 构建详细数据结构
+        detailed_data = {
+            "metadata": {
+                "username": username,
+                "timestamp": datetime.now().isoformat(),
+                "user_description": user_description,
+                "total_categories": len(all_results),
+                "token_usage": {
+                    "input_tokens": getattr(self, 'total_input_tokens', 0),
+                    "output_tokens": getattr(self, 'total_output_tokens', 0),
+                    "total_tokens": getattr(self, 'total_tokens', 0)
+                }
+            },
+            "detailed_scores": [
+                {
+                    "rank": i + 1,
+                    "category_id": result[0],
+                    "category_name": result[1],
+                    "score": result[2]
+                }
+                for i, result in enumerate(all_results)
+            ]
+        }
+        
+        # 保存到文件
+        try:
+            with open(filepath, 'w', encoding='utf-8') as f:
+                json.dump(detailed_data, f, ensure_ascii=False, indent=2)
+            logger.success(f"详细评分已保存到: {filepath}")
+            return filepath
+        except Exception as e:
+            logger.error(f"保存详细评分失败: {e}")
+            return None
+    
+    def match_categories(self, user_description: str, top_n: int = 5, save_detailed: bool = True, username: str = None) -> List[Tuple[str, str, int]]:
         """匹配用户研究方向到ArXiv分类
         
         Args:
             user_description: 用户研究方向描述
             top_n: 返回前N个最匹配的分类
+            save_detailed: 是否保存全部分类的详细评分
+            username: 用户名（用于保存详细评分）
             
         Returns:
             包含(category_id, category_name, score)的列表，按评分降序排列
@@ -356,6 +412,10 @@ class CategoryMatcher:
         
         # 按评分降序排序
         results.sort(key=lambda x: x[2], reverse=True)
+        
+        # 保存详细评分（如果启用且提供了用户名）
+        if save_detailed and username:
+            self.save_detailed_scores(username, user_description, results)
         
         # 输出token统计和费用计算
         self._print_token_usage()
