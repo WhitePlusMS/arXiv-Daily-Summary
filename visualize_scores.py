@@ -182,7 +182,7 @@ def main():
     主函数
     """
     # JSON文件路径
-    json_file_path = r"c:\Users\admin\Desktop\ARXIV_daily_article_summary\data\users\detailed_scores\T2_20250909_083739_detailed_scores.json"
+    json_file_path = r"c:\Users\admin\Desktop\ARXIV_daily_article_summary\data\users\detailed_scores\T3_20250909_111827_detailed_scores.json"
     
     print("正在加载评分数据...")
     categories, scores, category_names, metadata = load_scores_data(json_file_path)

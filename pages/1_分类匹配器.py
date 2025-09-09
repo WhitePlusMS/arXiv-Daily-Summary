@@ -622,7 +622,7 @@ def main():
                     st.session_state[edit_key] = False
                 
                 # 操作按钮
-                btn_col1, btn_col2, btn_col3 = st.columns(3)
+                btn_col1, btn_col2 = st.columns(2)
                 
                 with btn_col1:
                     if st.button("✏️ 编辑" if not st.session_state[edit_key] else "💾 保存", 
@@ -650,19 +650,14 @@ def main():
                             st.rerun()
                 
                 with btn_col2:
-                    if st.button("🗑️ 删除", key=f"delete_btn_{original_index}", use_container_width=True):
-                        st.session_state[f"show_delete_confirm_{original_index}"] = True
-                        st.rerun()
-                
-                with btn_col3:
-                    if st.button("❌ 取消" if st.session_state[edit_key] else "📋 复制", 
-                               key=f"cancel_btn_{original_index}", use_container_width=True):
-                        if st.session_state[edit_key]:
+                    if st.session_state[edit_key]:
+                        if st.button("❌ 取消", key=f"cancel_btn_{original_index}", use_container_width=True):
                             st.session_state[edit_key] = False
                             st.rerun()
-                        else:
-                            # 复制功能
-                            st.code(f"用户名: {item.get('username', '')}\n分类ID: {item.get('category_id', '')}\n研究内容: {item.get('user_input', '')}")
+                    else:
+                        if st.button("🗑️ 删除", key=f"delete_btn_{original_index}", use_container_width=True):
+                            st.session_state[f"show_delete_confirm_{original_index}"] = True
+                            st.rerun()
                 
                 # 删除确认对话框
                 if st.session_state.get(f"show_delete_confirm_{original_index}", False):
