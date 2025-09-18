@@ -675,8 +675,8 @@ def main():
                 else:
                     st.session_state.selected_items.discard(i)
                 
-                # 编辑模式切换
-                edit_key = f"edit_mode_{original_index}"
+                # 编辑模式切换 - 使用循环索引i而不是original_index来避免重复key
+                edit_key = f"edit_mode_{i}"
                 if edit_key not in st.session_state:
                     st.session_state[edit_key] = False
                 
@@ -685,12 +685,12 @@ def main():
                 
                 with btn_col1:
                     if st.button("✏️ 编辑" if not st.session_state[edit_key] else "💾 保存", 
-                               key=f"edit_btn_{original_index}", use_container_width=True):
+                               key=f"edit_btn_{i}", use_container_width=True):
                         if st.session_state[edit_key]:
-                            # 保存编辑
-                            new_username = st.session_state.get(f"edit_username_{original_index}", item.get('username', ''))
-                            new_category_id = st.session_state.get(f"edit_category_{original_index}", item.get('category_id', ''))
-                            new_user_input = st.session_state.get(f"edit_input_{original_index}", item.get('user_input', ''))
+                            # 保存编辑 - 使用original_index来更新数据
+                            new_username = st.session_state.get(f"edit_username_{i}", item.get('username', ''))
+                            new_category_id = st.session_state.get(f"edit_category_{i}", item.get('category_id', ''))
+                            new_user_input = st.session_state.get(f"edit_input_{i}", item.get('user_input', ''))
                             
                             # 更新数据
                             existing_data[original_index]['username'] = new_username
@@ -710,30 +710,30 @@ def main():
                 
                 with btn_col2:
                     if st.session_state[edit_key]:
-                        if st.button("❌ 取消", key=f"cancel_btn_{original_index}", use_container_width=True):
+                        if st.button("❌ 取消", key=f"cancel_btn_{i}", use_container_width=True):
                             st.session_state[edit_key] = False
                             st.rerun()
                     else:
-                        if st.button("🗑️ 删除", key=f"delete_btn_{original_index}", use_container_width=True):
-                            st.session_state[f"show_delete_confirm_{original_index}"] = True
+                        if st.button("🗑️ 删除", key=f"delete_btn_{i}", use_container_width=True):
+                            st.session_state[f"show_delete_confirm_{i}"] = True
                             st.rerun()
                 
                 # 删除确认对话框
-                if st.session_state.get(f"show_delete_confirm_{original_index}", False):
+                if st.session_state.get(f"show_delete_confirm_{i}", False):
                     st.warning("⚠️ 确认要删除这条记录吗？此操作不可撤销！")
                     del_col1, del_col2 = st.columns(2)
                     with del_col1:
-                        if st.button("✅ 确认删除", key=f"confirm_del_{original_index}", type="primary"):
+                        if st.button("✅ 确认删除", key=f"confirm_del_{i}", type="primary"):
                             existing_data.pop(original_index)
                             save_user_data(existing_data)
-                            st.session_state[f"show_delete_confirm_{original_index}"] = False
+                            st.session_state[f"show_delete_confirm_{i}"] = False
                             st.cache_data.clear()
                             st.success("✅ 删除成功")
                             st.rerun()
                     
                     with del_col2:
-                        if st.button("❌ 取消删除", key=f"cancel_del_{original_index}"):
-                            st.session_state[f"show_delete_confirm_{original_index}"] = False
+                        if st.button("❌ 取消删除", key=f"cancel_del_{i}"):
+                            st.session_state[f"show_delete_confirm_{i}"] = False
                             st.rerun()
                 
                 # 显示/编辑内容
@@ -744,13 +744,13 @@ def main():
                     edited_username = st.text_input(
                         "用户名",
                         value=item.get('username', ''),
-                        key=f"edit_username_{original_index}"
+                        key=f"edit_username_{i}"
                     )
                     
                     edited_category_id = st.text_input(
                         "分类ID",
                         value=item.get('category_id', ''),
-                        key=f"edit_category_{original_index}",
+                        key=f"edit_category_{i}",
                         help="多个分类用逗号分隔"
                     )
                     
@@ -758,7 +758,7 @@ def main():
                         "研究内容",
                         value=item.get('user_input', ''),
                         height=200,
-                        key=f"edit_input_{original_index}"
+                        key=f"edit_input_{i}"
                     )
                 else:
                     # 显示模式
@@ -776,7 +776,7 @@ def main():
                         value=item.get('user_input', ''),
                         height=150,
                         disabled=True,
-                        key=f"display_content_{original_index}",
+                        key=f"display_content_{i}",
                         label_visibility="collapsed"
                     )
     else:
