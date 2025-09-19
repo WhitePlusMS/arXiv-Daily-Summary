@@ -542,7 +542,7 @@ class LLMProvider:
 **请严格按照以下Markdown格式生成详细分析报告:**
 
 ## 1. {paper['title']}
-- **相关性评分**: ⭐⭐⭐⭐⭐ ({paper['relevance_score']}/10)
+- **相关性评分**:  ({paper['relevance_score']}/10)
 - **ArXiv ID**: {paper['arXiv_id']}
 - **作者**: {', '.join(paper['authors'])}
 - **论文链接**: <a href="{paper['pdf_url']}" class="link-btn pdf-link" target="_blank">PDF</a> <a href="{paper['abstract_url']}" class="link-btn arxiv-link" target="_blank">ArXiv</a>
