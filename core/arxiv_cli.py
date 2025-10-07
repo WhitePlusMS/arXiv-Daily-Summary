@@ -17,14 +17,14 @@ from datetime import datetime, timedelta
 from core.arxiv_fetcher import ArxivFetcher
 from core.llm_provider import LLMProvider
 from core.recommendation_engine import RecommendationEngine
-from ..utils.template_renderer import TemplateRenderer
-from ..utils.mcp_time_service import MCPTimeService
-from ..utils.mcp_time_service import get_current_time
+from core.utils.template_renderer import TemplateRenderer
+from core.utils.mcp_time_service import MCPTimeService
+from core.utils.mcp_time_service import get_current_time
 from core.output_manager import OutputManager
 import re
 
 # 项目根目录路径（用于文件读取）
-project_root = Path(__file__).parent.parent.parent
+project_root = Path(__file__).parent.parent
 
 
 class ArxivRecommenderCLI:

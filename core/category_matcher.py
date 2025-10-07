@@ -26,7 +26,7 @@ class MultiUserDataManager:
         """
         if output_file is None:
             # 获取项目根目录路径
-            project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+            project_root = os.path.dirname(os.path.dirname(__file__))
             self.output_file = os.path.join(project_root, 'data', 'users', 'user_categories.json')
         else:
             self.output_file = output_file
@@ -172,7 +172,7 @@ class CategoryMatcher:
             包含所有子分类的列表，每个元素包含id, name, description
         """
         # 获取项目根目录路径
-        project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        project_root = os.path.dirname(os.path.dirname(__file__))
         categories_file = os.path.join(
             project_root,
             'data', 
@@ -202,7 +202,7 @@ class CategoryMatcher:
             包含所有分类及其画像信息的列表
         """
         # 获取项目根目录路径
-        project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        project_root = os.path.dirname(os.path.dirname(__file__))
         enhanced_categories_file = os.path.join(
             project_root,
             'data', 
@@ -457,7 +457,7 @@ class CategoryMatcher:
             all_results: 全部分类的评分结果
         """
         # 获取项目根目录路径
-        project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        project_root = os.path.dirname(os.path.dirname(__file__))
         detailed_scores_dir = os.path.join(project_root, 'data', 'users', 'detailed_scores')
         
         # 确保目录存在

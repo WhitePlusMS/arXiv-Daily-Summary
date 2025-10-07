@@ -22,7 +22,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from core.task2_category_matching.task2_category_matcher import CategoryMatcher, MultiUserDataManager
+from core.category_matcher import CategoryMatcher, MultiUserDataManager
 from core.llm_provider import LLMProvider
 
 # 加载环境变量

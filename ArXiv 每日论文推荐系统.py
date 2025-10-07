@@ -27,7 +27,7 @@ from dotenv import load_dotenv
 load_dotenv(os.path.join(project_root, '.env'), override=True)
 
 # 导入CLI模块
-from core.task3_recommendation_cli.cli_main import ArxivRecommenderCLI
+from core.arxiv_cli import ArxivRecommenderCLI
 # 导入核心模块（用于配置显示）
 from core.output_manager import OutputManager
 

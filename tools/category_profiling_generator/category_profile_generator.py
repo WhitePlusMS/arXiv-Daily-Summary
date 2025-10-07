@@ -227,7 +227,7 @@ def main():
     save_enhanced_categories(categories, output_file_path)
 
     # 保存 Token 使用统计数据
-    token_usage_file_path = project_root / "core" / "task4_category_profiling" / "token_usage.json"
+    token_usage_file_path = project_root / "tools" / "category_profiling_generator" / "token_usage.json"
     try:
         with open(token_usage_file_path, 'w', encoding='utf-8') as f:
             json.dump(token_usage_stats, f, ensure_ascii=False, indent=2)
