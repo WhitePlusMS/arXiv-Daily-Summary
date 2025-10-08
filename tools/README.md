@@ -9,6 +9,8 @@ tools/
 ├── arxiv_category_extractor/     # ArXiv 分类信息提取工具
 ├── category_profiling_generator/ # 分类画像生成工具
 ├── cleanup_translated_file.py    # 翻译文件清理工具
+├── score_comparison_tool.py      # 评分对比可视化工具
+├── score_visualization_tool.py   # 评分可视化工具
 └── translate_categories.py       # 分类翻译工具
 ```
 
@@ -87,6 +89,30 @@ tools/
   - 保持原有的 JSON 数据结构
 - **配置**：需要在 `.env` 文件中配置 LLM 相关参数
 
+### 5. score_comparison_tool.py - 评分对比可视化工具
+
+- **功能**：对比原始版本和Enhanced版本的ArXiv分类评分差异
+- **特性**：
+  - 支持批量处理多个用户的对照数据
+  - 自动查找配对的原始和enhanced评分文件
+  - 生成单个用户的详细对比图表
+  - 创建所有用户的汇总对比图表
+  - 显示改进统计信息和效果摘要
+- **输出**：PNG格式的对比图表和统计报告
+- **使用场景**：评估Enhanced版本相对于原始版本的改进效果
+
+### 6. score_visualization_tool.py - 评分可视化工具
+
+- **功能**：读取详细评分JSON文件并生成可视化图表
+- **特性**：
+  - 支持批量处理多个评分文件
+  - 生成完整的评分分布柱状图
+  - 创建Top N分类的详细图表
+  - 显示评分统计信息（最高分、最低分、平均分、中位数）
+  - 支持中文字体显示
+- **输出**：PNG格式的可视化图表
+- **使用场景**：分析单个用户的分类评分分布和偏好
+
 ## 使用指南
 
 ### 环境准备
@@ -127,6 +153,17 @@ tools/
    ```bash
    cd tools/category_profiling_generator
    python category_profile_generator.py
+   ```
+
+5. **可视化评分数据**：
+   ```bash
+   cd tools
+   python score_visualization_tool.py
+   ```
+
+6. **对比评分差异**：
+   ```bash
+   python score_comparison_tool.py
    ```
 
 ## 注意事项

@@ -46,7 +46,7 @@ class PyEnvNVLauncher:
         self.project_root = Path.cwd()
         self.python_version_file = self.project_root / ".python-version"
         self.requirements_file = self.project_root / "requirements.txt"
-        self.main_file = self.project_root / "ArXiv 每日论文推荐系统.py"
+        self.main_file = self.project_root / "app.py"
         self.env_file = self.project_root / ".env"
         self.venv_path = self.project_root / ".venv"
         
