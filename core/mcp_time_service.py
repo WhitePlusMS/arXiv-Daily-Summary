@@ -23,7 +23,7 @@ class MCPTimeService:
             model: 模型名称，如果为None则从环境变量获取
         """
         # 加载环境变量
-        load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
+        load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
         
         # 检查是否启用MCP时间服务
         self.mcp_enabled = os.getenv("ENABLE_MCP_TIME_SERVICE", "false").lower() == "true"
