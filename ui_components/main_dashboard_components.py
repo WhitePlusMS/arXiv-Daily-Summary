@@ -270,7 +270,7 @@ def _render_download_section(result, service, specific_date=None):
 ## 配置信息
 - ArXiv 分类: {', '.join(config.get('arxiv_categories', []) if config else [])}
 - 推荐论文数: {config.get('num_recommendations', 10) if config else 10}
-- 详细分析数: {config.get('detailed_analysis_count', 3) if config else 3}
+- 详细分析数: {config.get('NUM_DETAILED_PAPERS', 3) if config else 3}
 - 研究兴趣: {', '.join(research_interests)}
 
 {result['report']}
