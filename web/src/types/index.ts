@@ -24,11 +24,25 @@ export interface RecommendationResult {
 }
 
 // API响应接口
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean
   data?: T
   message?: string
   error?: string
+}
+
+// 分类与子分类接口
+export interface Subcategory {
+  id: string
+  name: string
+  description?: string
+  name_cn?: string
+  description_cn?: string
+}
+
+export interface Category {
+  main_category: string
+  subcategories: Subcategory[]
 }
 
 // 报告文件接口

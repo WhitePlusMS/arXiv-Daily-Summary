@@ -21,6 +21,7 @@ from fastapi_services.models import (
 )
 from fastapi_services.service_container import get_arxiv_service
 from fastapi_services.main_dashboard_service import ArxivRecommenderService
+from services.category_browser_service import CategoryService
 
 # 创建FastAPI应用
 app = FastAPI(
@@ -158,6 +159,19 @@ async def get_recent_reports(
         return result
     except Exception as e:
         logger.error(f"获取最近报告失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# 新增：分类浏览器相关API
+@app.get("/api/categories")
+async def get_categories():
+    """获取合并后的ArXiv分类数据"""
+    logger.info("API调用: 获取分类数据")
+    try:
+        category_service = CategoryService()
+        data = category_service.load_categories_data()
+        return {"success": True, "data": data}
+    except Exception as e:
+        logger.error(f"获取分类数据失败: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # 辅助函数：解析报告文件路径

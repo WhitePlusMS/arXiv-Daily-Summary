@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { ApiResponse } from '@/types'
+import type { ApiResponse, UserProfile, RecommendationResult, ReportItem, Category } from '@/types'
 
 // 创建axios实例
 const api = axios.create({
@@ -28,17 +28,17 @@ api.interceptors.response.use(
 )
 
 // API服务函数
-export const initializeService = async (): Promise<ApiResponse<any>> => {
+export const initializeService = async (): Promise<ApiResponse<{ initialized: boolean }>> => {
   const response = await api.post('/api/initialize')
   return response.data
 }
 
-export const getConfig = async (): Promise<ApiResponse<any>> => {
+export const getConfig = async (): Promise<ApiResponse<Record<string, unknown>>> => {
   const response = await api.get('/api/config')
   return response.data
 }
 
-export const getUserProfiles = async (): Promise<ApiResponse<any>> => {
+export const getUserProfiles = async (): Promise<ApiResponse<UserProfile[]>> => {
   const response = await api.get('/api/user-profiles')
   return response.data
 }
@@ -48,23 +48,29 @@ export const getResearchInterests = async (): Promise<ApiResponse<string[]>> => 
   return response.data
 }
 
-export const updateResearchInterests = async (request: { interests: string[] }): Promise<ApiResponse<any>> => {
+export const updateResearchInterests = async (request: { interests: string[] }): Promise<ApiResponse<{ interests: string[] }>> => {
   const response = await api.post('/api/research-interests', request)
   return response.data
 }
 
-export const initializeComponents = async (request: { profile_name: string }): Promise<ApiResponse<any>> => {
+export const initializeComponents = async (request: { profile_name: string }): Promise<ApiResponse<{ initialized: boolean }>> => {
   const response = await api.post('/api/initialize-components', request)
   return response.data
 }
 
-export const runRecommendation = async (request: { profile_name: string, debug_mode: boolean }): Promise<any> => {
+export const runRecommendation = async (request: { profile_name: string, debug_mode: boolean }): Promise<ApiResponse<RecommendationResult>> => {
   const response = await api.post('/api/run-recommendation', request)
   return response.data
 }
 
-export const getRecentReports = async (): Promise<ApiResponse<any[]>> => {
+export const getRecentReports = async (): Promise<ApiResponse<ReportItem[]>> => {
   const response = await api.get('/api/recent-reports')
+  return response.data
+}
+
+// 获取分类数据
+export const getCategories = async (): Promise<ApiResponse<Category[]>> => {
+  const response = await api.get('/api/categories')
   return response.data
 }
 
@@ -86,7 +92,7 @@ export const getReportDownloadUrl = (params: { name: string, format: 'md' | 'htm
 }
 
 // 删除报告文件
-export const deleteReportFile = async (params: { name: string, format: 'md' | 'html' }): Promise<ApiResponse<any>> => {
+export const deleteReportFile = async (params: { name: string, format: 'md' | 'html' }): Promise<ApiResponse<{ deleted: boolean }>> => {
   const response = await api.delete('/api/reports/file', {
     params: { name: params.name, format: params.format }
   })
