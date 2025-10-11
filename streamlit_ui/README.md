@@ -1,6 +1,7 @@
 # ArXiv 每日论文推荐系统 - Streamlit UI 模块
 
 ## 版本信息
+
 - **版本**: 0.2
 - **类型**: Streamlit Web UI 界面
 - **状态**: 稳定版本
@@ -33,6 +34,7 @@ streamlit_ui/
 ```
 
 ### 架构设计原则
+
 1. **分层架构**: 采用 Pages → Services → Components 三层架构
    - **Pages**: 页面组装层，负责页面路由和组件组装
    - **Services**: 业务逻辑层，处理数据和业务逻辑
@@ -45,22 +47,26 @@ streamlit_ui/
 ## 功能模块
 
 ### 1. 主仪表板 (Main Dashboard)
+
 - 用户配置管理
 - 研究兴趣设置
 - 论文推荐生成
 - 历史记录查看
 
 ### 2. 分类匹配器 (Category Matcher)
+
 - ArXiv 分类匹配
 - 用户兴趣分析
 - 匹配结果可视化
 
 ### 3. 环境配置 (Environment Config)
+
 - API 密钥配置
 - 系统参数设置
 - 配置文件管理
 
 ### 4. 分类浏览器 (Category Browser)
+
 - ArXiv 分类体系浏览
 - 分类详情查看
 - 分类搜索功能
@@ -68,6 +74,7 @@ streamlit_ui/
 ## 启动方式
 
 ### 前提条件
+
 1. 已安装 PyEnv 和 NV (Node Version Manager)
 2. 项目根目录存在 `.python-version` 文件
 3. 已使用 NV 创建并激活虚拟环境
@@ -106,15 +113,18 @@ python start.py
 ```
 
 ## 访问地址
+
 - 默认地址: http://localhost:8501
 - 自定义端口: http://localhost:{指定端口}
 
 ## 依赖关系
+
 - 依赖项目根目录的 `core/` 模块
 - 需要项目根目录的 `.env` 配置文件
 - 使用项目根目录的 `requirements.txt` 安装依赖
 
 ## 注意事项
+
 1. 确保在正确的虚拟环境中运行
 2. 首次使用建议使用 `--init` 参数自动初始化
 3. 开发时建议使用 `--dev` 参数启用自动重载

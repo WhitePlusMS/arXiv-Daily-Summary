@@ -2,6 +2,8 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.10%2B-blue?logo=python" alt="Python Version">
+  <img src="https://img.shields.io/badge/FastAPI-0.100%2B-green?logo=fastapi" alt="FastAPI">
+  <img src="https://img.shields.io/badge/Vue.js-3.5%2B-green?logo=vue.js" alt="Vue.js">
   <img src="https://img.shields.io/badge/License-Apache--2.0-blue" alt="License">
 </p>
 
@@ -17,6 +19,7 @@
 
 ## 📚 目录导航
 
+- [🏗️ 系统架构](#️-系统架构) - 了解项目技术架构
 - [✨ 核心功能](#-核心功能) - 了解项目解决的核心问题
 - [⚡ 快速开始](#-快速开始) - 一键启动，快速体验
 - [💻 界面预览](#-界面预览) - 查看系统界面截图
@@ -24,6 +27,48 @@
 - [🤝 贡献与支持](#-贡献与支持) - 如何参与项目
 
 ---
+
+## 🏗️ 系统架构
+
+### 技术栈
+
+- **后端**: FastAPI + Python 3.10+
+- **前端**: Vue 3 + TypeScript + Vite
+- **AI 模型**: 通义千问 (DashScope API)
+- **数据存储**: JSON 文件 + 本地文件系统
+- **部署**: 支持本地开发和生产部署
+
+### 架构设计
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Vue3 前端     │    │  FastAPI 后端   │    │   核心服务层    │
+│                 │    │                 │    │                 │
+│ • 用户界面      │◄──►│ • RESTful API   │◄──►│ • 论文获取      │
+│ • 状态管理      │    │ • 数据验证      │    │ • 智能匹配      │
+│ • 路由管理      │    │ • 业务逻辑      │    │ • AI 分析       │
+│ • 组件化开发    │    │ • 异步处理      │    │ • 报告生成      │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
+
+### 模块组织
+
+- **`fastapi_services/`**: FastAPI 后端服务
+  - `fastapi_app.py`: 主应用入口和 API 路由
+  - `models.py`: 数据模型定义
+  - `service_container.py`: 依赖注入容器
+  - 各种业务服务模块
+
+- **`web/`**: Vue3 前端应用
+  - 基于 Vite 构建工具
+  - TypeScript 支持
+  - 组件化开发
+
+- **`core/`**: 核心业务逻辑
+  - 论文获取、分析、推荐引擎
+  - 与 AI 模型交互
+
+- **`streamlit_ui/`**: Streamlit 界面 (0.2 版本，向后兼容)
 
 ## ✨ 核心功能
 
@@ -33,11 +78,11 @@
 - **AI 深度分析**：通义千问模型驱动的论文摘要和核心观点提取
 - **多维度评估**：从相关性、创新性、实用性等角度综合评分
 
-### 自动化工作流
+### 现代化 Web 界面
 
-- **一键启动**：`python start.py` 即可完成所有配置和启动
-- **智能环境管理**：自动检测和配置 Python 环境、依赖包
-- **Web 界面**：Streamlit 驱动的直观操作界面
+- **响应式设计**：基于 Vue3 的现代化用户界面
+- **实时交互**：FastAPI 提供的高性能 API 支持
+- **组件化开发**：可复用的 UI 组件和清晰的代码结构
 
 ### 多样化输出
 
@@ -57,6 +102,14 @@
 </p>
 
 ## ⚡ 快速开始
+
+### 环境要求
+
+- **Python**: 3.10 或更高版本
+- **Node.js**: 20.19.0 或更高版本
+- **包管理器**: 推荐使用 uv (Python) 和 npm (Node.js)
+
+### 一键启动 (推荐)
 
 ```bash
 # 1. 克隆项目到本地
@@ -84,14 +137,27 @@ copy .env.example .env
 #    请手动打开 .env 文件并填入 DASHSCOPE_API_KEY
 #    您可以从通义千问获取 API 密钥：https://console.aliyun.com/dashscope
 
-# 9. 启动应用程序！
-python start.py
+# 9. 启动 FastAPI + Vue3 应用程序！
+python start_fastapi.py
 
-# 10. 访问 Web 界面
-#    打开浏览器，访问 http://localhost:8501
-#    您可以在界面中配置研究兴趣、调整参数，查看实时推荐结果
+# 10. 访问应用
+#    前端界面: http://localhost:5173
+#    后端 API: http://localhost:8000
+#    API 文档: http://localhost:8000/docs
 
 # enjoy it!
+```
+
+### 传统 Streamlit 界面
+
+如果您更喜欢使用 Streamlit 界面：
+
+```bash
+# 进入 streamlit_ui 目录
+cd streamlit_ui
+
+# 启动 Streamlit 应用
+python start.py
 ```
 
 系统会自动处理环境配置、依赖安装和服务启动。
