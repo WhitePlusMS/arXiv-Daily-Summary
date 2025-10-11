@@ -5,7 +5,7 @@
 """
 
 from functools import lru_cache
-from .arxiv_service import ArxivRecommenderService
+from .main_dashboard_service import ArxivRecommenderService
 
 
 class ServiceContainer:

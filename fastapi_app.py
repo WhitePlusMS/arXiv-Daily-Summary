@@ -20,7 +20,7 @@ from fastapi_services.models import (
     InitializeRequest
 )
 from fastapi_services.service_container import get_arxiv_service
-from fastapi_services.arxiv_service import ArxivRecommenderService
+from fastapi_services.main_dashboard_service import ArxivRecommenderService
 
 # 创建FastAPI应用
 app = FastAPI(
