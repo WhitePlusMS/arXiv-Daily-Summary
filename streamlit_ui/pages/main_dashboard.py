@@ -6,7 +6,7 @@ ArXiv 论文推荐系统 - 主仪表板页面
 """
 
 # 导入组件和服务
-from ui_components.main_dashboard_components import (
+from streamlit_ui.ui_components.main_dashboard_components import (
     render_header,
     render_user_config_section,
     render_research_interests_section,
@@ -14,7 +14,7 @@ from ui_components.main_dashboard_components import (
     render_history_section,
     render_footer
 )
-from services.main_dashboard_service import ArxivRecommenderService
+from streamlit_ui.services.main_dashboard_service import ArxivRecommenderService
 
 
 def main():

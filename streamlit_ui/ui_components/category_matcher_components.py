@@ -333,7 +333,7 @@ def render_matching_form():
 def render_matching_success():
     """渲染匹配成功消息"""
     st.markdown(
-        '<div class="success-message">✅ 匹配完成！结果已保存到数据库。<br>📊 全部115个分类的详细评分已保存到 data/users/detailed_scores/ 目录。</div>',
+        '<div class="success-message">✅ 匹配完成！结果已保存到数据库。<br>📊 全部115个分类的详细评分已保存到 ../../data/users/detailed_scores/ 目录。</div>',
         unsafe_allow_html=True
     )
 

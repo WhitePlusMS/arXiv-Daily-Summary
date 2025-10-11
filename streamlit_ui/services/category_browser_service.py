@@ -15,7 +15,7 @@ class CategoryService:
     
     def __init__(self):
         """初始化分类服务"""
-        self.base_path = Path(__file__).parent.parent
+        self.base_path = Path(__file__).parent.parent.parent
         self.categories_data = None
     
     def load_categories_data(self) -> Optional[List[Dict[str, Any]]]:

@@ -4,14 +4,14 @@
 ArXiv分类浏览器 - 显示所有可用的ArXiv分类
 """
 
-from ui_components.main_dashboard_components import render_footer
-from ui_components.category_browser_components import (
+from streamlit_ui.ui_components.main_dashboard_components import render_footer
+from streamlit_ui.ui_components.category_browser_components import (
     render_category_browser_header,
     render_statistics_card,
     render_category_section,
     render_usage_guide
 )
-from services.category_browser_service import CategoryService
+from streamlit_ui.services.category_browser_service import CategoryService
 
 
 def main():

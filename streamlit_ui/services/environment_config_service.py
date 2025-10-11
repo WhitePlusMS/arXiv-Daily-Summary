@@ -18,7 +18,7 @@ class EnvConfigManager:
     def __init__(self):
         # 获取项目根目录的绝对路径
         # 动态计算项目根目录
-        project_root = Path(__file__).parent.parent
+        project_root = Path(__file__).parent.parent.parent
         # 将项目根目录添加到sys.path
         if str(project_root) not in sys.path:
             sys.path.insert(0, str(project_root))

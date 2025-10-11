@@ -17,12 +17,12 @@ import sys
 from pathlib import Path
 
 # 添加项目根目录到 Python 路径
-project_root = Path(__file__).parent.parent
+project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 # 导入服务层和UI组件
-from services.category_matcher_service import CategoryMatcherService
-from ui_components.category_matcher_components import (
+from streamlit_ui.services.category_matcher_service import CategoryMatcherService
+from streamlit_ui.ui_components.category_matcher_components import (
     # 页面配置和样式
     render_page_config,
     render_custom_css,

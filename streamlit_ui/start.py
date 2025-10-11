@@ -43,10 +43,10 @@ class PyEnvNVLauncher:
     """PyEnv + NV 专用启动器 - 第一性原理重构版"""
     
     def __init__(self):
-        self.project_root = Path.cwd()
+        self.project_root = Path.cwd().parent
         self.python_version_file = self.project_root / ".python-version"
         self.requirements_file = self.project_root / "requirements.txt"
-        self.main_file = self.project_root / "app.py"
+        self.main_file = Path.cwd() / "app.py"
         self.env_file = self.project_root / ".env"
         self.venv_path = self.project_root / ".venv"
         

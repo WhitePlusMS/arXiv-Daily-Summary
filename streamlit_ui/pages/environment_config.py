@@ -8,7 +8,7 @@ ArXiv推荐系统 - 环境配置页面
 import streamlit as st
 
 # 导入组件和服务
-from ui_components.environment_config_components import (
+from streamlit_ui.ui_components.environment_config_components import (
     render_custom_css,
     render_sidebar_navigation,
     render_api_config,
@@ -20,7 +20,7 @@ from ui_components.environment_config_components import (
     render_log_config,
     render_footer
 )
-from services.environment_config_service import (
+from streamlit_ui.services.environment_config_service import (
     EnvConfigManager,
     initialize_config_state,
     check_config_changes,

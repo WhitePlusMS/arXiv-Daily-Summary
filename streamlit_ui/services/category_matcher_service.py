@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 
 # 添加项目根目录到 Python 路径
 from pathlib import Path
-project_root = Path(__file__).parent.parent
+project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from core.category_matcher import CategoryMatcher, MultiUserDataManager
@@ -37,37 +37,49 @@ class CategoryMatcherService:
         return st.session_state.category_matcher_service
     
     def load_existing_data(self):
-        """加载现有的JSON数据"""
-        # 获取项目根目录的绝对路径
-        project_root = Path(__file__).parent.parent
-        json_file = project_root / "data" / "users" / "user_categories.json"
-        
-        if json_file.exists():
-            try:
-                with open(json_file, 'r', encoding='utf-8') as f:
+        """加载现有的用户数据"""
+        try:
+            project_root = Path(__file__).parent.parent.parent
+            data_file = project_root / "data" / "users" / "user_categories.json"
+            
+            if data_file.exists():
+                with open(data_file, 'r', encoding='utf-8') as f:
                     return json.load(f)
-            except Exception as e:
-                st.error(f"加载JSON文件失败: {e}")
+            else:
                 return []
-        return []
+        except Exception as e:
+            st.error(f"加载数据时出错: {str(e)}")
+            return []
 
     def save_user_data(self, data):
-        """保存用户数据到JSON文件"""
-        # 获取项目根目录的绝对路径
-        project_root = Path(__file__).parent.parent
-        json_file = project_root / "data" / "users" / "user_categories.json"
-        
+        """保存用户数据到文件"""
         try:
-            # 确保目录存在
-            json_file.parent.mkdir(parents=True, exist_ok=True)
+            project_root = Path(__file__).parent.parent.parent
+            data_dir = project_root / "data" / "users"
+            data_dir.mkdir(parents=True, exist_ok=True)
             
-            # 保存数据
-            with open(json_file, 'w', encoding='utf-8') as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
+            data_file = data_dir / "user_categories.json"
+            
+            # 确保数据是可序列化的
+            serializable_data = []
+            for item in data:
+                if isinstance(item, dict):
+                    serializable_item = {}
+                    for key, value in item.items():
+                        if isinstance(value, (str, int, float, bool, list, dict)) or value is None:
+                            serializable_item[key] = value
+                        else:
+                            serializable_item[key] = str(value)
+                    serializable_data.append(serializable_item)
+                else:
+                    serializable_data.append(str(item))
+            
+            with open(data_file, 'w', encoding='utf-8') as f:
+                json.dump(serializable_data, f, ensure_ascii=False, indent=2)
             
             return True
         except Exception as e:
-            st.error(f"保存JSON文件失败: {e}")
+            st.error(f"保存数据时出错: {str(e)}")
             return False
 
     def initialize_matcher(self):
@@ -176,7 +188,7 @@ class CategoryMatcherService:
         """保存匹配结果到数据库"""
         try:
             # 使用 MultiUserDataManager 保存结果
-            data_manager = MultiUserDataManager("data/users/user_categories.json")
+            data_manager = MultiUserDataManager("../../data/users/user_categories.json")
             data_manager.add_user_result(username, results, user_input)
             data_manager.save_to_json()
             return True
@@ -186,16 +198,26 @@ class CategoryMatcherService:
 
     def get_detailed_score_files(self):
         """获取详细评分文件列表"""
-        project_root = Path(__file__).parent.parent
-        detailed_scores_dir = project_root / "data" / "users" / "detailed_scores"
-        
-        if detailed_scores_dir.exists():
-            score_files = list(detailed_scores_dir.glob("*_detailed_scores.json"))
-            if score_files:
-                # 按修改时间排序（最新的在前）
-                score_files.sort(key=lambda x: x.stat().st_mtime, reverse=True)
-                return score_files
-        return []
+        try:
+            project_root = Path(__file__).parent.parent.parent
+            score_dir = project_root / "data" / "users" / "detailed_scores"
+            
+            if not score_dir.exists():
+                return []
+            
+            files = []
+            for file_path in score_dir.glob("*.json"):
+                files.append({
+                    'name': file_path.name,
+                    'path': str(file_path),
+                    'size': file_path.stat().st_size,
+                    'modified': datetime.fromtimestamp(file_path.stat().st_mtime)
+                })
+            
+            return sorted(files, key=lambda x: x['modified'], reverse=True)
+        except Exception as e:
+            st.error(f"获取文件列表时出错: {str(e)}")
+            return []
 
     def delete_score_file(self, file_path):
         """删除评分文件"""
@@ -207,6 +229,19 @@ class CategoryMatcherService:
 
     def get_file_info(self, file_path):
         """获取文件信息"""
+        # 如果传入的是字典（来自get_detailed_score_files），直接返回
+        if isinstance(file_path, dict):
+            return {
+                'name': file_path.get('name', ''),
+                'size': file_path.get('size', 0),
+                'time': file_path.get('modified', datetime.now()).strftime("%Y-%m-%d %H:%M:%S") if isinstance(file_path.get('modified'), datetime) else str(file_path.get('modified', ''))
+            }
+        
+        # 如果传入的是路径字符串，转换为Path对象
+        if isinstance(file_path, str):
+            file_path = Path(file_path)
+        
+        # 处理Path对象
         return {
             'name': file_path.name,
             'size': file_path.stat().st_size,

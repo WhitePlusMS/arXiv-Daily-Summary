@@ -5,7 +5,7 @@
 """
 
 import streamlit as st
-from services.environment_config_service import (
+from streamlit_ui.services.environment_config_service import (
     validate_email, 
     validate_url, 
     track_config_change
@@ -391,7 +391,7 @@ def render_file_config(config_manager):
     with col1:
         user_categories_file = st.text_input(
             "研究兴趣描述文件",
-            value=st.session_state.config_changes.get('USER_CATEGORIES_FILE', 'data/users/user_categories.json'),
+            value=st.session_state.config_changes.get('USER_CATEGORIES_FILE', '../../data/users/user_categories.json'),
             help="研究兴趣描述文件路径"
         )
         st.session_state.config_changes['USER_CATEGORIES_FILE'] = user_categories_file
