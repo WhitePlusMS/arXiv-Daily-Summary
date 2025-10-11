@@ -6,6 +6,7 @@
 
 from functools import lru_cache
 from .main_dashboard_service import ArxivRecommenderService
+from .category_matcher_service import CategoryMatcherService
 
 
 class ServiceContainer:
@@ -26,6 +27,13 @@ class ServiceContainer:
             self._services['arxiv_service'] = ArxivRecommenderService()
         return self._services['arxiv_service']
 
+    @lru_cache(maxsize=1)
+    def get_category_matcher_service(self) -> CategoryMatcherService:
+        """获取分类匹配器服务实例"""
+        if 'category_matcher_service' not in self._services:
+            self._services['category_matcher_service'] = CategoryMatcherService()
+        return self._services['category_matcher_service']
+
 
 # 全局服务容器实例
 service_container = ServiceContainer()
@@ -35,3 +43,7 @@ service_container = ServiceContainer()
 def get_arxiv_service() -> ArxivRecommenderService:
     """FastAPI依赖注入：获取ArXiv推荐服务"""
     return service_container.get_arxiv_service()
+
+def get_category_matcher_service() -> CategoryMatcherService:
+    """FastAPI依赖注入：获取分类匹配器服务"""
+    return service_container.get_category_matcher_service()

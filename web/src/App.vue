@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import SidebarNav from './components/SidebarNav.vue'
+import Footer from './components/Footer.vue'
 </script>
 
 <template>
@@ -8,6 +9,7 @@ import SidebarNav from './components/SidebarNav.vue'
     <SidebarNav />
     <main class="app-main">
       <RouterView />
+      <Footer />
     </main>
   </div>
 </template>

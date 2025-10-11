@@ -93,15 +93,6 @@
         </p>
       </div>
     </div>
-
-    <!-- 页面底部 -->
-    <div class="streamlit-footer">
-      <div class="streamlit-divider"></div>
-      <div class="footer-content">
-        <p>ArXiv 学术分类浏览器 - Vue3 版本</p>
-        <p>基于 Streamlit 界面设计 | 作者: WhitePlusMS</p>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -282,40 +273,6 @@ onMounted(async () => {
   border-radius: 16px;
   max-width: 800px;
 }
-
-/* 复用部分Streamlit样式 */
-.streamlit-header {
-  margin-bottom: 0.5rem;
-}
-.streamlit-title {
-  font-size: 2rem;
-}
-.streamlit-caption {
-  color: #4b5563;
-}
-.streamlit-divider {
-  height: 1px;
-  background: #e5e7eb;
-  margin: 1rem 0;
-}
-.streamlit-section {
-  margin: 1rem 0;
-}
-.streamlit-subheader {
-  font-size: 1.25rem;
-  margin-bottom: 0.75rem;
-}
-.streamlit-error {
-  background: #fee2e2;
-  color: #b91c1c;
-  padding: 0.75rem;
-  border-radius: 8px;
-}
-.streamlit-text-area label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #374151;
-}
 .search-input {
   padding: 8px 12px;
   border: 1px solid #ccc;
@@ -328,41 +285,9 @@ onMounted(async () => {
   border-color: #007bff;
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
-.streamlit-textarea {
-  width: 60%;
-  max-width: 500px;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-}
-.streamlit-help {
-  color: #6b7280;
-  font-size: 0.9rem;
-  margin-top: 0.35rem;
-}
-.streamlit-expander-header {
-  cursor: pointer;
-  padding: 0.6rem 0.75rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  background: #f9fafb;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.streamlit-expander-header.expanded {
-  background: #eef2ff;
-  border-color: #c7d2fe;
-}
-.streamlit-expander-content {
-  padding: 0.75rem;
-}
 .expander-icon {
   font-weight: 700;
   color: #374151;
-}
-.streamlit-footer {
-  margin-top: 2rem;
 }
 .footer-content {
   color: #6b7280;

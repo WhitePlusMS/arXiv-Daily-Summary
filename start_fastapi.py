@@ -77,12 +77,60 @@ class FastAPIWebLauncher:
         else:
             self.venv_python = self.venv_path / "bin" / "python"
 
+        # Windows PowerShell 激活脚本路径（用于自动引导）
+        self.activate_ps1 = self.venv_path / "Scripts" / "Activate.ps1"
+
         # 运行时子进程句柄
         self.backend_proc: Optional[subprocess.Popen] = None
         self.web_proc: Optional[subprocess.Popen] = None
         # Node/npm 可执行路径（Windows 上可能需要使用 npm.cmd）
         self.node_path: Optional[str] = None
         self.npm_path: Optional[str] = None
+
+    # ===== 预引导：在 Windows 终端中自动激活 .venv 并重新运行当前脚本 =====
+    def try_bootstrap_via_powershell(self, no_exit: bool = True) -> bool:
+        """
+        当检测到未在项目 .venv 中运行、且在 Windows 环境下时：
+        - 若存在 .venv\\Scripts\\Activate.ps1，则启动一个 PowerShell 终端，按用户提供的命令激活 .venv
+        - 显示 Python 版本，并自动继续运行本启动脚本（避免手动再次输入）
+        - 返回 True 表示已启动新终端并进行引导，当前进程可安全退出
+        """
+        if platform.system() != "Windows":
+            return False
+
+        # 如果已在 .venv 中，则无需引导
+        virtual_env = os.environ.get('VIRTUAL_ENV', '')
+        try:
+            if virtual_env and Path(virtual_env).resolve() == self.venv_path.resolve():
+                return False
+        except Exception:
+            # 解析失败则继续尝试引导
+            pass
+
+        # 仅在激活脚本存在时才进行引导
+        if not self.activate_ps1.exists():
+            Logger.warning("未找到 PowerShell 激活脚本 .venv/\\Scripts/Activate.ps1，跳过自动引导")
+            return False
+
+        Logger.info("准备在新的 PowerShell 终端中激活 .venv 并重新运行启动脚本...")
+        # 组装 PowerShell 命令（按用户示例融合，并自动继续运行脚本）
+        ps_cmd = (
+            "Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; "
+            "& .\\.venv\\Scripts\\Activate.ps1; "
+            "Write-Host '✅ 已激活 .venv'; "
+            "python --version; "
+            "Write-Host '提示：自动继续运行 python start_fastapi.py'; "
+            "python .\\start_fastapi.py --no-bootstrap"
+        )
+
+        try:
+            args = ["powershell", "-NoExit" if no_exit else "-Command", "-Command", ps_cmd]
+            subprocess.Popen(args, cwd=self.project_root)
+            Logger.success("已在新终端触发 .venv 激活与二次启动")
+            return True
+        except Exception as e:
+            Logger.error(f"PowerShell 自动引导失败: {e}")
+            return False
 
     # ===== 通用检查（参考 start.py 设计） =====
     def check_python_version_file(self) -> Optional[str]:
@@ -430,6 +478,7 @@ def build_argparser() -> argparse.ArgumentParser:
     parser.add_argument("--auto-install-web", action="store_true", help="自动安装前端依赖")
     parser.add_argument("--check-venv", action="store_true", help="启用 NV 虚拟环境检查")
     parser.add_argument("--auto-init-venv", action="store_true", help="缺失时尝试自动创建 NV 虚拟环境")
+    parser.add_argument("--no-bootstrap", action="store_true", help="禁用 Windows PowerShell 自动引导 .venv 激活")
     return parser
 
 
@@ -440,5 +489,24 @@ if __name__ == "__main__":
 
     args = build_argparser().parse_args()
     launcher = FastAPIWebLauncher()
+    # 在 Windows 环境下，若未处于 .venv，则先尝试以 PowerShell 自动激活并重新运行本脚本
+    if platform.system() == "Windows" and not args.no_bootstrap:
+        try:
+            # 仅在未激活 .venv 时触发
+            virtual_env = os.environ.get('VIRTUAL_ENV', '')
+            need_bootstrap = True
+            try:
+                if virtual_env and Path(virtual_env).resolve() == launcher.venv_path.resolve():
+                    need_bootstrap = False
+            except Exception:
+                need_bootstrap = True
+
+            if need_bootstrap:
+                if launcher.try_bootstrap_via_powershell(no_exit=True):
+                    # 已在新终端中完成激活并启动，当前进程直接退出
+                    sys.exit(0)
+        except Exception:
+            # 引导失败则继续后续逻辑，由原有 NV 检查与提示处理
+            pass
     ok = launcher.run(args)
     sys.exit(0 if ok else 1)

@@ -216,14 +216,6 @@
       </div>
     </div>
 
-    <!-- 页面底部 - Streamlit样式 -->
-    <div class="streamlit-footer">
-      <div class="streamlit-divider"></div>
-      <div class="footer-content">
-        <p>ArXiv 每日论文推荐系统 - Vue3 版本</p>
-        <p>基于 Streamlit 界面设计 | 作者: WhitePlusMS</p>
-      </div>
-    </div>
 
     <!-- 预览模态框 -->
     <div v-if="showPreviewModal" class="modal-overlay" @click="closePreviewModal">

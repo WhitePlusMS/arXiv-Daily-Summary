@@ -18,6 +18,12 @@
           <span v-if="!collapsed">分类浏览</span>
         </RouterLink>
       </li>
+      <li>
+        <RouterLink to="/matcher" class="nav-link" :class="{ active: route.name === 'matcher' }">
+          <span class="icon">🎯</span>
+          <span v-if="!collapsed">分类匹配器</span>
+        </RouterLink>
+      </li>
     </ul>
   </nav>
 </template>

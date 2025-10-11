@@ -99,4 +99,68 @@ export const deleteReportFile = async (params: { name: string, format: 'md' | 'h
   return response.data
 }
 
+// =====================
+// 分类匹配器相关 API
+// =====================
+
+// 获取匹配器提供商配置
+export const getMatcherProviderConfig = async (): Promise<ApiResponse<Record<string, unknown>>> => {
+  const response = await api.get('/api/matcher/provider')
+  return response.data
+}
+
+// 获取用户匹配数据与统计（返回形如 { success, data: UserProfile[], stats }）
+export const getMatcherData = async (): Promise<ApiResponse<UserProfile[]> & { stats?: Record<string, unknown> }> => {
+  const response = await api.get('/api/matcher/data')
+  return response.data
+}
+
+// 优化研究描述
+export const optimizeMatcherDescription = async (request: { user_input: string }): Promise<ApiResponse<{ optimized: string }>> => {
+  const response = await api.post('/api/matcher/optimize', request)
+  return response.data
+}
+
+// 执行分类匹配
+export const runCategoryMatching = async (request: { user_input: string, username: string, top_n: number }): Promise<ApiResponse<{ results: { id: string, name: string, score: number }[], token_usage: { input_tokens: number, output_tokens: number, total_tokens: number } }>> => {
+  const response = await api.post('/api/matcher/run', request)
+  return response.data
+}
+
+// 更新单条匹配记录
+export const updateMatcherRecord = async (request: { index: number, username: string, category_id: string, user_input: string }): Promise<ApiResponse<{ updated: boolean }>> => {
+  const response = await api.put('/api/matcher/record', request)
+  return response.data
+}
+
+// 删除单条匹配记录
+export const deleteMatcherRecord = async (params: { index: number }): Promise<ApiResponse<{ deleted: boolean }>> => {
+  const response = await api.delete('/api/matcher/record', { params: { index: params.index } })
+  return response.data
+}
+
+// 批量删除匹配记录
+export const batchDeleteMatcherRecords = async (request: { indices: number[] }): Promise<ApiResponse<{ deleted: number }>> => {
+  const response = await api.delete('/api/matcher/records', { data: request })
+  return response.data
+}
+
+// 列出评分文件
+export const listMatcherScoreFiles = async (): Promise<ApiResponse<string[]>> => {
+  const response = await api.get('/api/matcher/scores')
+  return response.data
+}
+
+// 读取评分文件内容
+export const readMatcherScoreFileContent = async (params: { name: string }): Promise<ApiResponse<{ name: string, content: string }>> => {
+  const response = await api.get('/api/matcher/scores/content', { params })
+  return response.data
+}
+
+// 删除评分文件（统一使用 /api/matcher/scores）
+export const deleteMatcherScoreFile = async (params: { name: string }): Promise<ApiResponse<{ deleted: boolean }>> => {
+  const response = await api.delete('/api/matcher/scores', { params })
+  return response.data
+}
+
 export default api

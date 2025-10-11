@@ -17,9 +17,13 @@ from fastapi_services.models import (
     RecommendationRequest, 
     RecommendationResult,
     ResearchInterestsRequest,
-    InitializeRequest
+    InitializeRequest,
+    OptimizeRequest,
+    MatchRequest,
+    UpdateRecordRequest,
+    BatchDeleteRequest,
 )
-from fastapi_services.service_container import get_arxiv_service
+from fastapi_services.service_container import get_arxiv_service, get_category_matcher_service
 from fastapi_services.main_dashboard_service import ArxivRecommenderService
 from services.category_browser_service import CategoryService
 
@@ -33,7 +37,14 @@ app = FastAPI(
 # 添加CORS中间件
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:3000", "http://127.0.0.1:5173"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:5174",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -172,7 +183,7 @@ async def get_categories():
         return {"success": True, "data": data}
     except Exception as e:
         logger.error(f"获取分类数据失败: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+    raise HTTPException(status_code=500, detail=str(e))
 
 # 辅助函数：解析报告文件路径
 def _resolve_report_path(name: str, fmt: str) -> Path:
@@ -251,6 +262,181 @@ async def delete_report(
         raise
     except Exception as e:
         logger.error(f"删除报告失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# =====================
+# 分类匹配器相关 API
+# =====================
+
+@app.get("/api/matcher/provider")
+async def get_matcher_provider_config(
+    service = Depends(get_category_matcher_service)
+):
+    """获取分类匹配器提供商配置信息"""
+    logger.info("API调用: 获取匹配器提供商配置")
+    try:
+        return {"success": True, "data": service.get_provider_config()}
+    except Exception as e:
+        logger.error(f"获取提供商配置失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/matcher/data")
+async def get_matcher_data(
+    service = Depends(get_category_matcher_service)
+):
+    """获取用户匹配数据及统计"""
+    logger.info("API调用: 获取分类匹配数据")
+    try:
+        data = service.load_existing_data()
+        stats = service.get_statistics(data)
+        return {"success": True, "data": data, "stats": stats}
+    except Exception as e:
+        logger.error(f"获取匹配数据失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/matcher/optimize")
+async def optimize_description(
+    request: OptimizeRequest,
+    service = Depends(get_category_matcher_service)
+):
+    """使用AI优化研究描述"""
+    logger.info("API调用: 优化研究描述")
+    try:
+        optimized = service.optimize_research_description(request.user_input)
+        return {"success": True, "data": {"optimized": optimized}}
+    except Exception as e:
+        logger.error(f"优化研究描述失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/matcher/run")
+async def run_category_matching(
+    request: MatchRequest,
+    service = Depends(get_category_matcher_service)
+):
+    """执行分类匹配，并保存结果"""
+    logger.info(f"API调用: 执行分类匹配 - 用户: {request.username}, Top {request.top_n}")
+    try:
+        results, token_usage = service.execute_matching(request.user_input, request.username, request.top_n)
+        # 保存结果
+        service.save_matching_results(request.username, request.user_input, results)
+        return {"success": True, "data": {"results": results, "token_usage": token_usage}}
+    except Exception as e:
+        logger.error(f"执行分类匹配失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/matcher/record")
+async def update_matcher_record(
+    request: UpdateRecordRequest,
+    service = Depends(get_category_matcher_service)
+):
+    """更新单条匹配记录"""
+    logger.info(f"API调用: 更新匹配记录 - 索引: {request.index}")
+    try:
+        success = service.update_record(request.index, request.username, request.category_id, request.user_input)
+        if not success:
+            raise HTTPException(status_code=400, detail="更新失败或索引无效")
+        return {"success": True, "message": "更新成功"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"更新匹配记录失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/matcher/record")
+async def delete_matcher_record(
+    index: int = Query(..., description="记录索引"),
+    service = Depends(get_category_matcher_service)
+):
+    """删除单条匹配记录"""
+    logger.info(f"API调用: 删除匹配记录 - 索引: {index}")
+    try:
+        success = service.delete_single_record(index)
+        if not success:
+            raise HTTPException(status_code=400, detail="删除失败或索引无效")
+        return {"success": True, "message": "删除成功"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"删除匹配记录失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/matcher/records")
+async def batch_delete_matcher_records(
+    request: BatchDeleteRequest,
+    service = Depends(get_category_matcher_service)
+):
+    """批量删除匹配记录"""
+    logger.info(f"API调用: 批量删除匹配记录 - {len(request.indices)} 条")
+    try:
+        deleted_count = service.batch_delete_records(request.indices)
+        return {"success": True, "data": {"deleted": deleted_count}}
+    except Exception as e:
+        logger.error(f"批量删除记录失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/matcher/scores")
+async def list_score_files(
+    service = Depends(get_category_matcher_service)
+):
+    """列出详细评分文件"""
+    logger.info("API调用: 列出评分文件")
+    try:
+        files = service.list_detailed_score_files()
+        return {"success": True, "data": files}
+    except Exception as e:
+        logger.error(f"列出评分文件失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/matcher/scores/content")
+async def read_score_file_content(
+    name: str = Query(..., description="评分文件名"),
+    service = Depends(get_category_matcher_service)
+):
+    """读取评分文件内容"""
+    logger.info(f"API调用: 读取评分文件 - {name}")
+    try:
+        content = service.read_score_file_content(name)
+        return {"success": True, "data": {"name": name, "content": content}}
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="评分文件不存在")
+    except Exception as e:
+        logger.error(f"读取评分文件失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/matcher/scores")
+async def delete_score_file(
+    name: str = Query(..., description="评分文件名"),
+    service = Depends(get_category_matcher_service)
+):
+    """删除详细评分文件"""
+    logger.info(f"API调用: 删除评分文件 - {name}")
+    try:
+        success = service.delete_score_file(name)
+        if not success:
+            raise HTTPException(status_code=404, detail="评分文件不存在或删除失败")
+        return {"success": True, "message": "删除成功"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"删除评分文件失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/matcher/scores/file")
+async def delete_score_file(
+    name: str = Query(..., description="评分文件名"),
+    service = Depends(get_category_matcher_service)
+):
+    """删除评分文件"""
+    logger.info(f"API调用: 删除评分文件 - {name}")
+    try:
+        success = service.delete_score_file(name)
+        if not success:
+            raise HTTPException(status_code=400, detail="删除失败或文件不存在")
+        return {"success": True, "message": "删除成功"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"删除评分文件失败: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.exception_handler(Exception)

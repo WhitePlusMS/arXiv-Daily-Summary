@@ -48,3 +48,29 @@ class ResearchInterestsRequest(BaseModel):
 class InitializeRequest(BaseModel):
     """初始化请求模型"""
     profile_name: str
+
+
+# 分类匹配器相关请求模型
+class OptimizeRequest(BaseModel):
+    """优化研究描述请求"""
+    user_input: str
+
+
+class MatchRequest(BaseModel):
+    """执行分类匹配请求"""
+    username: str
+    user_input: str
+    top_n: int = 5
+
+
+class UpdateRecordRequest(BaseModel):
+    """更新记录请求"""
+    index: int
+    username: str
+    category_id: str
+    user_input: str
+
+
+class BatchDeleteRequest(BaseModel):
+    """批量删除记录请求"""
+    indices: List[int]
