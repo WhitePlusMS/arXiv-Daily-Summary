@@ -5,7 +5,7 @@
 """
 
 import streamlit as st
-from services.env_config_service import (
+from services.environment_config_service import (
     validate_email, 
     validate_url, 
     track_config_change

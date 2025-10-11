@@ -14,7 +14,7 @@ from ui_components.main_dashboard_components import (
     render_history_section,
     render_footer
 )
-from services.arxiv_service import ArxivRecommenderService
+from services.main_dashboard_service import ArxivRecommenderService
 
 
 def main():

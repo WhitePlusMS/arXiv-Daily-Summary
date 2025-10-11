@@ -11,7 +11,7 @@ from ui_components.category_browser_components import (
     render_category_section,
     render_usage_guide
 )
-from services.category_service import CategoryService
+from services.category_browser_service import CategoryService
 
 
 def main():

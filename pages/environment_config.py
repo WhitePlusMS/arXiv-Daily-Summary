@@ -20,7 +20,7 @@ from ui_components.environment_config_components import (
     render_log_config,
     render_footer
 )
-from services.env_config_service import (
+from services.environment_config_service import (
     EnvConfigManager,
     initialize_config_state,
     check_config_changes,
