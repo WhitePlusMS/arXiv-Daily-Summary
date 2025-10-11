@@ -12,7 +12,7 @@ import os
 from loguru import logger
 from typing import List, Optional
 
-from fastapi_services.models import (
+from .models import (
     UserProfile, 
     RecommendationRequest, 
     RecommendationResult,
@@ -23,10 +23,10 @@ from fastapi_services.models import (
     UpdateRecordRequest,
     BatchDeleteRequest,
 )
-from fastapi_services.service_container import get_arxiv_service, get_category_matcher_service, get_env_config_service
-from fastapi_services.main_dashboard_service import ArxivRecommenderService
-from fastapi_services.environment_config_service import EnvConfigService
-from services.category_browser_service import CategoryService
+from .service_container import get_arxiv_service, get_category_matcher_service, get_env_config_service
+from .main_dashboard_service import ArxivRecommenderService
+from .environment_config_service import EnvConfigService
+from streamlit_ui.services.category_browser_service import CategoryService
 
 # 创建FastAPI应用
 app = FastAPI(

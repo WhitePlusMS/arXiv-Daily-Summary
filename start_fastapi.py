@@ -4,7 +4,7 @@
 FastAPI + Web 前端联合启动脚本
 
 功能目标：
-1) 启动 FastAPI 后端服务（来自 fastapi_app:app）
+1) 启动 FastAPI 后端服务（来自 fastapi_services.fastapi_app:app）
 2) 同时启动 web 目录下的前端（Vite/Vue）开发服务器
 3) 在启动前进行完备环境检查（参考 start.py 的结构与设计）
 4) 提供清晰的日志与引导信息，并支持常用 CLI 参数
@@ -66,7 +66,7 @@ def find_available_port(start_port: int, max_attempts: int = 20) -> int:
 class FastAPIWebLauncher:
     def __init__(self):
         self.project_root = Path(os.path.dirname(os.path.abspath(__file__)))
-        self.fastapi_module = "fastapi_app:app"
+        self.fastapi_module = "fastapi_services.fastapi_app:app"
         self.web_dir = self.project_root / "web"
         self.python_version_file = self.project_root / ".python-version"
         self.env_file = self.project_root / ".env"
@@ -87,51 +87,6 @@ class FastAPIWebLauncher:
         self.node_path: Optional[str] = None
         self.npm_path: Optional[str] = None
 
-    # ===== 预引导：在 Windows 终端中自动激活 .venv 并重新运行当前脚本 =====
-    def try_bootstrap_via_powershell(self, no_exit: bool = True) -> bool:
-        """
-        当检测到未在项目 .venv 中运行、且在 Windows 环境下时：
-        - 若存在 .venv\\Scripts\\Activate.ps1，则启动一个 PowerShell 终端，按用户提供的命令激活 .venv
-        - 显示 Python 版本，并自动继续运行本启动脚本（避免手动再次输入）
-        - 返回 True 表示已启动新终端并进行引导，当前进程可安全退出
-        """
-        if platform.system() != "Windows":
-            return False
-
-        # 如果已在 .venv 中，则无需引导
-        virtual_env = os.environ.get('VIRTUAL_ENV', '')
-        try:
-            if virtual_env and Path(virtual_env).resolve() == self.venv_path.resolve():
-                return False
-        except Exception:
-            # 解析失败则继续尝试引导
-            pass
-
-        # 仅在激活脚本存在时才进行引导
-        if not self.activate_ps1.exists():
-            Logger.warning("未找到 PowerShell 激活脚本 .venv/\\Scripts/Activate.ps1，跳过自动引导")
-            return False
-
-        Logger.info("准备在新的 PowerShell 终端中激活 .venv 并重新运行启动脚本...")
-        # 组装 PowerShell 命令（按用户示例融合，并自动继续运行脚本）
-        ps_cmd = (
-            "Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; "
-            "& .\\.venv\\Scripts\\Activate.ps1; "
-            "Write-Host '✅ 已激活 .venv'; "
-            "python --version; "
-            "Write-Host '提示：自动继续运行 python start_fastapi.py'; "
-            "python .\\start_fastapi.py --no-bootstrap"
-        )
-
-        try:
-            args = ["powershell", "-NoExit" if no_exit else "-Command", "-Command", ps_cmd]
-            subprocess.Popen(args, cwd=self.project_root)
-            Logger.success("已在新终端触发 .venv 激活与二次启动")
-            return True
-        except Exception as e:
-            Logger.error(f"PowerShell 自动引导失败: {e}")
-            return False
-
     # ===== 通用检查（参考 start.py 设计） =====
     def check_python_version_file(self) -> Optional[str]:
         if not self.python_version_file.exists():
@@ -146,43 +101,48 @@ class FastAPIWebLauncher:
             Logger.error(f"读取 .python-version 失败: {e}")
             return None
 
-    def check_nv_virtual_environment(self, auto_init: bool = False) -> bool:
+    def check_nv_virtual_environment(self) -> bool:
         """
-        参考 start.py 的 NV 环境检查逻辑：
+        检查 NV 虚拟环境状态，当检测到环境未激活时提供手动激活指导
         - 存在 .venv 目录且包含 Python 可执行文件
-        - 如未激活，给予清晰的引导
-        - 可选自动创建
+        - 如未激活，给予清晰的引导并退出
+        - 不再自动创建或激活虚拟环境
         """
-        Logger.info("检查 NV 虚拟环境状态...")
+        Logger.info("检查NV虚拟环境状态...")
 
+        # 检查 .venv 目录是否存在
         if not self.venv_path.exists():
             Logger.warning("项目 .venv 目录不存在！")
-            if auto_init:
-                return self.auto_create_venv()
-            else:
-                self._show_nv_creation_guide()
-                return False
+            self._show_nv_creation_guide()
+            return False
 
+        # 检查虚拟环境中的 Python 可执行文件
         if not self.venv_python.exists():
             Logger.error(f"虚拟环境 Python 不存在: {self.venv_python}")
             self._show_nv_creation_guide()
             return False
 
-        # 环境变量提示（不强制）
+        # 检查 VIRTUAL_ENV 环境变量
         virtual_env = os.environ.get('VIRTUAL_ENV', '')
         if not virtual_env:
-            Logger.warning("VIRTUAL_ENV 未设置，可能未激活 .venv 环境")
+            Logger.warning("VIRTUAL_ENV环境变量未设置！")
+            Logger.warning("NV虚拟环境未激活")
             self._show_nv_activation_guide()
-        else:
-            try:
-                if Path(virtual_env).resolve() != self.venv_path.resolve():
-                    Logger.warning("当前激活的虚拟环境并非项目 .venv")
-                    self._show_nv_activation_guide()
-                else:
-                    Logger.success(f"NV 虚拟环境已激活: {virtual_env}")
-            except Exception:
-                self._show_nv_activation_guide()
+            return False
 
+        # 检查环境变量是否指向正确的 .venv 目录
+        try:
+            if Path(virtual_env).resolve() != self.venv_path.resolve():
+                Logger.warning(f"当前激活的虚拟环境不是项目 .venv: {virtual_env}")
+                Logger.warning(f"期望路径: {self.venv_path.resolve()}")
+                self._show_nv_activation_guide()
+                return False
+        except Exception:
+            Logger.error("无法解析当前虚拟环境路径")
+            self._show_nv_activation_guide()
+            return False
+
+        Logger.success(f"✅ NV虚拟环境已正确激活: {virtual_env}")
         return True
 
     def assert_running_in_venv(self) -> bool:
@@ -221,14 +181,18 @@ class FastAPIWebLauncher:
         return True
 
     def _show_nv_activation_guide(self):
-        Logger.info("请在项目根目录执行以下命令激活 NV 环境：")
-        Logger.info(f"  cd {self.project_root}")
-        Logger.info("  nv activate")
+        """显示NV虚拟环境激活指导"""
+        Logger.error("❌ 请按以下步骤激活NV虚拟环境:")
+        Logger.error(f"❌   cd {self.project_root}")
+        Logger.error("❌   .venv\Scripts\activate    ")
+        Logger.error("❌   python start.py")
 
     def _show_nv_creation_guide(self):
-        Logger.info("如需创建 NV 虚拟环境，可执行：")
-        Logger.info(f"  cd {self.project_root}")
-        Logger.info("  nv create && nv activate")
+        """显示NV虚拟环境创建指导"""
+        Logger.error("❌ 请按以下步骤创建NV虚拟环境:")
+        Logger.error(f"❌   cd {self.project_root}")
+        Logger.error("❌   nv create && nv activate")
+        Logger.error("❌   python start.py")
 
     def auto_create_venv(self) -> bool:
         Logger.info("自动创建虚拟环境: nv create")
@@ -252,11 +216,11 @@ class FastAPIWebLauncher:
 
     # ===== 后端（FastAPI）检查与启动 =====
     def check_backend_entry(self) -> bool:
-        entry_file = self.project_root / "fastapi_app.py"
+        entry_file = self.project_root / "fastapi_services" / "fastapi_app.py"
         if not entry_file.exists():
-            Logger.error("后端入口 fastapi_app.py 不存在！")
+            Logger.error("后端入口 fastapi_services/fastapi_app.py 不存在！")
             return False
-        Logger.success("已找到后端入口 fastapi_app.py")
+        Logger.success("已找到后端入口 fastapi_services/fastapi_app.py")
         return True
 
     def start_backend(self, host: str, port: int, reload: bool, log_level: str = "info") -> Optional[subprocess.Popen]:
@@ -366,8 +330,8 @@ class FastAPIWebLauncher:
 
         # Python/NV 环境检查
         self.check_python_version_file()
-        # 始终进行 NV 虚拟环境检查，并要求在 .venv 中运行
-        if not self.check_nv_virtual_environment(auto_init=args.auto_init_venv):
+        # 严格检查 NV 虚拟环境，如未激活则退出
+        if not self.check_nv_virtual_environment():
             return False
         if not self.assert_running_in_venv():
             return False
@@ -483,30 +447,13 @@ def build_argparser() -> argparse.ArgumentParser:
 
 
 if __name__ == "__main__":
-    # 保证项目根目录在 Python 路径中
+    # 设置项目根目录和路径
     project_root = os.path.dirname(os.path.abspath(__file__))
     sys.path.insert(0, project_root)
 
     args = build_argparser().parse_args()
     launcher = FastAPIWebLauncher()
-    # 在 Windows 环境下，若未处于 .venv，则先尝试以 PowerShell 自动激活并重新运行本脚本
-    if platform.system() == "Windows" and not args.no_bootstrap:
-        try:
-            # 仅在未激活 .venv 时触发
-            virtual_env = os.environ.get('VIRTUAL_ENV', '')
-            need_bootstrap = True
-            try:
-                if virtual_env and Path(virtual_env).resolve() == launcher.venv_path.resolve():
-                    need_bootstrap = False
-            except Exception:
-                need_bootstrap = True
 
-            if need_bootstrap:
-                if launcher.try_bootstrap_via_powershell(no_exit=True):
-                    # 已在新终端中完成激活并启动，当前进程直接退出
-                    sys.exit(0)
-        except Exception:
-            # 引导失败则继续后续逻辑，由原有 NV 检查与提示处理
-            pass
+    # 直接运行，不进行自动引导
     ok = launcher.run(args)
     sys.exit(0 if ok else 1)
