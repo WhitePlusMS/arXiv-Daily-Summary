@@ -1,0 +1,222 @@
+/*
+  Global Streamlit-like UI styles for reuse across pages.
+  Import this once in main.ts to enable across the app.
+*/
+
+:root {
+  --st-primary: #FF4B4B;
+  --st-primary-hover: #E13B3B;
+  --st-radius: 8px;
+}
+
+/* Layout containers */
+.streamlit-dashboard {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: 0 24px;
+  box-sizing: border-box;
+  font-family: "Source Sans Pro", "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif;
+}
+
+.streamlit-header {
+  margin: 16px 0 12px;
+}
+
+.streamlit-title {
+  font-size: 24px;
+  line-height: 1.3;
+  margin: 0 0 8px;
+}
+
+.streamlit-caption {
+  color: var(--color-text-soft);
+  font-size: 13px;
+}
+
+.streamlit-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 16px 0;
+}
+
+.streamlit-section {
+  background: var(--color-background-soft);
+  border: 1px solid var(--color-border);
+  border-radius: var(--st-radius);
+  padding: 16px;
+  margin: 16px 0;
+}
+
+.streamlit-subheader {
+  font-size: 18px;
+  margin: 0 0 12px;
+}
+
+/* Inputs */
+.streamlit-selectbox label,
+.streamlit-text-area label,
+.streamlit-date-input label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--color-text);
+}
+
+.streamlit-select,
+.streamlit-textarea,
+.streamlit-date {
+  width: 100%;
+  max-width: 600px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-background);
+  color: var(--color-text);
+  box-sizing: border-box;
+}
+
+.streamlit-textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.streamlit-help {
+  color: var(--color-text-soft);
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+/* Messages */
+.streamlit-success,
+.streamlit-error,
+.streamlit-warning,
+.streamlit-info {
+  border-radius: 6px;
+  padding: 12px;
+  margin: 12px 0;
+}
+
+.streamlit-success { background: #eafaf1; border: 1px solid #c9ecd9; }
+.streamlit-error   { background: #fff0f2; border: 1px solid #ffd0d8; }
+.streamlit-warning { background: #fff8e8; border: 1px solid #ffe1a6; }
+.streamlit-info    { background: #edf6ff; border: 1px solid #c7e3ff; }
+
+/* Buttons */
+.streamlit-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--st-radius);
+  padding: 8px 12px;
+  background: var(--color-background-mute);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.streamlit-button:hover { filter: brightness(1.05); }
+.streamlit-button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.streamlit-button-primary {
+  background: var(--st-primary);
+  border-color: var(--st-primary);
+  color: #fff;
+}
+
+.streamlit-button-primary:hover {
+  background: var(--st-primary-hover);
+  border-color: var(--st-primary-hover);
+}
+
+.streamlit-button-danger {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #fff;
+}
+
+.streamlit-button-small { padding: 6px 10px; font-size: 13px; }
+
+/* Expander */
+.streamlit-expander {
+  border: 1px solid var(--color-border);
+  border-radius: var(--st-radius);
+  background: var(--color-background);
+}
+
+.streamlit-expander-header {
+  padding: 10px 12px;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.streamlit-expander-content { padding: 12px; }
+
+/* Spinner */
+.streamlit-spinner { display: flex; align-items: center; gap: 10px; }
+.streamlit-spinner .spinner {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid var(--color-border);
+  border-top-color: #FF4B4B;
+  animation: sl-spin 0.8s linear infinite;
+}
+
+/* Override spinner color to use theme variable */
+.streamlit-spinner .spinner { border-top-color: var(--st-primary); }
+
+@keyframes sl-spin { to { transform: rotate(360deg); } }
+
+/* Reports list */
+.reports-section { margin-top: 12px; }
+.report-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--st-radius);
+  margin-bottom: 10px;
+  background: var(--color-background);
+}
+
+.report-info { display: flex; gap: 12px; align-items: baseline; }
+.report-name { font-weight: 600; }
+.report-date, .report-size { color: var(--color-text-soft); font-size: 12px; }
+.report-actions { display: flex; gap: 8px; }
+
+/* Footer */
+.streamlit-footer { margin-top: 16px; color: var(--color-text-soft); font-size: 12px; }
+
+/* Modal preview */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.modal-content {
+  background: var(--color-background);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--st-radius);
+  width: min(800px, 90vw);
+  max-height: 80vh;
+  overflow: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.modal-close { cursor: pointer; border: none; background: transparent; font-size: 20px; }
+.modal-body { padding: 12px; }
+.preview-content { line-height: 1.6; }

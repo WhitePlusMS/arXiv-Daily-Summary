@@ -1,0 +1,24 @@
+@import './base.css';
+
+#app {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+}
+
+a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+  padding: 3px;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+
+/* 取消默认模板的居中与双列栅格，页面按组件自行布局 */
