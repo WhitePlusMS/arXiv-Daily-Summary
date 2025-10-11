@@ -7,6 +7,7 @@
 from functools import lru_cache
 from .main_dashboard_service import ArxivRecommenderService
 from .category_matcher_service import CategoryMatcherService
+from .environment_config_service import EnvConfigService
 
 
 class ServiceContainer:
@@ -34,6 +35,13 @@ class ServiceContainer:
             self._services['category_matcher_service'] = CategoryMatcherService()
         return self._services['category_matcher_service']
 
+    @lru_cache(maxsize=1)
+    def get_env_config_service(self) -> EnvConfigService:
+        """获取环境配置服务实例"""
+        if 'env_config_service' not in self._services:
+            self._services['env_config_service'] = EnvConfigService()
+        return self._services['env_config_service']
+
 
 # 全局服务容器实例
 service_container = ServiceContainer()
@@ -47,3 +55,7 @@ def get_arxiv_service() -> ArxivRecommenderService:
 def get_category_matcher_service() -> CategoryMatcherService:
     """FastAPI依赖注入：获取分类匹配器服务"""
     return service_container.get_category_matcher_service()
+
+def get_env_config_service() -> EnvConfigService:
+    """FastAPI依赖注入：获取环境配置服务"""
+    return service_container.get_env_config_service()

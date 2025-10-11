@@ -24,6 +24,12 @@
           <span v-if="!collapsed">分类匹配器</span>
         </RouterLink>
       </li>
+      <li>
+        <RouterLink to="/env-config" class="nav-link" :class="{ active: route.name === 'env-config' }">
+          <span class="icon">⚙️</span>
+          <span v-if="!collapsed">环境配置</span>
+        </RouterLink>
+      </li>
     </ul>
   </nav>
 </template>

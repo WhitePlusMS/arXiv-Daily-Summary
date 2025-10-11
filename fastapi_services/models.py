@@ -74,3 +74,9 @@ class UpdateRecordRequest(BaseModel):
 class BatchDeleteRequest(BaseModel):
     """批量删除记录请求"""
     indices: List[int]
+
+
+# 环境配置相关
+class SaveEnvRequest(BaseModel):
+    """保存环境配置请求"""
+    config: Dict[str, Any]

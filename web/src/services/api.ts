@@ -100,6 +100,30 @@ export const deleteReportFile = async (params: { name: string, format: 'md' | 'h
 }
 
 // =====================
+// 环境配置相关 API
+// =====================
+
+export const getEnvConfig = async (): Promise<ApiResponse<Record<string, unknown>>> => {
+  const response = await api.get('/api/env-config')
+  return response.data
+}
+
+export const saveEnvConfig = async (request: { config: Record<string, unknown> }): Promise<ApiResponse<{ saved: boolean }>> => {
+  const response = await api.post('/api/env-config/save', request)
+  return response.data
+}
+
+export const reloadEnvConfig = async (): Promise<ApiResponse<Record<string, unknown>>> => {
+  const response = await api.post('/api/env-config/reload')
+  return response.data
+}
+
+export const restoreDefaultEnvConfig = async (): Promise<ApiResponse<Record<string, unknown>>> => {
+  const response = await api.post('/api/env-config/restore-default')
+  return response.data
+}
+
+// =====================
 // 分类匹配器相关 API
 // =====================
 

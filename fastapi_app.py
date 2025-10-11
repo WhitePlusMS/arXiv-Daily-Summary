@@ -23,8 +23,9 @@ from fastapi_services.models import (
     UpdateRecordRequest,
     BatchDeleteRequest,
 )
-from fastapi_services.service_container import get_arxiv_service, get_category_matcher_service
+from fastapi_services.service_container import get_arxiv_service, get_category_matcher_service, get_env_config_service
 from fastapi_services.main_dashboard_service import ArxivRecommenderService
+from fastapi_services.environment_config_service import EnvConfigService
 from services.category_browser_service import CategoryService
 
 # 创建FastAPI应用
@@ -184,6 +185,55 @@ async def get_categories():
     except Exception as e:
         logger.error(f"获取分类数据失败: {str(e)}")
     raise HTTPException(status_code=500, detail=str(e))
+
+# =====================
+# 环境配置相关 API
+# =====================
+
+@app.get("/api/env-config")
+async def get_env_config(service: EnvConfigService = Depends(get_env_config_service)):
+    """获取 .env 配置"""
+    logger.info("API调用: 获取环境配置")
+    try:
+        result = await service.get_config()
+        return result
+    except Exception as e:
+        logger.error(f"获取环境配置失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/env-config/save")
+async def save_env_config(request: dict, service: EnvConfigService = Depends(get_env_config_service)):
+    """保存 .env 配置。请求体需包含 { config: {...} }"""
+    logger.info("API调用: 保存环境配置")
+    try:
+        cfg = request.get("config", {}) if isinstance(request, dict) else {}
+        result = await service.save_config(cfg)
+        return result
+    except Exception as e:
+        logger.error(f"保存环境配置失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/env-config/reload")
+async def reload_env_config(service: EnvConfigService = Depends(get_env_config_service)):
+    """重新加载 .env 配置"""
+    logger.info("API调用: 重新加载环境配置")
+    try:
+        result = await service.reload_config()
+        return result
+    except Exception as e:
+        logger.error(f"重新加载环境配置失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/env-config/restore-default")
+async def restore_default_env_config(service: EnvConfigService = Depends(get_env_config_service)):
+    """从 .env.example 恢复默认配置"""
+    logger.info("API调用: 恢复默认环境配置")
+    try:
+        result = await service.restore_default()
+        return result
+    except Exception as e:
+        logger.error(f"恢复默认环境配置失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 # 辅助函数：解析报告文件路径
 def _resolve_report_path(name: str, fmt: str) -> Path:
