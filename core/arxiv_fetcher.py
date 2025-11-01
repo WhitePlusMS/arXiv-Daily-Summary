@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 import pytz
 import xml.etree.ElementTree as ET
 import urllib.parse
-from core.common_utils import run_with_retries
+from core.common_utils import run_with_retries, write_json, make_on_retry_logger
 
 class ArxivFetcher:
     def __init__(self, base_url: str = "http://export.arxiv.org/api/query", retries: int = 3, delay: int = 5):
@@ -127,9 +127,7 @@ class ArxivFetcher:
             papers = [self._parse_api_entry(entry, category) for entry in feed.entries]
             return papers
 
-        def _on_retry(attempt_idx: int, exc: Exception):
-            logger.warning(f"论文获取失败 ({attempt_idx}/{self.retries}) - {category}: {exc}")
-            logger.debug(f"等待 {self.delay} 秒后重试")
+        _on_retry = make_on_retry_logger("论文获取", category, self.retries, self.delay)
 
         try:
             papers = run_with_retries(_do_request, self.retries, self.delay, _on_retry)
@@ -162,9 +160,8 @@ class ArxivFetcher:
             papers = [self._parse_api_entry(entry, None) for entry in feed.entries]
             return papers
 
-        def _on_retry(attempt_idx: int, exc: Exception):
-            logger.warning(f"复杂查询失败 ({attempt_idx}/{self.retries}) - '{search_query}': {exc}")
-            logger.debug(f"等待 {self.delay} 秒后重试")
+        # 使用统一的 on_retry 回调模板，保持日志语义与内容完全一致
+        _on_retry = make_on_retry_logger("复杂查询", f"'{search_query}'", self.retries, self.delay)
 
         try:
             papers = run_with_retries(_do_request, self.retries, self.delay, _on_retry)
@@ -309,8 +306,8 @@ class ArxivFetcher:
 def save_to_json(data, filename):
     logger.debug(f"JSON保存开始 - {filename}")
     try:
-        with open(filename, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
+        # 使用统一的JSON写入工具函数，参数与原实现一致
+        write_json(filename, data, ensure_ascii=False, indent=2)
         logger.debug(f"JSON保存完成 - {filename}")
     except Exception as e:
         logger.error(f"JSON保存失败 - {filename}: {e}")

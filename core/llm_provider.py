@@ -242,6 +242,206 @@ class LLMProvider:
         )
 
     # =========================
+    # 统一提示词构建方法（集中管理）
+    # =========================
+
+    @staticmethod
+    def build_time_service_system_message() -> str:
+        """用于时间工具调用后的最终系统消息，要求仅输出标准时间字符串。"""
+        return (
+            "你是一个只会返回标准时间格式的机器人。请根据工具返回的结果，直接输出格式为 YYYY-MM-DD HH:MM:SS 的时间字符串，不要包含任何其他文字、标点或解释。"
+        )
+
+    @staticmethod
+    def build_scoring_warmup_messages() -> List[Dict[str, str]]:
+        """用于 OLLAMA 预热的一组消息，确保仅返回整数评分。"""
+        return [
+            {
+                "role": "system",
+                "content": "You are a scoring assistant. You MUST respond with only a single integer between 0-100. No explanations, no text, just the number.",
+            },
+            {
+                "role": "user",
+                "content": "Output only a number 0-100. No text. Test warmup:",
+            },
+        ]
+
+    @staticmethod
+    def build_scoring_system_message(strict: bool = True) -> str:
+        """分类评分的系统消息。
+        strict=True 时，额外强调不允许思维链、不允许解释，仅输出数字。
+        """
+        if strict:
+            return (
+                "You are a scoring assistant. You MUST respond with only a single integer between 0-100. NEVER use <think> tags or any thinking process. NEVER provide explanations. Output format: just the number, nothing else."
+            )
+        return (
+            "You are a scoring assistant. You MUST respond with only a single integer between 0-100. No explanations, no text, just the number."
+        )
+
+    def build_category_evaluation_prompt(self, user_description: str, category: Dict[str, Any]) -> str:
+        """构建基础版分类评估提示词（CO-STAR 风格）。"""
+        return f"""
+# CO-STAR Prompt for Academic Category Matching
+
+## (C) Context:
+你正在为一个内部的"智能投稿助手"系统提供核心判断能力。该系统的用户是严谨的科研人员，他们需要根据你的评分来决定自己耗费心血的研究论文应该投往哪个ArXiv分类。ArXiv的分类体系复杂，存在广泛的交叉和重叠，一个研究方向往往与多个分类都有关联，但关联的性质和程度有细微差别。你的判断是这个决策过程中的关键一环。
+
+## (S) Style & (T) Tone:
+请扮演一位极其严谨、经验丰富的ArXiv高级审核员。你的判断风格必须是分析性的、批判性的，并且对细节极其敏感。你的工作语气是要求苛刻的，追求绝对的精确，不接受任何模棱两可或过于概括的评估。
+
+## (A) Audience:
+你的评估结果的最终受众是一位正在为自己的重要论文（可能是博士毕业论文或一项重大研究的成果）寻找最恰当分类的研究者。他们依赖你的精确评分来避免论文被错投或淹没在不相关的领域中。
+
+## (O) Objective:
+你的核心目标是，严格评估以下提供的"用户研究方向"与"ArXiv分类"之间的匹配程度，并输出一个**精确到个位数的整数评分（0-100）**。这个评分必须能反映两者之间哪怕最细微的关联度差异。
+- **100分** 代表该研究是此分类的教科书式范例。
+- **85-99分** 代表非常核心的匹配，是理想的投稿目标。
+- **60-84分** 代表强相关，研究属于该分类的常见子领域或应用领域。
+- **30-59分** 代表存在方法论或主题上的交叉，但并非核心。
+- **1-29分** 代表仅有微弱或间接的联系。
+- **0分** 代表完全不相关。
+
+## (R) Response Format:
+你的输出**必须且只能是**一个0到100之间的整数。
+- **禁止**返回任何解释、理由、文字或单位。
+- **必须**提供细粒度的分数，例如 78, 93, 62，而不是笼统的 70, 80, 90。
+Output only a number 0-100. No text.
+---
+### [输入数据]
+
+#### 用户研究方向:
+{user_description}
+
+#### ArXiv分类信息:
+- ID: {category['id']}
+- 名称: {category['name']}
+- 描述: {category['description']}
+---
+### [输出]
+""".strip()
+
+    def build_category_evaluation_prompt_enhanced(self, user_description: str, category: Dict[str, Any]) -> str:
+        """构建增强版分类评估提示词（含分类画像）。"""
+        profile_info = ""
+        if "profile" in category:
+            profile = category["profile"]
+            profile_info = f"""
+#### 分类深度画像:
+**领域概述**: {profile.get('profile_summary', '暂无')}
+
+**核心研究主题**:
+{chr(10).join([f'    • {topic}' for topic in profile.get('core_topics', [])])}
+
+**常用研究方法**:
+{chr(10).join([f'    • {method}' for method in profile.get('common_methodologies', [])])}
+
+**跨学科连接**:
+{chr(10).join([f'    • {connection}' for connection in profile.get('interdisciplinary_connections', [])])}
+
+**关键术语**:
+{', '.join(profile.get('key_terminologies', []))}
+"""
+
+        return f"""
+## (C) Context:
+你正在为一个高精度的"智能投稿助手"系统提供核心判断能力。该系统的用户是严谨的科研人员，他们需要根据你的评分来决定自己耗费心血的研究论文应该投往哪个ArXiv分类。现在你拥有了该分类的深度画像信息，包括核心研究主题、常用方法论、跨学科连接和关键术语，这使你能够进行更加精准和细致的匹配评估。
+## (O) Objective:
+基于提供的分类深度画像信息，严格评估"用户研究方向"与"ArXiv分类"之间的匹配程度，输出一个**精确到个位数的整数评分（0-100）**。
+## (S) Style & (T) Tone:
+请扮演一位拥有深度领域知识的ArXiv资深审核专家。你的判断风格必须是:
+- **深度分析性**: 不仅看表面关键词匹配，更要理解研究的本质和方法论
+- **多维度评估**: 从研究主题、方法论、跨学科性、术语使用等多个维度综合判断
+- **精确量化**: 对细微差别敏感，能够区分85分和87分的差异
+- **前瞻性思考**: 考虑研究的发展趋势和在该分类中的接受度
+## (A) Audience:
+你的评估结果将直接影响一位研究者的论文投稿决策。他们可能是:
+- 正在撰写博士论文的研究生
+- 准备投稿重要研究成果的学者
+- 寻求最佳发表平台的跨学科研究者
+他们依赖你的精确评分来最大化论文的影响力和可见度。
+**评分标准**:
+- **95-100分**: 研究完美契合分类的核心主题和方法论，是该分类的典型代表
+- **85-94分**: 研究高度匹配分类的主要研究方向，使用相关方法论和术语
+- **70-84分**: 研究与分类有强相关性，涉及相关主题或方法，但可能不是核心
+- **50-69分**: 研究与分类存在明显交集，在跨学科连接或方法论上有重叠
+- **25-49分**: 研究与分类有一定关联，可能使用相关术语或涉及边缘主题
+- **10-24分**: 研究与分类仅有微弱联系，关联性较为间接
+- **1-9分**: 研究与分类几乎无关，仅在极个别方面可能有联系
+- **0分**: 研究与分类完全不相关
+## (R) Response Format:
+你的输出**必须且只能是**一个0到100之间的整数。
+- **严格禁止**返回任何解释、理由、文字、符号或单位
+- **必须**提供精确的个位数评分，体现细微差别
+- **示例**: 73, 89, 56（而非70, 90, 60）
+Output only a number 0-100. No text.
+---
+### [输入数据]
+
+#### 用户研究方向:
+{user_description}
+
+#### ArXiv分类基础信息:
+- **分类ID**: {category['id']}
+- **分类名称**: {category.get('name_cn', category.get('name', ''))}
+- **官方描述**: {category.get('description_cn', category.get('description', ''))}
+{profile_info}
+---
+### [输出]
+""".strip()
+
+    @staticmethod
+    def build_category_translation_prompt(text: str) -> str:
+        """构建英文到中文的专业翻译提示词。"""
+        return f"""
+你是一个精通中英文的专业翻译。请将以下英文文本翻译成简洁、专业、流畅的简体中文。
+请只返回翻译后的文本，不要包含任何额外的解释或说明。
+
+英文原文:
+"{text}"
+
+翻译后的中文:
+"""
+
+    @staticmethod
+    def build_category_profile_prompt(category: Dict[str, Any], papers: List[Dict[str, Any]]) -> str:
+        """为分类画像生成构建统一提示词。"""
+        papers_info = []
+        for p in papers:
+            papers_info.append(f"- 标题: {p['title']}\n- 摘要: {p['abstract']}")
+        papers_text = "\n\n".join(papers_info)
+
+        return f"""
+你是一个专业的科研领域分析师。请基于以下信息，为一个 ArXiv 科研分类生成一个详细的画像。
+
+**分类信息:**
+- 分类ID: {category['id']}
+- 分类名称: {category.get('name_cn', category.get('name', ''))}
+- 官方描述: {category.get('description_cn', category.get('description', ''))}
+
+**该分类下的代表性论文（标题和摘要）:**
+{papers_text}
+
+**你的任务是，总结以上所有信息，生成一个结构化的、详细的分类画像。请严格按照以下JSON格式输出，不要添加任何额外的解释或说明文字：**
+
+{{
+  "profile_summary": "用一段话总结该分类的核心研究内容和目标。",
+  "core_topics": [
+    "根据论文内容，列出3-5个最核心的研究主题或子领域"
+  ],
+  "common_methodologies": [
+    "根据论文内容，列出3-5种该领域常用的研究方法、技术或模型"
+  ],
+  "interdisciplinary_connections": [
+    "分析并列出该分类与其他2-3个科研领域最可能的交叉点"
+  ],
+  "key_terminologies": [
+    "根据论文内容，提取并列出10个最关键的专业术语"
+  ]
+}}
+"""
+
+    # =========================
     # Token感知截断与统计输出
     # =========================
     @staticmethod
@@ -467,11 +667,6 @@ class LLMProvider:
         except Exception as e:
             logger.error(f"研究描述优化异常: {e}")
             return f"优化失败，返回原始描述：\n\n{user_description}"
-        except Exception as e:
-            logger.error(f"论文评估异常 - {title_short}: {e}")
-            return {
-                "relevance_score": 0
-            }
     
     def build_summary_report_prompt(self, papers: List[Dict[str, Any]], current_time: str) -> str:
         """构建总结报告提示词。
@@ -651,14 +846,9 @@ class LLMProvider:
         """
         # Token感知截断：优先按token估算，再用字符长度兜底
         full_text = paper.get('full_text', '')
-        try:
-            max_tokens_text = int(os.getenv('FULLTEXT_MAX_TOKENS', '4000'))
-        except Exception:
-            max_tokens_text = 4000
-        try:
-            max_chars_fallback = int(os.getenv('FULLTEXT_MAX_CHARS', '15000'))
-        except Exception:
-            max_chars_fallback = 15000
+        from core.common_utils import get_env_int
+        max_tokens_text = get_env_int('FULLTEXT_MAX_TOKENS', 4000)
+        max_chars_fallback = get_env_int('FULLTEXT_MAX_CHARS', 15000)
         full_text = self._truncate_by_tokens(full_text, max_tokens_text, max_chars_fallback)
 
         return f"""

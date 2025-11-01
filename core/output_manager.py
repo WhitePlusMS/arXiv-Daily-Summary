@@ -16,6 +16,7 @@ from pathlib import Path
 
 from loguru import logger
 from .template_renderer import TemplateRenderer
+from .common_utils import sanitize_username
 import re
 
 
@@ -39,9 +40,8 @@ class OutputManager:
 
     def _sanitize_username_for_filename(self, username: str) -> str:
         """将用户名转换为安全的文件名片段（用于文件名）。"""
-        if not username:
-            return "USER"
-        return re.sub(r'[\\/:*?"<>|\s]+', '_', username.strip())
+        # 委托给统一的工具函数，保持与原逻辑完全一致
+        return sanitize_username(username)
     
     def save_markdown_report(
         self, 

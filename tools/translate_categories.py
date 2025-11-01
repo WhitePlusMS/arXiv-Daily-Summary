@@ -50,20 +50,6 @@ class CategoryTranslator:
         )
         logger.info("LLMProvider 初始化成功，用于翻译。")
 
-    def _build_translation_prompt(self, text: str) -> str:
-        """
-        构建翻译提示词。
-        """
-        return f"""
-你是一个精通中英文的专业翻译。请将以下英文文本翻译成简洁、专业、流畅的简体中文。
-请只返回翻译后的文本，不要包含任何额外的解释或说明。
-
-英文原文:
-"{text}"
-
-翻译后的中文:
-"""
-
     def translate_text(self, text: str) -> str:
         """
         使用LLM翻译单个文本。
@@ -71,7 +57,7 @@ class CategoryTranslator:
         if not text or not isinstance(text, str):
             return ""
         
-        prompt = self._build_translation_prompt(text)
+        prompt = LLMProvider.build_category_translation_prompt(text)
         try:
             # 使用较低的温度以获得更稳定、确定性的翻译结果
             translated_text = self.llm_provider.generate_response(prompt, temperature=0.1)

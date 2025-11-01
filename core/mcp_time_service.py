@@ -116,10 +116,11 @@ class MCPTimeService:
                                 "content": function_response,
                             }
                         )
+                from core.llm_provider import LLMProvider
                 messages.append(
                     {
                         "role": "system",
-                        "content": "你是一个只会返回标准时间格式的机器人。请根据工具返回的结果，直接输出格式为 YYYY-MM-DD HH:MM:SS 的时间字符串，不要包含任何其他文字、标点或解释。",
+                        "content": LLMProvider.build_time_service_system_message(),
                     }
                 )
 

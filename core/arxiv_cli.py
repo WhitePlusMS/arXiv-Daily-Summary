@@ -21,6 +21,7 @@ from core.template_renderer import TemplateRenderer
 from core.mcp_time_service import MCPTimeService
 from core.mcp_time_service import get_current_time
 from core.output_manager import OutputManager
+from core.common_utils import sanitize_username, get_env_int, get_env_bool
 import re
 
 # 项目根目录路径（用于文件读取）
@@ -118,9 +119,9 @@ class ArxivRecommenderCLI:
             # 日志配置
             'log_level': os.getenv('LOG_LEVEL', 'INFO'),
             'log_file': os.getenv('LOG_FILE', 'logs/arxiv_recommender.log'),
-            'log_to_console': os.getenv('LOG_TO_CONSOLE', 'true').lower() == 'true',
-            'log_max_size': int(os.getenv('LOG_MAX_SIZE', '10')),
-            'log_backup_count': int(os.getenv('LOG_BACKUP_COUNT', '5')),
+            'log_to_console': get_env_bool('LOG_TO_CONSOLE', True),
+            'log_max_size': get_env_int('LOG_MAX_SIZE', 10),
+            'log_backup_count': get_env_int('LOG_BACKUP_COUNT', 5),
         }
         
         return config
@@ -769,7 +770,8 @@ class ArxivRecommenderCLI:
     
     def _sanitize_username(self, username: str) -> str:
         """将用户名转换为安全的文件名片段"""
-        return re.sub(r'[\\/:*?"<>|\s]+', '_', username.strip()) if username else "USER"
+        # 委托给统一的工具函数，保持与原逻辑完全一致
+        return sanitize_username(username)
     
     def _save_markdown_if_configured(self, markdown_content: str, current_time: str, target_date: str = None):
         """如果配置了保存Markdown，则保存报告。
@@ -1076,7 +1078,7 @@ def main():
         logger.remove()  # 移除默认处理器
         
         log_level = os.getenv('LOG_LEVEL', 'INFO')
-        log_to_console = os.getenv('LOG_TO_CONSOLE', 'true').lower() == 'true'
+        log_to_console = get_env_bool('LOG_TO_CONSOLE', True)
         log_file = os.getenv('LOG_FILE', 'logs/arxiv_recommender.log')
         
         # 控制台日志
@@ -1094,8 +1096,8 @@ def main():
             if log_dir and not os.path.exists(log_dir):
                 os.makedirs(log_dir, exist_ok=True)
             
-            log_max_size = int(os.getenv('LOG_MAX_SIZE', '10')) * 1024 * 1024  # 转换为字节
-            log_backup_count = int(os.getenv('LOG_BACKUP_COUNT', '5'))
+            log_max_size = get_env_int('LOG_MAX_SIZE', 10) * 1024 * 1024  # 转换为字节
+            log_backup_count = get_env_int('LOG_BACKUP_COUNT', 5)
             
             logger.add(
                 log_file,

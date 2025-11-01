@@ -9,6 +9,7 @@ import json
 import time
 from typing import List, Dict, Optional, Tuple, Any
 from core.llm_provider import LLMProvider
+from core.common_utils import write_json
 from loguru import logger
 from datetime import datetime
 import re
@@ -75,8 +76,8 @@ class MultiUserDataManager:
         # 合并数据（追加新数据到现有数据后面）
         all_users_list = existing_data + new_users_list
         
-        with open(self.output_file, 'w', encoding='utf-8') as f:
-            json.dump(all_users_list, f, ensure_ascii=False, indent=2)
+        # 使用统一的JSON写入工具函数，参数与原实现一致
+        write_json(self.output_file, all_users_list, ensure_ascii=False, indent=2)
         
         logger.success(f"数据已保存到: {self.output_file}")
         print(f"\n=== 数据保存完成 ===")
@@ -140,10 +141,7 @@ class CategoryMatcher:
             try:
                 # 发送简单的预热请求（统一走 LLMProvider，确保限流与统计一致）
                 response = self.llm.chat_with_retry(
-                    messages=[
-                        {"role": "system", "content": "You are a scoring assistant. You MUST respond with only a single integer between 0-100. No explanations, no text, just the number."},
-                        {"role": "user", "content": "Output only a number 0-100. No text. Test warmup:"}
-                    ],
+                    messages=LLMProvider.build_scoring_warmup_messages(),
                     temperature=0.0,
                     max_tokens=3,
                     max_retries=1,
@@ -241,7 +239,7 @@ class CategoryMatcher:
         Returns:
             评估提示词
         """
-        return self.generate_prompt(user_description, category)
+        return self.llm.build_category_evaluation_prompt(user_description, category)
     
     def _build_enhanced_evaluation_prompt(self, user_description: str, category: Dict[str, Any]) -> str:
         """构建增强版评估提示词，利用分类画像信息
@@ -253,126 +251,8 @@ class CategoryMatcher:
         Returns:
             增强版评估提示词
         """
-        return self.generate_enhanced_prompt(user_description, category)
+        return self.llm.build_category_evaluation_prompt_enhanced(user_description, category)
 
-    def generate_prompt(self, user_description, category):
-        return f"""
-    # CO-STAR Prompt for Academic Category Matching
-
-    ## (C) Context:
-    你正在为一个内部的"智能投稿助手"系统提供核心判断能力。该系统的用户是严谨的科研人员，他们需要根据你的评分来决定自己耗费心血的研究论文应该投往哪个ArXiv分类。ArXiv的分类体系复杂，存在广泛的交叉和重叠，一个研究方向往往与多个分类都有关联，但关联的性质和程度有细微差别。你的判断是这个决策过程中的关键一环。
-
-    ## (S) Style & (T) Tone:
-    请扮演一位极其严谨、经验丰富的ArXiv高级审核员。你的判断风格必须是分析性的、批判性的，并且对细节极其敏感。你的工作语气是要求苛刻的，追求绝对的精确，不接受任何模棱两可或过于概括的评估。
-
-    ## (A) Audience:
-    你的评估结果的最终受众是一位正在为自己的重要论文（可能是博士毕业论文或一项重大研究的成果）寻找最恰当分类的研究者。他们依赖你的精确评分来避免论文被错投或淹没在不相关的领域中。
-
-    ## (O) Objective:
-    你的核心目标是，严格评估以下提供的"用户研究方向"与"ArXiv分类"之间的匹配程度，并输出一个**精确到个位数的整数评分（0-100）**。这个评分必须能反映两者之间哪怕最细微的关联度差异。
-    - **100分** 代表该研究是此分类的教科书式范例。
-    - **85-99分** 代表非常核心的匹配，是理想的投稿目标。
-    - **60-84分** 代表强相关，研究属于该分类的常见子领域或应用领域。
-    - **30-59分** 代表存在方法论或主题上的交叉，但并非核心。
-    - **1-29分** 代表仅有微弱或间接的联系。
-    - **0分** 代表完全不相关。
-
-    ## (R) Response Format:
-    你的输出**必须且只能是**一个0到100之间的整数。
-    - **禁止**返回任何解释、理由、文字或单位。
-    - **必须**提供细粒度的分数，例如 78, 93, 62，而不是笼统的 70, 80, 90。
-    Output only a number 0-100. No text.
-    ---
-    ### [输入数据]
-
-    #### 用户研究方向:
-    {user_description}
-
-    #### ArXiv分类信息:
-    - ID: {category['id']}
-    - 名称: {category['name']}
-    - 描述: {category['description']}
-    ---
-    ### [输出]
-    """.strip()
-
-    def generate_enhanced_prompt(self, user_description, category):
-        """生成增强版提示词，利用分类画像信息提供更精准的匹配评估
-        
-        Args:
-            user_description: 用户研究描述
-            category: 包含profile信息的分类数据
-            
-        Returns:
-            增强版评估提示词
-        """
-        # 构建分类画像信息
-        profile_info = ""
-        if 'profile' in category:
-            profile = category['profile']
-            profile_info = f"""
-    #### 分类深度画像:
-    **领域概述**: {profile.get('profile_summary', '暂无')}
-    
-    **核心研究主题**:
-    {chr(10).join([f'    • {topic}' for topic in profile.get('core_topics', [])])}
-    
-    **常用研究方法**:
-    {chr(10).join([f'    • {method}' for method in profile.get('common_methodologies', [])])}
-    
-    **跨学科连接**:
-    {chr(10).join([f'    • {connection}' for connection in profile.get('interdisciplinary_connections', [])])}
-    
-    **关键术语**:
-    {', '.join(profile.get('key_terminologies', []))}
-    """
-        
-        return f"""
-    ## (C) Context:
-    你正在为一个高精度的"智能投稿助手"系统提供核心判断能力。该系统的用户是严谨的科研人员，他们需要根据你的评分来决定自己耗费心血的研究论文应该投往哪个ArXiv分类。现在你拥有了该分类的深度画像信息，包括核心研究主题、常用方法论、跨学科连接和关键术语，这使你能够进行更加精准和细致的匹配评估。
-    ## (O) Objective:
-    基于提供的分类深度画像信息，严格评估"用户研究方向"与"ArXiv分类"之间的匹配程度，输出一个**精确到个位数的整数评分（0-100）**。
-    ## (S) Style & (T) Tone:
-    请扮演一位拥有深度领域知识的ArXiv资深审核专家。你的判断风格必须是:
-    - **深度分析性**: 不仅看表面关键词匹配，更要理解研究的本质和方法论
-    - **多维度评估**: 从研究主题、方法论、跨学科性、术语使用等多个维度综合判断
-    - **精确量化**: 对细微差别敏感，能够区分85分和87分的差异
-    - **前瞻性思考**: 考虑研究的发展趋势和在该分类中的接受度
-    ## (A) Audience:
-    你的评估结果将直接影响一位研究者的论文投稿决策。他们可能是:
-    - 正在撰写博士论文的研究生
-    - 准备投稿重要研究成果的学者
-    - 寻求最佳发表平台的跨学科研究者
-    他们依赖你的精确评分来最大化论文的影响力和可见度。
-    **评分标准**:
-    - **95-100分**: 研究完美契合分类的核心主题和方法论，是该分类的典型代表
-    - **85-94分**: 研究高度匹配分类的主要研究方向，使用相关方法论和术语
-    - **70-84分**: 研究与分类有强相关性，涉及相关主题或方法，但可能不是核心
-    - **50-69分**: 研究与分类存在明显交集，在跨学科连接或方法论上有重叠
-    - **25-49分**: 研究与分类有一定关联，可能使用相关术语或涉及边缘主题
-    - **10-24分**: 研究与分类仅有微弱联系，关联性较为间接
-    - **1-9分**: 研究与分类几乎无关，仅在极个别方面可能有联系
-    - **0分**: 研究与分类完全不相关
-    ## (R) Response Format:
-    你的输出**必须且只能是**一个0到100之间的整数。
-    - **严格禁止**返回任何解释、理由、文字、符号或单位
-    - **必须**提供精确的个位数评分，体现细微差别
-    - **示例**: 73, 89, 56（而非70, 90, 60）
-    Output only a number 0-100. No text.
-    ---
-    ### [输入数据]
-
-    #### 用户研究方向:
-    {user_description}
-
-    #### ArXiv分类基础信息:
-    - **分类ID**: {category['id']}
-    - **分类名称**: {category.get('name_cn', category.get('name', ''))}
-    - **官方描述**: {category.get('description_cn', category.get('description', ''))}
-    {profile_info}
-    ---
-    ### [输出]
-    """.strip()
 
     def _call_llm(self, prompt: str) -> int:
         """调用LLM获取评分，带重试与稳健解析
@@ -391,7 +271,7 @@ class CategoryMatcher:
                 # 委托到统一的 LLMProvider 调用与重试逻辑（保留系统指令与温度/长度设置）
                 response = self.llm.chat_with_retry(
                     messages=[
-                        {"role": "system", "content": "You are a scoring assistant. You MUST respond with only a single integer between 0-100. NEVER use <think> tags or any thinking process. NEVER provide explanations. Output format: just the number, nothing else."},
+                        {"role": "system", "content": LLMProvider.build_scoring_system_message(strict=True)},
                         {"role": "user", "content": prompt}
                     ],
                     temperature=0.0,
@@ -423,8 +303,9 @@ class CategoryMatcher:
                 logger.warning(f"LLM调用失败(第{attempt+1}次): {e}")
                 # 指数退避等待，给Ollama冷启动/模型加载留时间
                 if attempt < max_retries - 1:
-                    sleep_s = backoff_base * (2 ** attempt)
-                    time.sleep(sleep_s)
+                    # 使用统一的退避休眠封装，保持时间公式一致
+                    from core.common_utils import backoff_sleep
+                    backoff_sleep(attempt, backoff_base, factor=2)
                 else:
                     # 最后一次失败，返回0分避免中断全流程
                     logger.warning("LLM多次调用失败，返回0作为该分类评分")
@@ -475,8 +356,8 @@ class CategoryMatcher:
         
         # 保存到文件
         try:
-            with open(filepath, 'w', encoding='utf-8') as f:
-                json.dump(detailed_data, f, ensure_ascii=False, indent=2)
+            # 使用统一的JSON写入工具函数，参数与原实现一致
+            write_json(filepath, detailed_data, ensure_ascii=False, indent=2)
             logger.success(f"详细评分已保存到: {filepath}")
             return filepath
         except Exception as e:

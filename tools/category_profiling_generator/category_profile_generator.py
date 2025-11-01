@@ -37,36 +37,8 @@ def generate_category_profile(llm_provider: LLMProvider, category: dict, papers:
     
     papers_text = "\n\n".join(papers_info)
     
-    # 构建 Prompt
-    prompt = f"""
-    你是一个专业的科研领域分析师。请基于以下信息，为一个 ArXiv 科研分类生成一个详细的画像。
-
-    **分类信息:**
-    - 分类ID: {category['id']}
-    - 分类名称: {category['name_cn']}
-    - 官方描述: {category['description_cn']}
-
-    **该分类下的代表性论文（标题和摘要）:**
-    {papers_text}
-
-    **你的任务是，总结以上所有信息，生成一个结构化的、详细的分类画像。请严格按照以下JSON格式输出，不要添加任何额外的解释或说明文字：**
-
-    {{
-      "profile_summary": "用一段话总结该分类的核心研究内容和目标。",
-      "core_topics": [
-        "根据论文内容，列出3-5个最核心的研究主题或子领域"
-      ],
-      "common_methodologies": [
-        "根据论文内容，列出3-5种该领域常用的研究方法、技术或模型"
-      ],
-      "interdisciplinary_connections": [
-        "分析并列出该分类与其他2-3个科研领域最可能的交叉点"
-      ],
-      "key_terminologies": [
-        "根据论文内容，提取并列出10个最关键的专业术语"
-      ]
-    }}
-    """
+    # 构建 Prompt（集中管理）
+    prompt = LLMProvider.build_category_profile_prompt(category, papers)
     
     print(f"\n正在为分类 {category['id']} 调用 LLM 生成画像...")
     
