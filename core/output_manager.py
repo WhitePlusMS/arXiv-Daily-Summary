@@ -38,10 +38,7 @@ class OutputManager:
         self.template_renderer = TemplateRenderer(template_dir)
         logger.success("OutputManager初始化完成")
 
-    def _sanitize_username_for_filename(self, username: str) -> str:
-        """将用户名转换为安全的文件名片段（用于文件名）。"""
-        # 委托给统一的工具函数，保持与原逻辑完全一致
-        return sanitize_username(username)
+    # 移除冗余的用户名清洗包装方法，直接在调用处使用公共工具函数
     
     def save_markdown_report(
         self, 
@@ -70,7 +67,7 @@ class OutputManager:
             # 生成文件名
             if filename is None:
                 date_str = target_date if target_date else datetime.datetime.now().strftime("%Y-%m-%d")
-                safe_username = self._sanitize_username_for_filename(username)
+                safe_username = sanitize_username(username)
                 filename = f"{date_str}_{safe_username}_ARXIV_summary.md"
             
             filepath = Path(save_dir) / filename
@@ -115,7 +112,7 @@ class OutputManager:
             # 生成文件名
             if filename is None:
                 date_str = target_date if target_date else datetime.datetime.now().strftime("%Y-%m-%d")
-                safe_username = self._sanitize_username_for_filename(username)
+                safe_username = sanitize_username(username)
                 filename = f"{date_str}_{safe_username}_ARXIV_summary.html"
             
             filepath = Path(save_dir) / filename
@@ -164,7 +161,7 @@ class OutputManager:
             # 生成文件名
             if filename is None:
                 date_str = target_date if target_date else datetime.datetime.now().strftime("%Y-%m-%d")
-                safe_username = self._sanitize_username_for_filename(username)
+                safe_username = sanitize_username(username)
                 filename = f"{date_str}_{safe_username}_ARXIV_summary.html"
             
             filepath = Path(save_dir) / filename

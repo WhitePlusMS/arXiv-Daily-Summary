@@ -187,15 +187,6 @@ def get_current_time() -> str:
     return get_time_service().get_current_time()
 
 
-def get_time_via_llm_tool() -> Optional[str]:
-    """通过LLM工具调用获取时间的便捷函数（保持向后兼容）。
-    
-    Returns:
-        LLM返回的时间字符串，失败时返回None
-    """
-    return get_time_service().get_time_via_llm_tool()
-
-
 def main():
     """独立测试函数。"""
     logger.info("MCPTimeService测试开始")

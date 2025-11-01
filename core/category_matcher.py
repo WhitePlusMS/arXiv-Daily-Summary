@@ -229,29 +229,6 @@ class CategoryMatcher:
         except Exception:
             pass
     
-    def _build_evaluation_prompt(self, user_description: str, category: Dict[str, Any]) -> str:
-        """构建评估提示词
-        
-        Args:
-            user_description: 用户研究描述
-            category: 单个分类信息
-            
-        Returns:
-            评估提示词
-        """
-        return self.llm.build_category_evaluation_prompt(user_description, category)
-    
-    def _build_enhanced_evaluation_prompt(self, user_description: str, category: Dict[str, Any]) -> str:
-        """构建增强版评估提示词，利用分类画像信息
-        
-        Args:
-            user_description: 用户研究描述
-            category: 包含profile信息的分类数据
-            
-        Returns:
-            增强版评估提示词
-        """
-        return self.llm.build_category_evaluation_prompt_enhanced(user_description, category)
 
 
     def _call_llm(self, prompt: str) -> int:
@@ -383,7 +360,7 @@ class CategoryMatcher:
         for i, category in enumerate(self.categories):
             logger.debug(f"评估分类 {i+1}/{len(self.categories)}: {category['id']}")
             
-            prompt = self._build_evaluation_prompt(user_description, category)
+            prompt = self.llm.build_category_evaluation_prompt(user_description, category)
             score = self._call_llm(prompt)
             
             results.append((category['id'], category['name'], score))
@@ -424,7 +401,7 @@ class CategoryMatcher:
         for i, category in enumerate(self.enhanced_categories):
             logger.debug(f"评估增强版分类 {i+1}/{len(self.enhanced_categories)}: {category['id']}")
             
-            prompt = self._build_enhanced_evaluation_prompt(user_description, category)
+            prompt = self.llm.build_category_evaluation_prompt_enhanced(user_description, category)
             score = self._call_llm(prompt)
             
             category_name = category.get('name_cn', category.get('name', ''))

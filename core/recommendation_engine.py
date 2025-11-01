@@ -132,13 +132,6 @@ class RecommendationEngine:
         logger.success(f"论文获取完成 - 总计: {len(all_papers)} 篇")
         return all_papers
 
-    def _evaluate_paper_relevance(self, paper: Dict[str, Any]) -> Dict[str, Any]:
-        """使用轻量模型评估论文相关性。"""
-        # 使用轻量模型的默认温度配置（通过传入None以便使用provider的default设置）
-        return self.light_llm_provider.evaluate_paper_relevance(
-            paper, self.description, temperature=None
-        )
-
     def _process_single_paper(self, paper: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """处理单篇论文，包含重试机制。"""
         max_retries = 2  # 减少重试次数
@@ -149,7 +142,10 @@ class RecommendationEngine:
                 # 添加请求间隔，避免API限流
                 time.sleep(0.1)  # 每篇论文评估前等待0.5秒
                 
-                evaluation = self._evaluate_paper_relevance(paper)
+                # 直接调用轻量模型进行相关性评估（内联，去除额外间接层）
+                evaluation = self.light_llm_provider.evaluate_paper_relevance(
+                    paper, self.description, temperature=None
+                )
                 
                 # 合并论文信息和评估结果
                 result = {
@@ -228,9 +224,7 @@ class RecommendationEngine:
 
 
 
-    def summarize(self, papers: List[Dict[str, Any]], current_time: str) -> str:
-        """生成论文推荐的Markdown总结报告。"""
-        return self.llm_provider.generate_summary_report(papers, current_time)
+    # 移除未使用的 summarize 包装方法：直接使用 llm_provider.generate_summary_report
 
     def _process_single_paper_analysis(self, paper: Dict[str, Any]) -> str:
         """处理单篇论文的详细分析。"""

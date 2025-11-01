@@ -768,10 +768,6 @@ class ArxivRecommenderCLI:
             logger.warning("邮件发送失败，但报告已成功生成并保存到本地")
             # 不重新抛出异常，让程序继续运行
     
-    def _sanitize_username(self, username: str) -> str:
-        """将用户名转换为安全的文件名片段"""
-        # 委托给统一的工具函数，保持与原逻辑完全一致
-        return sanitize_username(username)
     
     def _save_markdown_if_configured(self, markdown_content: str, current_time: str, target_date: str = None):
         """如果配置了保存Markdown，则保存报告。
@@ -790,7 +786,7 @@ class ArxivRecommenderCLI:
             # 生成文件名
             date_str = target_date if target_date else datetime.now().strftime("%Y-%m-%d")
             username = self._get_current_username()
-            safe_username = self._sanitize_username(username)
+            safe_username = sanitize_username(username)
             filename = f"{date_str}_{safe_username}_ARXIV_summary.md"
             logger.debug(f"生成文件名: {filename}")
             
@@ -826,7 +822,7 @@ class ArxivRecommenderCLI:
             # 生成文件名
             date_str = target_date if target_date else datetime.now().strftime("%Y-%m-%d")
             username = self._get_current_username()
-            safe_username = self._sanitize_username(username)
+            safe_username = sanitize_username(username)
             filename = f"{date_str}_{safe_username}_ARXIV_summary.html"
             
             # 保存HTML文件
@@ -869,7 +865,7 @@ class ArxivRecommenderCLI:
             # 生成文件名
             date_str = target_date if target_date else datetime.now().strftime("%Y-%m-%d")
             username = self._get_current_username()
-            safe_username = self._sanitize_username(username)
+            safe_username = sanitize_username(username)
             filename = f"{date_str}_{safe_username}_ARXIV_summary.html"
             logger.debug(f"生成HTML文件名: {filename}")
             
