@@ -598,10 +598,16 @@ class ArxivRecommenderCLI:
             
             # 初始化LLM提供商
             logger.debug(f"初始化LLM提供商 - 模型: {self.config['qwen_model']}")
+            # 在此构造主LLM提供者，并作为依赖注入传递给推荐引擎
             self.llm_provider = LLMProvider(
                 model=self.config['qwen_model'],
                 base_url=self.config['dashscope_base_url'],
-                api_key=self.config['dashscope_api_key']
+                api_key=self.config['dashscope_api_key'],
+                description=self._load_research_interests(),
+                username=self._get_current_username(),
+                temperature=self.config['qwen_model_temperature'],
+                top_p=self.config['qwen_model_top_p'],
+                max_tokens=self.config['qwen_model_max_tokens'],
             )
             logger.debug("LLM提供商初始化完成")
             
@@ -625,7 +631,9 @@ class ArxivRecommenderCLI:
                 num_workers=self.config['max_workers'],
                 temperature=self.config['qwen_model_temperature'],
                 top_p=self.config['qwen_model_top_p'],
-                max_tokens=self.config['qwen_model_max_tokens']
+                max_tokens=self.config['qwen_model_max_tokens'],
+                arxiv_fetcher=self.arxiv_fetcher,
+                llm_provider=self.llm_provider,
             )
             logger.debug(f"推荐引擎初始化完成 - 类别: {self.config['arxiv_categories']}, 工作线程: {self.config['max_workers']}")
             
@@ -751,7 +759,7 @@ class ArxivRecommenderCLI:
         logger.info(f"邮件发送开始 - 发送方: {self.config['sender_email']}, 接收方: {self.config['receiver_email']}")
         
         try:
-            self.output_manager.send_email(
+            self.output_manager.email_sender.send_html(
                 sender=self.config['sender_email'],
                 receiver=self.config['receiver_email'],
                 password=self.config['email_password'],

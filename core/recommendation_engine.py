@@ -32,6 +32,9 @@ class RecommendationEngine:
         temperature: float = 0.7,
         top_p: float = 0.9,
         max_tokens: int = 4000,
+        arxiv_fetcher: Optional[ArxivFetcher] = None,
+        llm_provider: Optional[LLMProvider] = None,
+        light_llm_provider: Optional[LLMProvider] = None,
     ):
         """初始化推荐引擎。
         
@@ -58,26 +61,26 @@ class RecommendationEngine:
         self.description = description
         self.num_workers = num_workers
         
-        # 初始化ArXiv获取器和LLM提供商
+        # 初始化ArXiv获取器和LLM提供商（支持依赖注入，减少重复构造与耦合）
         logger.debug("初始化ArXiv获取器和LLM提供商")
-        self.arxiv_fetcher = ArxivFetcher()
-        
+        self.arxiv_fetcher = arxiv_fetcher or ArxivFetcher()
+
         # 主LLM提供者（用于详细分析和报告生成）
-        self.llm_provider = LLMProvider(
-            model=model, 
-            base_url=base_url, 
-            api_key=api_key, 
-            description=description, 
+        self.llm_provider = llm_provider or LLMProvider(
+            model=model,
+            base_url=base_url,
+            api_key=api_key,
+            description=description,
             username=username,
             temperature=temperature,
             top_p=top_p,
-            max_tokens=max_tokens
+            max_tokens=max_tokens,
         )
-        
+
         # 轻量模型提供者（用于论文相关性评估）
-        self.light_llm_provider = create_light_llm_provider(
+        self.light_llm_provider = light_llm_provider or create_light_llm_provider(
             description=description,
-            username=username
+            username=username,
         )
         
         self.temperature = temperature
@@ -375,8 +378,8 @@ class RecommendationEngine:
         logger.info("内容生成开始 - 并发执行总结、详细分析和简要分析")
         
         with ThreadPoolExecutor(max_workers=3) as executor:
-            # 提交三个任务到线程池
-            summary_future = executor.submit(self.summarize, recommended_papers, current_time)
+            # 提交三个任务到线程池（直接使用llm_provider生成总结报告，移除无用包装）
+            summary_future = executor.submit(self.llm_provider.generate_summary_report, recommended_papers, current_time)
             analysis_future = executor.submit(self._generate_detailed_analysis, recommended_papers)
             brief_future = executor.submit(self._generate_brief_analysis, recommended_papers)
             
