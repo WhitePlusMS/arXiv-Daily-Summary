@@ -118,10 +118,7 @@ class CategoryMatcher:
         self.llm = LLMProvider(model=model, base_url=base_url, api_key=api_key, username="TEST")
         self.categories = self._load_categories()
         self.enhanced_categories = self._load_enhanced_categories()
-        # Token统计
-        self.total_input_tokens = 0
-        self.total_output_tokens = 0
-        self.total_tokens = 0
+        # Token统计迁移至 LLMProvider（单一真源）
         logger.info(f"分类匹配器初始化完成 - 加载了 {len(self.categories)} 个分类")
     
     def warmup(self, attempts: int = 2):
@@ -141,24 +138,26 @@ class CategoryMatcher:
         
         for i in range(attempts):
             try:
-                # 发送简单的预热请求
-                response = self.llm._client.chat.completions.create(
-                    model=self.model,
+                # 发送简单的预热请求（统一走 LLMProvider，确保限流与统计一致）
+                response = self.llm.chat_with_retry(
                     messages=[
                         {"role": "system", "content": "You are a scoring assistant. You MUST respond with only a single integer between 0-100. No explanations, no text, just the number."},
                         {"role": "user", "content": "Output only a number 0-100. No text. Test warmup:"}
                     ],
+                    temperature=0.0,
                     max_tokens=3,
-                    temperature=0.0
+                    max_retries=1,
+                    wait_time=0,
+                    return_raw=True,
                 )
-                
-                output = response.choices[0].message.content.strip()
+
+                output = (response.choices[0].message.content or "").strip()
                 logger.info(f"预热第{i+1}次成功，输出: '{output}'")
-                
+
                 # 短暂延迟
                 if i < attempts - 1:
                     time.sleep(0.5)
-                    
+
             except Exception as e:
                 logger.warning(f"预热第{i+1}次失败: {e}")
                 # 继续尝试，不中断预热过程
@@ -226,22 +225,11 @@ class CategoryMatcher:
             return self.categories
     
     def _print_token_usage(self):
-        """输出token使用统计和费用计算"""
-        print("\n=== Token使用统计 ===")
-        print(f"输入Token: {self.total_input_tokens:,}")
-        print(f"输出Token: {self.total_output_tokens:,}")
-        print(f"总Token: {self.total_tokens:,}")
-        
-        # 计算费用（基于通义千问的定价）
-        # 通义千问Plus: 输入0.008元/千token，输出0.02元/千token
-        input_cost = (self.total_input_tokens / 1000) * 0.008
-        output_cost = (self.total_output_tokens / 1000) * 0.02
-        total_cost = input_cost + output_cost
-        
-        print(f"\n=== 费用计算 (通义千问Plus定价) ===")
-        print(f"输入费用: ¥{input_cost:.4f}")
-        print(f"输出费用: ¥{output_cost:.4f}")
-        print(f"总费用: ¥{total_cost:.4f}")
+        """输出token使用统计和费用计算（委托LLMProvider统一实现）。"""
+        try:
+            self.llm.log_usage_and_cost()
+        except Exception:
+            pass
     
     def _build_evaluation_prompt(self, user_description: str, category: Dict[str, Any]) -> str:
         """构建评估提示词
@@ -413,14 +401,7 @@ class CategoryMatcher:
                     return_raw=True,
                 )
 
-                # 统计token使用量（兼容无usage场景）
-                try:
-                    if hasattr(response, 'usage') and response.usage:
-                        self.total_input_tokens += getattr(response.usage, 'prompt_tokens', 0) or 0
-                        self.total_output_tokens += getattr(response.usage, 'completion_tokens', 0) or 0
-                        self.total_tokens += getattr(response.usage, 'total_tokens', 0) or 0
-                except Exception:
-                    pass
+                # Token统计由 LLMProvider 统一处理
 
                 # 提取数字评分（稳健解析）
                 content = (response.choices[0].message.content or "").strip()
@@ -479,11 +460,7 @@ class CategoryMatcher:
                 "timestamp": datetime.now().isoformat(),
                 "user_description": user_description,
                 "total_categories": len(all_results),
-                "token_usage": {
-                    "input_tokens": getattr(self, 'total_input_tokens', 0),
-                    "output_tokens": getattr(self, 'total_output_tokens', 0),
-                    "total_tokens": getattr(self, 'total_tokens', 0)
-                }
+            "token_usage": self.llm.get_usage_stats()
             },
             "detailed_scores": [
                 {

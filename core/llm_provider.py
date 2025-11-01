@@ -9,6 +9,7 @@ import json
 import traceback
 import os
 from openai import OpenAI
+import threading
 from typing import Optional, Dict, Any, List
 from loguru import logger
 
@@ -39,6 +40,21 @@ class LLMProvider:
         self.default_temperature = temperature
         self.default_top_p = top_p
         self.default_max_tokens = max_tokens
+        # Token用量统计（作为单一真源）
+        self.total_input_tokens = 0
+        self.total_output_tokens = 0
+        self.total_tokens = 0
+        # 并发限流（统一入口，类级共享信号量，跨实例统一限流）
+        try:
+            max_concurrency = int(os.getenv('LLM_MAX_CONCURRENCY', '2'))
+            if max_concurrency < 1:
+                max_concurrency = 1
+        except Exception:
+            max_concurrency = 2
+        self._max_concurrency = max_concurrency
+        if not hasattr(LLMProvider, "_global_rate_limiter") or LLMProvider._global_rate_limiter is None:
+            LLMProvider._global_rate_limiter = threading.BoundedSemaphore(self._max_concurrency)
+        self._rate_limiter = LLMProvider._global_rate_limiter
         logger.success(f"LLMProvider初始化完成 - 模型: {model}, URL: {base_url}, 用户: {username}, 温度: {temperature}, top_p: {top_p}, max_tokens: {max_tokens}")
     
     @property
@@ -104,6 +120,8 @@ class LLMProvider:
         
         for attempt in range(max_retries):
             try:
+                # 全局并发限流
+                self._rate_limiter.acquire()
                 logger.debug(f"第 {attempt + 1} 次API调用尝试")
                 response = self._client.chat.completions.create(
                     model=self._model_name,
@@ -113,6 +131,15 @@ class LLMProvider:
                     max_tokens=max_tokens,
                 )
                 logger.debug(f"API调用成功 - 尝试次数: {attempt + 1}")
+                # 更新token统计（兼容无usage场景）
+                try:
+                    usage = getattr(response, 'usage', None)
+                    if usage:
+                        self.total_input_tokens += getattr(usage, 'prompt_tokens', 0) or 0
+                        self.total_output_tokens += getattr(usage, 'completion_tokens', 0) or 0
+                        self.total_tokens += getattr(usage, 'total_tokens', 0) or 0
+                except Exception:
+                    pass
                 if return_raw:
                     return response
                 return response.choices[0].message.content
@@ -158,6 +185,12 @@ class LLMProvider:
                 else:
                     logger.error(f"API调用彻底失败 - 所有 {max_retries} 次尝试均失败")
                     raise
+            finally:
+                # 释放并发令牌
+                try:
+                    self._rate_limiter.release()
+                except Exception:
+                    pass
 
     def generate_response(self, prompt: str, temperature: float = None, top_p: float = None, max_tokens: int = None) -> str:
         """使用OpenAI API生成响应。
@@ -207,6 +240,75 @@ class LLMProvider:
             wait_time=wait_time,
             return_raw=return_raw,
         )
+
+    # =========================
+    # Token感知截断与统计输出
+    # =========================
+    @staticmethod
+    def _estimate_tokens(text: str) -> int:
+        """粗略估算tokens数量（低风险近似，避免额外依赖）。
+        经验法：英文约4字符1token，中文约2字符1token，混合取3字符1token近似。
+        """
+        if not text:
+            return 0
+        # 简单近似：长度/3
+        return max(1, int(len(text) / 3))
+
+    @staticmethod
+    def _truncate_by_tokens(text: str, max_tokens: int, max_chars_fallback: int) -> str:
+        """按估算token数截断文本，字符阈值为第二道防线。"""
+        if not text:
+            return text
+        est = LLMProvider._estimate_tokens(text)
+        if est <= max_tokens and len(text) <= max_chars_fallback:
+            return text
+        # 估算允许字符数，保守取每token约3字符
+        allowed_chars_by_tokens = max_tokens * 3
+        allowed_chars = min(allowed_chars_by_tokens, max_chars_fallback)
+        truncated = text[:allowed_chars].rstrip()
+        return truncated + "... (truncated)"
+
+    def get_usage_stats(self) -> Dict[str, int]:
+        """返回累计token用量。"""
+        return {
+            "input_tokens": self.total_input_tokens,
+            "output_tokens": self.total_output_tokens,
+            "total_tokens": self.total_tokens,
+        }
+
+    def compute_cost_yuan(self, input_price_per_1k: float = None, output_price_per_1k: float = None) -> Dict[str, float]:
+        """根据定价计算费用（人民币）。缺省按通义千问Plus：输入0.008/千token，输出0.02/千token。"""
+        try:
+            default_in = float(os.getenv('PRICE_INPUT_PER_1K', '0.008'))
+        except Exception:
+            default_in = 0.008
+        try:
+            default_out = float(os.getenv('PRICE_OUTPUT_PER_1K', '0.02'))
+        except Exception:
+            default_out = 0.02
+        input_price = input_price_per_1k if input_price_per_1k is not None else default_in
+        output_price = output_price_per_1k if output_price_per_1k is not None else default_out
+        input_cost = (self.total_input_tokens / 1000.0) * input_price
+        output_cost = (self.total_output_tokens / 1000.0) * output_price
+        total_cost = input_cost + output_cost
+        return {
+            "input_cost": input_cost,
+            "output_cost": output_cost,
+            "total_cost": total_cost,
+        }
+
+    def log_usage_and_cost(self):
+        """通过logger输出当前token用量与费用估算。"""
+        stats = self.get_usage_stats()
+        cost = self.compute_cost_yuan()
+        logger.info("=== Token使用统计 ===")
+        logger.info(f"输入Token: {stats['input_tokens']:,}")
+        logger.info(f"输出Token: {stats['output_tokens']:,}")
+        logger.info(f"总Token: {stats['total_tokens']:,}")
+        logger.info("=== 费用估算 (单位: 元) ===")
+        logger.info(f"输入费用: ¥{cost['input_cost']:.4f}")
+        logger.info(f"输出费用: ¥{cost['output_cost']:.4f}")
+        logger.info(f"总费用: ¥{cost['total_cost']:.4f}")
     
     def build_research_description_optimization_prompt(self, user_description: str) -> str:
         """构建研究内容描述优化提示词（基于COSTAR原则）。
@@ -547,10 +649,17 @@ class LLMProvider:
         Returns:
             详细分析提示词
         """
-        # Truncate full_text to avoid API errors
+        # Token感知截断：优先按token估算，再用字符长度兜底
         full_text = paper.get('full_text', '')
-        if len(full_text) > 15000:
-            full_text = full_text[:15000] + "... (truncated)"
+        try:
+            max_tokens_text = int(os.getenv('FULLTEXT_MAX_TOKENS', '4000'))
+        except Exception:
+            max_tokens_text = 4000
+        try:
+            max_chars_fallback = int(os.getenv('FULLTEXT_MAX_CHARS', '15000'))
+        except Exception:
+            max_chars_fallback = 15000
+        full_text = self._truncate_by_tokens(full_text, max_tokens_text, max_chars_fallback)
 
         return f"""
 你是一位顶尖的AI研究科学家和资深学术导师。你的任务是基于我提供的研究兴趣和一篇完整的ArXiv论文，为我生成一份高度结构化、富有洞察力的中文研究分析报告。

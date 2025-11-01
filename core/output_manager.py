@@ -169,13 +169,16 @@ class OutputManager:
             
             filepath = Path(save_dir) / filename
             
-            # Remove the header from the detailed analysis to avoid duplicating it in the template
+            # 更稳健地清理细分块标题与分隔线（支持可变空白与不同标记）
+            import re
             if detailed_analysis:
-                detailed_analysis = detailed_analysis.replace('# 📚 详细论文列表', '').replace('---', '').strip()
-            
-            # Remove the header from the brief analysis to avoid duplicating it in the template
+                # 去掉顶级标题行与多余分隔线
+                detailed_analysis = re.sub(r"^\s*#\s*📚\s*详细论文列表\s*\n?", "", detailed_analysis, flags=re.MULTILINE)
+                detailed_analysis = re.sub(r"\n?\s*---\s*\n?", "\n", detailed_analysis).strip()
+
             if brief_analysis:
-                brief_analysis = brief_analysis.replace('# 📝 简要论文列表', '').replace('---', '').strip()
+                brief_analysis = re.sub(r"^\s*#\s*📝\s*简要论文列表\s*\n?", "", brief_analysis, flags=re.MULTILINE)
+                brief_analysis = re.sub(r"\n?\s*---\s*\n?", "\n", brief_analysis).strip()
             
             # 生成统计数据
             category_stats = None
