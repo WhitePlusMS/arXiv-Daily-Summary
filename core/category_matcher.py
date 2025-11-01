@@ -8,7 +8,7 @@ import re
 import json
 import time
 from typing import List, Dict, Optional, Tuple, Any
-from openai import OpenAI
+from core.llm_provider import LLMProvider
 from loguru import logger
 from datetime import datetime
 import re
@@ -114,7 +114,8 @@ class CategoryMatcher:
         """
         self.model = model
         self.base_url = base_url
-        self.client = OpenAI(base_url=base_url, api_key=api_key)
+        # 统一由 LLMProvider 管理OpenAI兼容客户端与重试逻辑
+        self.llm = LLMProvider(model=model, base_url=base_url, api_key=api_key, username="TEST")
         self.categories = self._load_categories()
         self.enhanced_categories = self._load_enhanced_categories()
         # Token统计
@@ -141,7 +142,7 @@ class CategoryMatcher:
         for i in range(attempts):
             try:
                 # 发送简单的预热请求
-                response = self.client.chat.completions.create(
+                response = self.llm._client.chat.completions.create(
                     model=self.model,
                     messages=[
                         {"role": "system", "content": "You are a scoring assistant. You MUST respond with only a single integer between 0-100. No explanations, no text, just the number."},
@@ -399,14 +400,17 @@ class CategoryMatcher:
         last_error = None
         for attempt in range(max_retries):
             try:
-                response = self.client.chat.completions.create(
-                    model=self.model,
+                # 委托到统一的 LLMProvider 调用与重试逻辑（保留系统指令与温度/长度设置）
+                response = self.llm.chat_with_retry(
                     messages=[
                         {"role": "system", "content": "You are a scoring assistant. You MUST respond with only a single integer between 0-100. NEVER use <think> tags or any thinking process. NEVER provide explanations. Output format: just the number, nothing else."},
                         {"role": "user", "content": prompt}
                     ],
                     temperature=0.0,
-                    max_tokens=10
+                    max_tokens=10,
+                    max_retries=max_retries,
+                    wait_time=1,
+                    return_raw=True,
                 )
 
                 # 统计token使用量（兼容无usage场景）

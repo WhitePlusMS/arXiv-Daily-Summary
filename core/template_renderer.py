@@ -9,6 +9,7 @@ from jinja2 import Environment, FileSystemLoader, Template
 from pathlib import Path
 from loguru import logger
 import markdown
+from core.common_utils import STAR_LOW_THRESHOLD, STAR_HIGH_THRESHOLD
 
 
 class TemplateRenderer:
@@ -54,12 +55,12 @@ class TemplateRenderer:
         
         def format_score_stars(score: float) -> str:
             """将评分转换为星级显示。"""
-            if score <= 2:
+            if score <= STAR_LOW_THRESHOLD:
                 return ""
-            elif score >= 8:
+            elif score >= STAR_HIGH_THRESHOLD:
                 return "⭐" * 5
             else:
-                star_count = int((score - 2) / 1.2)
+                star_count = int((score - STAR_LOW_THRESHOLD) / 1.2)
                 return "⭐" * min(star_count, 5)
         
         def truncate_text(text: str, length: int = 100) -> str:

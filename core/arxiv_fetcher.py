@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 import pytz
 import xml.etree.ElementTree as ET
 import urllib.parse
+from core.common_utils import run_with_retries
 
 class ArxivFetcher:
     def __init__(self, base_url: str = "http://export.arxiv.org/api/query", retries: int = 3, delay: int = 5):
@@ -63,6 +64,22 @@ class ArxivFetcher:
             comments = entry.get("arxiv_comment", "无评论信息")
             authors = [author.name for author in entry.authors] if hasattr(entry, "authors") else []
             published = entry.published
+
+            # 解析分类标签（不影响现有输出字段）
+            categories = []
+            primary_category = None
+            try:
+                if hasattr(entry, "tags") and entry.tags:
+                    for tag in entry.tags:
+                        term = getattr(tag, "term", None) or (tag.get("term") if isinstance(tag, dict) else None)
+                        if term:
+                            categories.append(term)
+                    if categories:
+                        primary_category = categories[0]
+            except Exception:
+                # 保持稳健：标签解析失败时忽略，不影响现有行为
+                categories = []
+                primary_category = None
             
             title_short = title[:50] + '...' if len(title) > 50 else title
             logger.debug(f"论文解析完成 - {arxiv_id}: {title_short}")
@@ -77,6 +94,8 @@ class ArxivFetcher:
                 "published": published,
                 "full_text": "",
                 "category": category,  # 添加分类信息
+                "categories": categories,  # 新增：全部分类标签（仅扩展，未更改现有逻辑）
+                "primary_category": primary_category,  # 新增：主分类（首个标签）
             }
         except Exception as error:
             logger.error(f"论文解析失败: {error}")
@@ -91,6 +110,8 @@ class ArxivFetcher:
                 "published": "",
                 "full_text": "",
                 "category": category,
+                "categories": [],
+                "primary_category": None,
             }
 
     def fetch_papers(self, category: str, max_results: int = 100, sort_by: str = "lastUpdatedDate") -> List[Dict[str, Any]]:
@@ -99,24 +120,24 @@ class ArxivFetcher:
         url = f"{self.base_url}?search_query={query}&start=0&max_results={max_results}&sortBy={sort_by}&sortOrder=descending"
         logger.debug(f"API请求URL: {url}")
         
-        for attempt in range(self.retries):
-            try:
-                logger.debug(f"尝试获取论文 ({attempt + 1}/{self.retries})")
-                response = self.session.get(url, timeout=30)
-                response.raise_for_status()
-                feed = feedparser.parse(response.text)
-                papers = [self._parse_api_entry(entry, category) for entry in feed.entries]
-                logger.success(f"论文获取完成 - {category}: {len(papers)} 篇")
-                return papers
-            except requests.RequestException as error:
-                logger.warning(f"论文获取失败 ({attempt + 1}/{self.retries}) - {category}: {error}")
-                if attempt < self.retries - 1:
-                    logger.debug(f"等待 {self.delay} 秒后重试")
-                    time.sleep(self.delay)
-                else:
-                    logger.error(f"论文获取彻底失败 - {category}: 所有 {self.retries} 次尝试均失败")
-                    return []
-        return []
+        def _do_request():
+            response = self.session.get(url, timeout=30)
+            response.raise_for_status()
+            feed = feedparser.parse(response.text)
+            papers = [self._parse_api_entry(entry, category) for entry in feed.entries]
+            return papers
+
+        def _on_retry(attempt_idx: int, exc: Exception):
+            logger.warning(f"论文获取失败 ({attempt_idx}/{self.retries}) - {category}: {exc}")
+            logger.debug(f"等待 {self.delay} 秒后重试")
+
+        try:
+            papers = run_with_retries(_do_request, self.retries, self.delay, _on_retry)
+            logger.success(f"论文获取完成 - {category}: {len(papers)} 篇")
+            return papers
+        except Exception:
+            logger.error(f"论文获取彻底失败 - {category}: 所有 {self.retries} 次尝试均失败")
+            return []
 
     def fetch_papers_by_query(self, search_query: str, max_results: int = 100, sort_by: str = "relevance") -> List[Dict[str, Any]]:
         """
@@ -134,25 +155,24 @@ class ArxivFetcher:
         url = f"{self.base_url}?search_query={encoded_query}&start=0&max_results={max_results}&sortBy={sort_by}&sortOrder=descending"
         logger.debug(f"API请求URL: {url}")
 
-        for attempt in range(self.retries):
-            try:
-                logger.debug(f"尝试获取论文 ({attempt + 1}/{self.retries})")
-                response = self.session.get(url, timeout=30)
-                response.raise_for_status()
-                feed = feedparser.parse(response.text)
-                # 注意: 对于复杂查询，分类是未知的，因此传递None
-                papers = [self._parse_api_entry(entry, None) for entry in feed.entries]
-                logger.success(f"复杂查询完成 - '{search_query}': {len(papers)} 篇")
-                return papers
-            except requests.RequestException as error:
-                logger.warning(f"复杂查询失败 ({attempt + 1}/{self.retries}) - '{search_query}': {error}")
-                if attempt < self.retries - 1:
-                    logger.debug(f"等待 {self.delay} 秒后重试")
-                    time.sleep(self.delay)
-                else:
-                    logger.error(f"复杂查询彻底失败 - '{search_query}': 所有 {self.retries} 次尝试均失败")
-                    return []
-        return []
+        def _do_request():
+            response = self.session.get(url, timeout=30)
+            response.raise_for_status()
+            feed = feedparser.parse(response.text)
+            papers = [self._parse_api_entry(entry, None) for entry in feed.entries]
+            return papers
+
+        def _on_retry(attempt_idx: int, exc: Exception):
+            logger.warning(f"复杂查询失败 ({attempt_idx}/{self.retries}) - '{search_query}': {exc}")
+            logger.debug(f"等待 {self.delay} 秒后重试")
+
+        try:
+            papers = run_with_retries(_do_request, self.retries, self.delay, _on_retry)
+            logger.success(f"复杂查询完成 - '{search_query}': {len(papers)} 篇")
+            return papers
+        except Exception:
+            logger.error(f"复杂查询彻底失败 - '{search_query}': 所有 {self.retries} 次尝试均失败")
+            return []
 
     def fetch_papers_paged(self, category: str, date: str, per_page: int = 200, max_pages: int = 5, max_total: Optional[int] = None) -> List[Dict[str, Any]]:
         """分页 + 日期过滤（按北京时区）

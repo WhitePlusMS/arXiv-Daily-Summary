@@ -182,17 +182,17 @@ class FastAPIWebLauncher:
 
     def _show_nv_activation_guide(self):
         """显示NV虚拟环境激活指导"""
-        Logger.error("❌ 请按以下步骤激活NV虚拟环境:")
-        Logger.error(f"❌   cd {self.project_root}")
-        Logger.error("❌   .venv\Scripts\activate    ")
-        Logger.error("❌   python start.py")
+        Logger.error("请按以下步骤激活NV虚拟环境:")
+        Logger.error(f"cd {self.project_root}")
+        Logger.error(r".\.venv\Scripts\activate")
+        Logger.error("python start.py")
 
     def _show_nv_creation_guide(self):
         """显示NV虚拟环境创建指导"""
-        Logger.error("❌ 请按以下步骤创建NV虚拟环境:")
-        Logger.error(f"❌   cd {self.project_root}")
-        Logger.error("❌   nv create && nv activate")
-        Logger.error("❌   python start.py")
+        Logger.error("请按以下步骤创建NV虚拟环境:")
+        Logger.error(f"cd {self.project_root}")
+        Logger.error("nv create && nv activate")
+        Logger.error("python start.py")
 
     def auto_create_venv(self) -> bool:
         Logger.info("自动创建虚拟环境: nv create")

@@ -15,13 +15,6 @@ from typing import List, Dict, Any, Optional
 from pathlib import Path
 
 from loguru import logger
-import sys
-from pathlib import Path
-
-# 添加项目根目录到Python路径
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
-
 from .template_renderer import TemplateRenderer
 import re
 
@@ -199,17 +192,25 @@ class OutputManager:
                     if 'title' in paper:
                         titles.append(paper['title'])
                     
-                    # 统计分类（优先使用category字段）
+                    # 统计分类（优先使用明确字段，再回退）
                     category = None
-                    if 'category' in paper and paper['category']:
-                        category = paper['category']
-                    elif 'arXiv_id' in paper:
-                        # 从arXiv ID中提取分类，格式通常为 "2024.0001" 或 "cs.AI/2024001"
+                    # 1) primary_category 优先
+                    primary = paper.get('primary_category')
+                    if isinstance(primary, str) and primary:
+                        category = primary
+                    # 2) categories 列表次之
+                    if not category:
+                        categories = paper.get('categories')
+                        if isinstance(categories, list) and categories:
+                            category = categories[0]
+                    # 3) 旧字段 category 再次回退
+                    if not category and paper.get('category'):
+                        category = paper.get('category')
+                    # 4) 最后尝试 arXiv_id 推断（仅支持 cs.AI/xxxx 样式）
+                    if not category and paper.get('arXiv_id'):
                         arxiv_id = paper['arXiv_id']
                         if '/' in arxiv_id:
                             category = arxiv_id.split('/')[0]
-                        else:
-                            pass
                     
                     if category:
                         category_counts[category] = category_counts.get(category, 0) + 1
@@ -244,38 +245,7 @@ class OutputManager:
             logger.error(f"HTML分离报告保存失败: {e}")
             return None, None
     
-    def generate_star_rating(self, score: float) -> str:
-        """生成HTML星级评分（保持向后兼容）。
-        
-        Args:
-            score: 相关性评分 (0-10)
-            
-        Returns:
-            HTML星级评分字符串
-        """
-        full_star = '<span class="full-star">⭐</span>'
-        half_star = '<span class="half-star">⭐</span>'
-        
-        low_threshold = 2
-        high_threshold = 8
-        
-        if score <= low_threshold:
-            return ""
-        elif score >= high_threshold:
-            return '<div class="star-wrapper">' + full_star * 5 + '</div>'
-        else:
-            interval = (high_threshold - low_threshold) / 10
-            star_count = math.ceil((score - low_threshold) / interval)
-            full_stars = star_count // 2
-            half_stars = star_count % 2
-            
-            return (
-                '<div class="star-wrapper">'
-                + full_star * full_stars
-                + half_star * half_stars
-                + '</div>'
-            )
-    
+
 
     
     def send_email(

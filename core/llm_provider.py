@@ -73,7 +73,7 @@ class LLMProvider:
     
     def _call_api_with_retry(
         self, messages: list, temperature: float = None, top_p: float = None, 
-        max_tokens: int = None, max_retries: int = 2, wait_time: int = 1
+        max_tokens: int = None, max_retries: int = 2, wait_time: int = 1, return_raw: bool = False
     ) -> str:
         """使用重试机制调用OpenAI API。
         
@@ -113,6 +113,8 @@ class LLMProvider:
                     max_tokens=max_tokens,
                 )
                 logger.debug(f"API调用成功 - 尝试次数: {attempt + 1}")
+                if return_raw:
+                    return response
                 return response.choices[0].message.content
                 
             except Exception as error:
@@ -156,7 +158,7 @@ class LLMProvider:
                 else:
                     logger.error(f"API调用彻底失败 - 所有 {max_retries} 次尝试均失败")
                     raise
-    
+
     def generate_response(self, prompt: str, temperature: float = None, top_p: float = None, max_tokens: int = None) -> str:
         """使用OpenAI API生成响应。
         
@@ -171,6 +173,40 @@ class LLMProvider:
         """
         messages = self._build_messages(prompt)
         return self._call_api_with_retry(messages, temperature, top_p, max_tokens)
+
+    def chat_with_retry(
+        self,
+        messages: list,
+        temperature: float = None,
+        top_p: float = None,
+        max_tokens: int = None,
+        max_retries: int = 2,
+        wait_time: int = 1,
+        return_raw: bool = False,
+    ):
+        """公共聊天接口，支持重试与可选原始响应返回。
+
+        Args:
+            messages: OpenAI兼容消息列表
+            temperature: 采样温度
+            top_p: top_p 参数
+            max_tokens: 最大token数
+            max_retries: 最大重试次数
+            wait_time: 重试等待秒数
+            return_raw: 是否返回原始响应对象
+
+        Returns:
+            字符串内容或原始响应对象（取决于 return_raw）
+        """
+        return self._call_api_with_retry(
+            messages=messages,
+            temperature=temperature,
+            top_p=top_p,
+            max_tokens=max_tokens,
+            max_retries=max_retries,
+            wait_time=wait_time,
+            return_raw=return_raw,
+        )
     
     def build_research_description_optimization_prompt(self, user_description: str) -> str:
         """构建研究内容描述优化提示词（基于COSTAR原则）。
