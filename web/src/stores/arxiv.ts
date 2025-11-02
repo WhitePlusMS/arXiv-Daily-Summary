@@ -1,10 +1,10 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import type { UserProfile, RecommendationResult } from '@/types'
+import type { UserProfile, RecommendationResult, FrontendConfig, ReportItem } from '@/types'
 
 export const useArxivStore = defineStore('arxiv', () => {
   // 状态
-  const config = ref<any>(null)
+  const config = ref<FrontendConfig | null>(null)
   const userProfiles = ref<UserProfile[]>([])
   const researchInterests = ref<string[]>([])
   const selectedProfile = ref<UserProfile | null>(null)
@@ -12,7 +12,7 @@ export const useArxivStore = defineStore('arxiv', () => {
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const lastRecommendationResult = ref<RecommendationResult | null>(null)
-  const recentReports = ref<any[]>([])
+  const recentReports = ref<ReportItem[]>([])
 
   // 计算属性
   const isDebugMode = computed(() => config.value?.debug_mode || false)
@@ -20,7 +20,7 @@ export const useArxivStore = defineStore('arxiv', () => {
   const hasResearchInterests = computed(() => researchInterests.value.length > 0)
 
   // 方法
-  function setConfig(newConfig: any) {
+  function setConfig(newConfig: FrontendConfig) {
     config.value = newConfig
   }
 
@@ -63,7 +63,7 @@ export const useArxivStore = defineStore('arxiv', () => {
     lastRecommendationResult.value = result
   }
 
-  function setRecentReports(reports: any[]) {
+  function setRecentReports(reports: ReportItem[]) {
     recentReports.value = reports
   }
 

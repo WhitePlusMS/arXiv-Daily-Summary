@@ -31,6 +31,45 @@ export interface ApiResponse<T = unknown> {
   error?: string
 }
 
+// 前端运行态配置（小写+语义化），与后端 .env 大写映射区分
+export interface FrontendConfig {
+  // API / LLM
+  dashscope_api_key?: string
+  dashscope_base_url?: string
+  qwen_model?: string
+
+  // ArXiv
+  arxiv_base_url?: string
+  arxiv_retries?: number
+  arxiv_delay?: number
+  arxiv_categories?: string[]
+  max_entries?: number
+  num_brief_papers?: number
+  num_detailed_papers?: number
+  num_recommendations?: number
+
+  // 运行控制
+  debug_mode?: boolean
+
+  // 邮件
+  email_to?: string
+  email_from?: string
+  email_password?: string
+
+  // 时间与日志
+  timezone?: string
+  date_format?: string
+  log_level?: string
+}
+
+// Toast 消息类型
+export interface ToastMessage {
+  id: number
+  type: 'success' | 'error' | 'warning' | 'info'
+  text: string
+  createdAt: number
+}
+
 // 分类与子分类接口
 export interface Subcategory {
   id: string

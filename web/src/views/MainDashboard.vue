@@ -4,7 +4,9 @@
     <div class="streamlit-header">
       <h1 class="streamlit-title">📚 ArXiv 每日论文推荐系统</h1>
       <div class="streamlit-caption">
-        当前时间: {{ localTime }} ({{ localTimezone }}) | ArXiv时间: {{ arxivTime }} ({{ arxivTimezone }})
+        当前时间: {{ localTime }} ({{ localTimezone }}) | ArXiv时间: {{ arxivTime }} ({{
+          arxivTimezone
+        }})
       </div>
       <div class="streamlit-divider"></div>
     </div>
@@ -19,18 +21,14 @@
       <h2 class="streamlit-subheader">👤 用户配置</h2>
       <div class="streamlit-selectbox">
         <label>选择用户配置：</label>
-        <select 
-          v-model="selectedProfileName" 
+        <select
+          v-model="selectedProfileName"
           @change="handleProfileChange"
           :disabled="isLoading"
           class="streamlit-select"
         >
           <option value="自定义">自定义</option>
-          <option 
-            v-for="profile in userProfiles" 
-            :key="profile.username" 
-            :value="profile.username"
-          >
+          <option v-for="profile in userProfiles" :key="profile.username" :value="profile.username">
             {{ profile.username }}
           </option>
         </select>
@@ -40,11 +38,11 @@
       <div v-if="selectedProfile && selectedProfileName !== '自定义'" class="streamlit-success">
         <div class="success-content">
           <strong>✅ 已加载用户 {{ selectedProfileName }} 的配置</strong>
-          <br><br>
-          <strong>分类标签</strong>: <code>{{ selectedProfile.category_id || '未设置' }}</code>
-          <br><br>
+          <br /><br />
+          <strong>分类标签</strong>: <code>{{ selectedProfile.category_id || "未设置" }}</code>
+          <br /><br />
           <strong>研究兴趣</strong>:
-          <pre class="research-interests-code">{{ selectedProfile.user_input || '未设置' }}</pre>
+          <pre class="research-interests-code">{{ selectedProfile.user_input || "未设置" }}</pre>
         </div>
       </div>
 
@@ -54,7 +52,7 @@
       <div v-if="selectedProfile && selectedProfile.category_id" class="streamlit-section">
         <h2 class="streamlit-subheader">🏷️ 分类标签</h2>
         <div class="streamlit-info">
-          <code>{{ selectedProfile.category_id.replace(',', ' ') }}</code>
+          <code>{{ selectedProfile.category_id.replace(",", " ") }}</code>
         </div>
       </div>
     </div>
@@ -78,15 +76,15 @@
     <!-- 推荐系统区域 - 完全复制Streamlit布局 -->
     <div class="streamlit-section">
       <h2 class="streamlit-subheader">🚀 运行推荐系统</h2>
-      
+
       <!-- 调试模式警告 -->
       <div v-if="isDebugMode" class="streamlit-warning">
         🔧 <strong>调试模式已启用</strong> - 系统将使用模拟数据，不会调用真实的ArXiv API和LLM服务
       </div>
 
       <!-- 主推荐按钮 -->
-      <button 
-        @click="runMainRecommendation" 
+      <button
+        @click="runMainRecommendation"
         :disabled="isLoading || !hasResearchInterests"
         class="streamlit-button streamlit-button-primary"
       >
@@ -96,34 +94,31 @@
 
       <!-- 高级选项折叠区域 -->
       <div class="streamlit-expander">
-        <div 
-          class="streamlit-expander-header" 
+        <div
+          class="streamlit-expander-header"
           @click="toggleAdvancedOptions"
-          :class="{ 'expanded': showAdvancedOptions }"
+          :class="{ expanded: showAdvancedOptions }"
         >
-          <span class="expander-icon">{{ showAdvancedOptions ? '▼' : '▶' }}</span>
+          <span class="expander-icon">{{ showAdvancedOptions ? "▼" : "▶" }}</span>
           🔧 高级选项：查询特定日期的报告
         </div>
-        
+
         <div v-if="showAdvancedOptions" class="streamlit-expander-content">
           <div class="streamlit-markdown">
             <p>💡 <strong>提示：</strong> 如果您需要查看特定日期的论文推荐，可以在这里指定日期。</p>
-            <p>⚠️ <strong>注意：</strong> ArXiv通常在周日至周四发布论文，周五和周六不发布新论文。</p>
+            <p>
+              ⚠️ <strong>注意：</strong> ArXiv通常在周日至周四发布论文，周五和周六不发布新论文。
+            </p>
           </div>
-          
+
           <div class="streamlit-date-input">
             <label>选择查询日期</label>
-            <input 
-              type="date" 
-              v-model="selectedDate"
-              :max="todayStr"
-              class="streamlit-date"
-            >
+            <input type="date" v-model="selectedDate" :max="todayStr" class="streamlit-date" />
             <div class="streamlit-help">选择您想要查询论文的日期</div>
           </div>
-          
-          <button 
-            @click="runSpecificDateRecommendation" 
+
+          <button
+            @click="runSpecificDateRecommendation"
             :disabled="isLoading"
             class="streamlit-button"
           >
@@ -156,21 +151,15 @@
           </p>
         </div>
       </div>
-      <div v-else class="streamlit-error">
-        ❌ {{ lastRecommendationResult.message }}
-      </div>
+      <div v-else class="streamlit-error">❌ {{ lastRecommendationResult.message }}</div>
     </div>
 
     <!-- 历史报告区域 - 完全复制Streamlit功能 -->
     <div class="streamlit-section">
       <h2 class="streamlit-subheader">📁 历史报告管理</h2>
-      
-      <button 
-        @click="loadRecentReports" 
-        :disabled="isLoading"
-        class="streamlit-button"
-      >
-        {{ isLoading ? '加载中...' : '🔄 刷新报告列表' }}
+
+      <button @click="loadRecentReports" :disabled="isLoading" class="streamlit-button">
+        {{ isLoading ? "加载中..." : "🔄 刷新报告列表" }}
       </button>
 
       <!-- 报告列表 -->
@@ -183,29 +172,29 @@
             <div class="report-size">{{ formatFileSize(report.size) }}</div>
           </div>
           <div class="report-actions">
-            <button 
-              @click="downloadReport(report, 'md')" 
+            <button
+              @click="downloadReport(report, 'md')"
               class="streamlit-button streamlit-button-small"
               title="下载Markdown版本"
             >
               📄 MD
             </button>
-            <button 
-              @click="downloadReport(report, 'html')" 
+            <button
+              @click="downloadReport(report, 'html')"
               class="streamlit-button streamlit-button-small"
               title="下载HTML版本"
             >
               🌐 HTML
             </button>
-            <button 
-              @click="previewReport(report)" 
+            <button
+              @click="previewReport(report)"
               class="streamlit-button streamlit-button-small"
               title="预览报告"
             >
               👁️ 预览
             </button>
-            <button 
-              @click="deleteReport(report)" 
+            <button
+              @click="deleteReport(report)"
               class="streamlit-button streamlit-button-small streamlit-button-danger"
               title="删除报告"
             >
@@ -215,7 +204,6 @@
         </div>
       </div>
     </div>
-
 
     <!-- 预览模态框 -->
     <div v-if="showPreviewModal" class="modal-overlay" @click="closePreviewModal">
@@ -233,31 +221,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useArxivStore } from '@/stores/counter'
-import * as api from '@/services/api'
-import type { ReportItem } from '@/types'
+import { ref, onMounted, watch } from "vue";
+import { storeToRefs } from "pinia";
+import { useArxivStore } from "@/stores/arxiv";
+import * as api from "@/services/api";
+import type { ReportItem } from "@/types";
 
 // 使用store
-const store = useArxivStore()
+const store = useArxivStore();
 
 // 响应式数据
-const localTime = ref('')
-const arxivTime = ref('')
-const localTimezone = ref('')
-const arxivTimezone = ref('')
-const interestsText = ref('')
-const selectedDate = ref('')
-const todayStr = ref('')
-const yesterdayStr = ref('')
-const prevStr = ref('')
-const showAdvancedOptions = ref(false)
-const isRunning = ref(false)
-const runningMessage = ref('')
-const selectedProfile = ref(null)
-const showPreviewModal = ref(false)
-const previewContent = ref('')
+const localTime = ref("");
+const arxivTime = ref("");
+const localTimezone = ref("");
+const arxivTimezone = ref("");
+const interestsText = ref("");
+const selectedDate = ref("");
+const todayStr = ref("");
+const yesterdayStr = ref("");
+const prevStr = ref("");
+const showAdvancedOptions = ref(false);
+const isRunning = ref(false);
+const runningMessage = ref("");
+const selectedProfile = ref(null);
+const showPreviewModal = ref(false);
+const previewContent = ref("");
 
 // 计算属性（使用 storeToRefs 保持响应性）
 const {
@@ -270,407 +258,353 @@ const {
   recentReports,
   isDebugMode,
   hasValidConfig,
-  hasResearchInterests
-} = storeToRefs(store)
+  hasResearchInterests,
+} = storeToRefs(store);
 
 // 方法
 const updateTime = () => {
-  const now = new Date()
-  
+  const now = new Date();
+
   // 本地时间
-  localTime.value = now.toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  })
-  
+  localTime.value = now.toLocaleString("zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+
   // 获取本地时区
-  const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone
-  localTimezone.value = localTz
-  
+  const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  localTimezone.value = localTz;
+
   // ArXiv时间 (US/Eastern)
-  const arxivDate = new Date(now.toLocaleString("en-US", {timeZone: "America/New_York"}))
-  arxivTime.value = arxivDate.toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  })
-  
+  const arxivDate = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
+  arxivTime.value = arxivDate.toLocaleString("zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+
   // 判断是否为夏令时
-  const january = new Date(now.getFullYear(), 0, 1)
-  const july = new Date(now.getFullYear(), 6, 1)
-  const stdOffset = Math.max(january.getTimezoneOffset(), july.getTimezoneOffset())
-  const isDST = now.getTimezoneOffset() < stdOffset
-  arxivTimezone.value = isDST ? 'EDT' : 'EST'
-}
+  const january = new Date(now.getFullYear(), 0, 1);
+  const july = new Date(now.getFullYear(), 6, 1);
+  const stdOffset = Math.max(january.getTimezoneOffset(), july.getTimezoneOffset());
+  const isDST = now.getTimezoneOffset() < stdOffset;
+  arxivTimezone.value = isDST ? "EDT" : "EST";
+};
 
 const updateDates = () => {
-  const today = new Date()
-  const yesterday = new Date(today)
-  yesterday.setDate(today.getDate() - 1)
-  const prev = new Date(today)
-  prev.setDate(today.getDate() - 2)
-  
-  todayStr.value = today.toISOString().split('T')[0]
-  yesterdayStr.value = yesterday.toISOString().split('T')[0]
-  prevStr.value = prev.toISOString().split('T')[0]
-  selectedDate.value = yesterdayStr.value
-}
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  const prev = new Date(today);
+  prev.setDate(today.getDate() - 2);
+
+  todayStr.value = today.toISOString().split("T")[0];
+  yesterdayStr.value = yesterday.toISOString().split("T")[0];
+  prevStr.value = prev.toISOString().split("T")[0];
+  selectedDate.value = yesterdayStr.value;
+};
 
 const handleProfileChange = () => {
-  store.setSelectedProfile(selectedProfileName.value)
-  
+  store.setSelectedProfile(selectedProfileName.value);
+
   // 查找选中的配置
-  if (selectedProfileName.value !== '自定义') {
-    selectedProfile.value = userProfiles.value.find(p => p.username === selectedProfileName.value)
-    
+  if (selectedProfileName.value !== "自定义") {
+    selectedProfile.value = userProfiles.value.find(
+      (p) => p.username === selectedProfileName.value
+    );
+
     // 更新研究兴趣
     if (selectedProfile.value && selectedProfile.value.user_input) {
-      const interests = selectedProfile.value.user_input.split('\n').filter(line => line.trim())
-      store.setResearchInterests(interests)
+      const interests = selectedProfile.value.user_input.split("\n").filter((line) => line.trim());
+      store.setResearchInterests(interests);
     }
   } else {
-    selectedProfile.value = null
+    selectedProfile.value = null;
   }
-}
+};
 
 const toggleAdvancedOptions = () => {
-  showAdvancedOptions.value = !showAdvancedOptions.value
-}
-
+  showAdvancedOptions.value = !showAdvancedOptions.value;
+};
 
 const initializeComponents = async () => {
-  isRunning.value = true
-  runningMessage.value = '正在初始化系统组件...'
-  
+  isRunning.value = true;
+  runningMessage.value = "正在初始化系统组件...";
+
   try {
     const response = await api.initializeComponents({
-      profile_name: selectedProfileName.value
-    })
-    
+      profile_name: selectedProfileName.value,
+    });
+
     if (!response.success) {
-      store.setError(response.message || '初始化组件失败')
-      return false
+      store.setError(response.message || "初始化组件失败");
+      return false;
     }
-    return true
+    return true;
   } catch (err) {
-    store.setError('初始化组件时发生错误')
-    console.error('初始化组件错误:', err)
-    return false
+    store.setError("初始化组件时发生错误");
+    console.error("初始化组件错误:", err);
+    return false;
   } finally {
-    isRunning.value = false
-    runningMessage.value = ''
+    isRunning.value = false;
+    runningMessage.value = "";
   }
-}
+};
 
 const runMainRecommendation = async () => {
   if (!hasResearchInterests.value) {
-    store.setError('请先输入研究兴趣！')
-    return
+    store.setError("请先输入研究兴趣！");
+    return;
   }
-  
+
   if (!hasValidConfig.value) {
-    store.setError('DashScope API Key 未配置，请检查 .env 文件！')
-    return
+    store.setError("DashScope API Key 未配置，请检查 .env 文件！");
+    return;
   }
-  
+
   // 先初始化组件
-  const initSuccess = await initializeComponents()
-  if (!initSuccess) return
-  
+  const initSuccess = await initializeComponents();
+  if (!initSuccess) return;
+
   // 运行推荐
-  isRunning.value = true
-  runningMessage.value = '🚀 开始运行推荐系统...'
-  
+  isRunning.value = true;
+  runningMessage.value = "🚀 开始运行推荐系统...";
+
   try {
     const response = await api.runRecommendation({
       profile_name: selectedProfileName.value,
-      debug_mode: isDebugMode.value
-    })
-    
-    store.setLastRecommendationResult(response)
-    
+      debug_mode: isDebugMode.value,
+    });
+
+    store.setLastRecommendationResult(response);
+
     if (!response.success) {
-      store.setError(response.message || '推荐执行失败')
+      store.setError(response.message || "推荐执行失败");
     } else {
       // 推荐成功后，自动刷新历史报告列表
-      await loadRecentReports()
+      await loadRecentReports();
     }
   } catch (err: unknown) {
     const getMsg = (e: unknown): string => {
-      const obj = e as { code?: string; message?: string; name?: string }
-      const msg = String(obj?.message || '')
-      if (obj?.code === 'ECONNABORTED' || msg.toLowerCase().includes('timeout')) {
-        return '请求超时（生成报告可能较慢）。请稍后重试或启用调试模式。'
+      const obj = e as { code?: string; message?: string; name?: string };
+      const msg = String(obj?.message || "");
+      if (obj?.code === "ECONNABORTED" || msg.toLowerCase().includes("timeout")) {
+        return "请求超时（生成报告可能较慢）。请稍后重试或启用调试模式。";
       }
-      if (msg.includes('ERR_ABORTED') || obj?.name === 'CanceledError') {
-        return '请求被取消（页面刷新或HMR导致）。请重试。'
+      if (msg.includes("ERR_ABORTED") || obj?.name === "CanceledError") {
+        return "请求被取消（页面刷新或HMR导致）。请重试。";
       }
-      return '执行推荐时发生错误'
-    }
-    store.setError(getMsg(err))
-    console.error('执行推荐错误:', err)
+      return "执行推荐时发生错误";
+    };
+    store.setError(getMsg(err));
+    console.error("执行推荐错误:", err);
   } finally {
-    isRunning.value = false
-    runningMessage.value = ''
+    isRunning.value = false;
+    runningMessage.value = "";
   }
-}
+};
 
 const runSpecificDateRecommendation = async () => {
   if (!hasResearchInterests.value) {
-    store.setError('请先输入研究兴趣！')
-    return
+    store.setError("请先输入研究兴趣！");
+    return;
   }
-  
+
   // 先初始化组件
-  const initSuccess = await initializeComponents()
-  if (!initSuccess) return
-  
+  const initSuccess = await initializeComponents();
+  if (!initSuccess) return;
+
   // 运行特定日期推荐
-  isRunning.value = true
-  runningMessage.value = `🚀 开始查询 ${selectedDate.value} 的论文...`
-  
+  isRunning.value = true;
+  runningMessage.value = `🚀 开始查询 ${selectedDate.value} 的论文...`;
+
   try {
     const response = await api.runRecommendation({
       profile_name: selectedProfileName.value,
-      debug_mode: isDebugMode.value
-    })
-    
-    store.setLastRecommendationResult(response)
-    
+      debug_mode: isDebugMode.value,
+    });
+
+    store.setLastRecommendationResult(response);
+
     if (!response.success) {
-      store.setError(response.message || '推荐执行失败')
+      store.setError(response.message || "推荐执行失败");
     } else {
       // 推荐成功后，自动刷新历史报告列表
-      await loadRecentReports()
+      await loadRecentReports();
     }
   } catch (err: unknown) {
     const getMsg = (e: unknown): string => {
-      const obj = e as { code?: string; message?: string; name?: string }
-      const msg = String(obj?.message || '')
-      if (obj?.code === 'ECONNABORTED' || msg.toLowerCase().includes('timeout')) {
-        return `请求超时（生成 ${selectedDate.value} 的报告可能较慢）。请稍后重试或启用调试模式。`
+      const obj = e as { code?: string; message?: string; name?: string };
+      const msg = String(obj?.message || "");
+      if (obj?.code === "ECONNABORTED" || msg.toLowerCase().includes("timeout")) {
+        return `请求超时（生成 ${selectedDate.value} 的报告可能较慢）。请稍后重试或启用调试模式。`;
       }
-      if (msg.includes('ERR_ABORTED') || obj?.name === 'CanceledError') {
-        return '请求被取消（页面刷新或HMR导致）。请重试。'
+      if (msg.includes("ERR_ABORTED") || obj?.name === "CanceledError") {
+        return "请求被取消（页面刷新或HMR导致）。请重试。";
       }
-      return '执行推荐时发生错误'
-    }
-    store.setError(getMsg(err))
-    console.error('执行推荐错误:', err)
+      return "执行推荐时发生错误";
+    };
+    store.setError(getMsg(err));
+    console.error("执行推荐错误:", err);
   } finally {
-    isRunning.value = false
-    runningMessage.value = ''
+    isRunning.value = false;
+    runningMessage.value = "";
   }
-}
+};
 
 const loadRecentReports = async () => {
-  store.setLoading(true)
-  store.clearError()
-  
+  store.setLoading(true);
+  store.clearError();
+
   try {
-    const response = await api.getRecentReports()
-    
+    const response = await api.getRecentReports();
+
     if (response.success && response.data) {
-      store.setRecentReports(response.data)
+      store.setRecentReports(response.data);
     } else {
-      store.setError(response.message || '加载报告失败')
+      store.setError(response.message || "加载报告失败");
     }
   } catch (err) {
-    store.setError('加载报告时发生错误')
-    console.error('加载报告错误:', err)
+    store.setError("加载报告时发生错误");
+    console.error("加载报告错误:", err);
   } finally {
-    store.setLoading(false)
+    store.setLoading(false);
   }
-}
+};
 
-const downloadReport = async (report: ReportItem, format: 'md' | 'html') => {
+const downloadReport = async (report: ReportItem, format: "md" | "html") => {
   // 后端要求 name 不含扩展名；最近报告返回的 name 含扩展名，需去掉
-  const baseName = report.name.replace(/\.(md|html)$/i, '')
-  const url = api.getReportDownloadUrl({ name: baseName, format })
-  const link = document.createElement('a')
-  link.href = url
-  link.target = '_blank'
-  link.rel = 'noopener'
-  link.click()
-}
+  const baseName = report.name.replace(/\.(md|html)$/i, "");
+  const url = api.getReportDownloadUrl({ name: baseName, format });
+  const link = document.createElement("a");
+  link.href = url;
+  link.target = "_blank";
+  link.rel = "noopener";
+  link.click();
+};
 
 const previewReport = async (report: ReportItem) => {
   try {
-    const fmt: 'md' | 'html' = 'html'
-    const baseName = report.name.replace(/\.(md|html)$/i, '')
-    const res = await api.previewReport({ name: baseName, format: fmt })
+    const fmt: "md" | "html" = "html";
+    const baseName = report.name.replace(/\.(md|html)$/i, "");
+    const res = await api.previewReport({ name: baseName, format: fmt });
     if (res.success && res.data?.content) {
       // HTML 直接渲染；Markdown 简单包裹在 <pre>
-      previewContent.value = fmt === 'html' ? res.data.content : `<pre>${res.data.content}</pre>`
-      showPreviewModal.value = true
+      previewContent.value = fmt === "html" ? res.data.content : `<pre>${res.data.content}</pre>`;
+      showPreviewModal.value = true;
     } else {
-      store.setError(res.message || '预览失败')
+      store.setError(res.message || "预览失败");
     }
   } catch (err) {
-    store.setError('预览报告时发生错误')
-    console.error('预览错误:', err)
+    store.setError("预览报告时发生错误");
+    console.error("预览错误:", err);
   }
-}
+};
 
 const deleteReport = async (report: ReportItem) => {
   if (confirm(`确定要删除报告 "${report.name}" 的 MD 文件吗？`)) {
     try {
-      const baseName = report.name.replace(/\.(md|html)$/i, '')
-      const resMd = await api.deleteReportFile({ name: baseName, format: 'md' })
-      const resHtml = await api.deleteReportFile({ name: baseName, format: 'html' })
+      const baseName = report.name.replace(/\.(md|html)$/i, "");
+      const resMd = await api.deleteReportFile({ name: baseName, format: "md" });
+      const resHtml = await api.deleteReportFile({ name: baseName, format: "html" });
       if (resMd.success || resHtml.success) {
-        await loadRecentReports()
+        await loadRecentReports();
       } else {
-        store.setError('删除报告失败')
+        store.setError("删除报告失败");
       }
     } catch (err) {
-      store.setError('删除报告时发生错误')
-      console.error('删除错误:', err)
+      store.setError("删除报告时发生错误");
+      console.error("删除错误:", err);
     }
   }
-}
+};
 
 const closePreviewModal = () => {
-  showPreviewModal.value = false
-  previewContent.value = ''
-}
+  showPreviewModal.value = false;
+  previewContent.value = "";
+};
 
 const formatDate = (dateStr: string) => {
-  return new Date(dateStr).toLocaleString('zh-CN')
-}
+  return new Date(dateStr).toLocaleString("zh-CN");
+};
 
 const formatFileSize = (bytes: number) => {
-  if (bytes === 0) return '0 Bytes'
-  const k = 1024
-  const sizes = ['Bytes', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-}
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+};
 
 // 监听研究兴趣变化，更新文本框
-watch(researchInterests, (newInterests) => {
-  interestsText.value = newInterests.join('\n')
-}, { immediate: true })
+watch(
+  researchInterests,
+  (newInterests) => {
+    interestsText.value = newInterests.join("\n");
+  },
+  { immediate: true }
+);
 
 // 监听文本框变化，自动更新研究兴趣
 watch(interestsText, (newText) => {
   if (newText.trim()) {
-    const interests = newText.split('\n').filter(line => line.trim())
-    store.setResearchInterests(interests)
+    const interests = newText.split("\n").filter((line) => line.trim());
+    store.setResearchInterests(interests);
   }
-})
+});
 
 // 初始化
 onMounted(async () => {
   // 更新时间和日期
-  updateTime()
-  updateDates()
-  setInterval(updateTime, 1000)
-  
+  updateTime();
+  updateDates();
+  setInterval(updateTime, 1000);
+
   // 初始化服务
-  store.setLoading(true)
-  
+  store.setLoading(true);
+
   try {
     // 初始化服务
-    await api.initializeService()
-    
+    await api.initializeService();
+
     // 加载配置
-    const configResponse = await api.getConfig()
+    const configResponse = await api.getConfig();
     if (configResponse.success && configResponse.data) {
-      store.setConfig(configResponse.data)
+      store.setConfig(configResponse.data);
     }
-    
+
     // 加载用户配置
-    const profilesResponse = await api.getUserProfiles()
+    const profilesResponse = await api.getUserProfiles();
     if (profilesResponse.success && profilesResponse.data) {
-      store.setUserProfiles(profilesResponse.data)
+      store.setUserProfiles(profilesResponse.data);
       // 若当前未选择任何配置，默认设为“自定义”，避免下拉框出现空白
       if (!selectedProfileName.value) {
-        selectedProfileName.value = '自定义'
+        selectedProfileName.value = "自定义";
       }
       // 同步选中配置的相关显示
-      handleProfileChange()
+      handleProfileChange();
     }
-    
+
     // 加载研究兴趣
-    const interestsResponse = await api.getResearchInterests()
+    const interestsResponse = await api.getResearchInterests();
     if (interestsResponse.success && interestsResponse.data) {
-      store.setResearchInterests(interestsResponse.data)
+      store.setResearchInterests(interestsResponse.data);
     }
-    
+
     // 页面初始化完成后，加载最近报告列表
-    await loadRecentReports()
-    
+    await loadRecentReports();
   } catch (err) {
-    store.setError('初始化应用时发生错误')
-    console.error('初始化错误:', err)
+    store.setError("初始化应用时发生错误");
+    console.error("初始化错误:", err);
   } finally {
-    store.setLoading(false)
+    store.setLoading(false);
   }
-})
+});
 </script>
-
-<style scoped>
-
-/* 代码展示块 */
-code {
-  background-color: #f1f3f4;
-  padding: 0.125rem 0.25rem;
-  border-radius: 0.25rem;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-  font-size: 0.875em;
-}
-
-/* 研究兴趣的代码块展示 */
-.research-interests-code {
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 0.375rem;
-  padding: 0.75rem;
-  margin: 0.5rem 0;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-  font-size: 0.875rem;
-  white-space: pre-wrap;
-  overflow-x: auto;
-}
-
-/* 结果详情与说明 */
-.success-content {
-  line-height: 1.8;
-}
-
-.result-details {
-  margin-top: 0.5rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid #e6eaf1;
-}
-
-.result-details p {
-  margin: 0.25rem 0;
-  font-size: 0.875rem;
-}
-
-/* 折叠标题的小图标，仅用于本页 */
-.expander-icon {
-  font-size: 0.75rem;
-  transition: transform 0.2s;
-}
-
-/* 页脚内容（非全局类） */
-.footer-content {
-  text-align: center;
-  color: #808495;
-  font-size: 0.875rem;
-}
-
-.footer-content p {
-  margin: 0.25rem 0;
-}
-</style>

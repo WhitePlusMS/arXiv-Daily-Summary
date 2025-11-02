@@ -38,7 +38,7 @@
           type="text"
           v-model="keyword"
           placeholder="例如：cs.AI、人工智能、quantum"
-          class="search-input"
+          class="streamlit-input"
         />
         <div class="streamlit-help">支持在分类ID、英文/中文名称、英文/中文描述中搜索</div>
       </div>
@@ -99,7 +99,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { storeToRefs } from "pinia";
-import { useArxivStore } from "@/stores/counter";
+import { useArxivStore } from "@/stores/arxiv";
 import * as api from "@/services/api";
 
 const store = useArxivStore();
@@ -173,124 +173,3 @@ onMounted(async () => {
   }
 });
 </script>
-
-<style scoped>
-.stats-card {
-  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-  padding: 1.5rem;
-  border-radius: 20px;
-  margin: 0.5rem 0 1rem 0;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  display: flex;
-  justify-content: space-around;
-  text-align: center;
-  gap: 2rem;
-  max-width: 800px;
-}
-.stat-item {
-  flex: 1;
-}
-.stat-value {
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: #2563eb;
-  margin-bottom: 0.5rem;
-}
-.stat-value.green {
-  color: #059669;
-}
-.stat-label {
-  color: #4b5563;
-  font-size: 1.05rem;
-  font-weight: 500;
-}
-.stat-divider {
-  width: 1px;
-  background: #d1d5db;
-}
-
-.category-section {
-  margin-bottom: 1rem;
-}
-.main-desc {
-  background: #f8fafc;
-  padding: 0.8rem;
-  border-radius: 12px;
-  margin-bottom: 0.8rem;
-  color: #4b5563;
-}
-.sub-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-.sub-card {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-.sub-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 0.8rem;
-}
-.sub-id {
-  background: linear-gradient(135deg, #eff6ff, #dbeafe);
-  color: #1e40af;
-  padding: 0.4rem 0.8rem;
-  border-radius: 8px;
-  font-family: "Monaco", "Menlo", monospace;
-  font-size: 1rem;
-  font-weight: 700;
-  min-width: 70px;
-  text-align: center;
-}
-.sub-title {
-  font-weight: 700;
-  color: #111827;
-  font-size: 1.1rem;
-}
-.sub-desc {
-  color: #374151;
-  line-height: 1.6;
-  font-size: 1.05rem;
-}
-.sub-desc-cn {
-  color: #4b5563;
-  line-height: 1.6;
-  font-size: 1rem;
-  margin-top: 0.4rem;
-  border-top: 1px solid #e5e7eb;
-  padding-top: 0.4rem;
-}
-
-.guide-card {
-  background: linear-gradient(135deg, #eff6ff, #dbeafe);
-  padding: 1.2rem;
-  border-radius: 16px;
-  max-width: 800px;
-}
-.search-input {
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
-  width: 300px;
-}
-.search-input:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-}
-.expander-icon {
-  font-weight: 700;
-  color: #374151;
-}
-.footer-content {
-  color: #6b7280;
-  text-align: center;
-}
-</style>

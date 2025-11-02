@@ -11,7 +11,3 @@
 <script setup lang="ts">
 // 通用页脚组件，依赖全局 streamlit.css 样式
 </script>
-
-<style scoped>
-.footer-content { text-align: center; }
-</style>
