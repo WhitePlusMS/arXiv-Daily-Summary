@@ -75,6 +75,14 @@ class ArxivRecommenderCLI:
             'dashscope_api_key': os.getenv('DASHSCOPE_API_KEY', ''),
             'dashscope_base_url': os.getenv('DASHSCOPE_BASE_URL', 'https://dashscope.aliyuncs.com/compatible-mode/v1'),
             'qwen_model': os.getenv('QWEN_MODEL', 'qwen-plus'),
+
+            # 提供方与模型映射（前端需要感知）
+            'heavy_model_provider': os.getenv('HEAVY_MODEL_PROVIDER', 'dashscope'),
+            'light_model_provider': os.getenv('LIGHT_MODEL_PROVIDER', os.getenv('HEAVY_MODEL_PROVIDER', 'dashscope')),
+            'ollama_base_url': os.getenv('OLLAMA_BASE_URL', 'http://localhost:11434/v1'),
+            'ollama_model_heavy': os.getenv('OLLAMA_MODEL_HEAVY', ''),
+            'ollama_model_light': os.getenv('OLLAMA_MODEL_LIGHT', ''),
+            'qwen_model_light': os.getenv('QWEN_MODEL_LIGHT', ''),
             
             # ArXiv获取器配置
             'arxiv_base_url': os.getenv('ARXIV_BASE_URL', 'http://export.arxiv.org/api/query'),
@@ -596,18 +604,35 @@ class ArxivRecommenderCLI:
             )
             logger.debug(f"ArXiv获取器初始化完成 - URL: {self.config['arxiv_base_url']}, 重试: {self.config['arxiv_retries']}, 延迟: {self.config['arxiv_delay']}s")
             
-            # 初始化LLM提供商
-            logger.debug(f"初始化LLM提供商 - 模型: {self.config['qwen_model']}")
-            # 在此构造主LLM提供者，并作为依赖注入传递给推荐引擎
+            # 初始化LLM提供商（按重型模型提供方选择）
+            heavy_provider = os.getenv('HEAVY_MODEL_PROVIDER', 'dashscope').lower()
+            if heavy_provider == 'ollama':
+                heavy_model = os.getenv('OLLAMA_MODEL_HEAVY', os.getenv('OLLAMA_MODEL_LIGHT', 'llama3.2:3b'))
+                heavy_base_url = os.getenv('OLLAMA_BASE_URL', 'http://localhost:11434/v1')
+                heavy_api_key = 'ollama'
+                # 采样参数复用通义配置（若未来增加Ollama重型参数，可替换为相应环境变量）
+                heavy_temperature = self.config['qwen_model_temperature']
+                heavy_top_p = self.config['qwen_model_top_p']
+                heavy_max_tokens = self.config['qwen_model_max_tokens']
+            else:
+                heavy_model = os.getenv('QWEN_MODEL', self.config['qwen_model'])
+                heavy_base_url = os.getenv('DASHSCOPE_BASE_URL', self.config['dashscope_base_url'])
+                heavy_api_key = os.getenv('DASHSCOPE_API_KEY', self.config['dashscope_api_key'])
+                heavy_temperature = self.config['qwen_model_temperature']
+                heavy_top_p = self.config['qwen_model_top_p']
+                heavy_max_tokens = self.config['qwen_model_max_tokens']
+
+            logger.debug(f"初始化LLM提供商 - 提供方: {heavy_provider}, 模型: {heavy_model}")
+            # 构造主LLM提供者，并作为依赖注入传递给推荐引擎
             self.llm_provider = LLMProvider(
-                model=self.config['qwen_model'],
-                base_url=self.config['dashscope_base_url'],
-                api_key=self.config['dashscope_api_key'],
+                model=heavy_model,
+                base_url=heavy_base_url,
+                api_key=heavy_api_key,
                 description=self._load_research_interests(),
                 username=self._get_current_username(),
-                temperature=self.config['qwen_model_temperature'],
-                top_p=self.config['qwen_model_top_p'],
-                max_tokens=self.config['qwen_model_max_tokens'],
+                temperature=heavy_temperature,
+                top_p=heavy_top_p,
+                max_tokens=heavy_max_tokens,
             )
             logger.debug("LLM提供商初始化完成")
             
@@ -623,15 +648,15 @@ class ArxivRecommenderCLI:
                 max_entries=self.config['max_entries'],
                 num_brief_papers=self.config['num_brief_papers'],
                 num_detailed_papers=self.config['num_detailed_papers'],
-                model=self.config['qwen_model'],
-                base_url=self.config['dashscope_base_url'],
-                api_key=self.config['dashscope_api_key'],
+                model=heavy_model,
+                base_url=heavy_base_url,
+                api_key=heavy_api_key,
                 description=research_interests,
                 username=username,
                 num_workers=self.config['max_workers'],
-                temperature=self.config['qwen_model_temperature'],
-                top_p=self.config['qwen_model_top_p'],
-                max_tokens=self.config['qwen_model_max_tokens'],
+                temperature=heavy_temperature,
+                top_p=heavy_top_p,
+                max_tokens=heavy_max_tokens,
                 arxiv_fetcher=self.arxiv_fetcher,
                 llm_provider=self.llm_provider,
             )

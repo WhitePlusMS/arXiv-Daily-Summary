@@ -16,7 +16,16 @@ export const useArxivStore = defineStore('arxiv', () => {
 
   // 计算属性
   const isDebugMode = computed(() => config.value?.debug_mode || false)
-  const hasValidConfig = computed(() => config.value && config.value.dashscope_api_key)
+  const hasValidConfig = computed(() => {
+    const cfg = config.value
+    if (!cfg) return false
+    const provider = (cfg.heavy_model_provider || 'dashscope').toLowerCase()
+    if (provider === 'ollama') {
+      return !!cfg.ollama_base_url
+    }
+    // 默认按 DashScope 校验
+    return !!cfg.dashscope_api_key
+  })
   const hasResearchInterests = computed(() => researchInterests.value.length > 0)
 
   // 方法

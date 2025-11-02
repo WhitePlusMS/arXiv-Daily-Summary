@@ -10,7 +10,7 @@ import traceback
 import os
 from openai import OpenAI
 import threading
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Union
 from loguru import logger
 
 
@@ -19,7 +19,23 @@ class LLMProvider:
     负责所有LLM提示词构建和交互逻辑。"""
     
     def __init__(self, model: str, base_url: str, api_key: str, description: str = "", username: str = "TEST", 
-                 temperature: float = 0.7, top_p: float = 0.9, max_tokens: int = 4000):
+                 temperature: float = 0.7, top_p: float = 0.9, max_tokens: int = 4000,
+                 # 兼容Qwen/OpenAI的扩展默认参数
+                 top_k: Optional[int] = None,
+                 repetition_penalty: Optional[float] = None,
+                 seed: Optional[int] = None,
+                 stop: Optional[Union[str, List[str]]] = None,
+                 tool_choice: Optional[str] = None,
+                 response_format: Optional[Union[str, Dict[str, Any]]] = None,
+                 enable_thinking: Optional[bool] = None,
+                 logprobs: Optional[bool] = None,
+                 top_logprobs: Optional[int] = None,
+                 presence_penalty: Optional[float] = None,
+                 frequency_penalty: Optional[float] = None,
+                 enable_search: Optional[bool] = None,
+                 thinking_budget: Optional[int] = None,
+                 incremental_output: Optional[bool] = None,
+                 ):
         """初始化LLM提供商。
         
         Args:
@@ -40,6 +56,21 @@ class LLMProvider:
         self.default_temperature = temperature
         self.default_top_p = top_p
         self.default_max_tokens = max_tokens
+        # 扩展默认参数
+        self.default_top_k = top_k
+        self.default_repetition_penalty = repetition_penalty
+        self.default_seed = seed
+        self.default_stop = stop
+        self.default_tool_choice = tool_choice
+        self.default_response_format = response_format
+        self.default_enable_thinking = enable_thinking
+        self.default_logprobs = logprobs
+        self.default_top_logprobs = top_logprobs
+        self.default_presence_penalty = presence_penalty
+        self.default_frequency_penalty = frequency_penalty
+        self.default_enable_search = enable_search
+        self.default_thinking_budget = thinking_budget
+        self.default_incremental_output = incremental_output
         # Token用量统计（作为单一真源）
         self.total_input_tokens = 0
         self.total_output_tokens = 0
@@ -57,7 +88,13 @@ class LLMProvider:
         if not hasattr(LLMProvider, "_global_rate_limiter") or LLMProvider._global_rate_limiter is None:
             LLMProvider._global_rate_limiter = threading.BoundedSemaphore(self._max_concurrency)
         self._rate_limiter = LLMProvider._global_rate_limiter
-        logger.success(f"LLMProvider初始化完成 - 模型: {model}, URL: {base_url}, 用户: {username}, 温度: {temperature}, top_p: {top_p}, max_tokens: {max_tokens}")
+        logger.success(
+            f"LLMProvider初始化完成 - 模型: {model}, URL: {base_url}, 用户: {username}, "
+            f"温度: {temperature}, top_p: {top_p}, max_tokens: {max_tokens}, "
+            f"top_k: {top_k}, repetition_penalty: {repetition_penalty}, seed: {seed}, "
+            f"stop: {stop}, tool_choice: {tool_choice}, response_format: {response_format}, "
+            f"enable_thinking: {enable_thinking}, logprobs: {logprobs}, top_logprobs: {top_logprobs}"
+        )
     
     @property
     def model_name(self) -> str:
@@ -90,8 +127,30 @@ class LLMProvider:
         ]
     
     def _call_api_with_retry(
-        self, messages: list, temperature: float = None, top_p: float = None, 
-        max_tokens: int = None, max_retries: int = 2, wait_time: int = 1, return_raw: bool = False
+        self,
+        messages: list,
+        temperature: float = None,
+        top_p: float = None,
+        max_tokens: int = None,
+        # 扩展参数（每次调用可覆盖默认值）
+        top_k: Optional[int] = None,
+        repetition_penalty: Optional[float] = None,
+        seed: Optional[int] = None,
+        stop: Optional[Union[str, List[str]]] = None,
+        tools: Optional[List[Dict[str, Any]]] = None,
+        tool_choice: Optional[str] = None,
+        response_format: Optional[Union[str, Dict[str, Any]]] = None,
+        enable_thinking: Optional[bool] = None,
+        logprobs: Optional[bool] = None,
+        top_logprobs: Optional[int] = None,
+        presence_penalty: Optional[float] = None,
+        frequency_penalty: Optional[float] = None,
+        enable_search: Optional[bool] = None,
+        thinking_budget: Optional[int] = None,
+        incremental_output: Optional[bool] = None,
+        max_retries: int = 2,
+        wait_time: int = 1,
+        return_raw: bool = False,
     ) -> str:
         """使用重试机制调用OpenAI API。
         
@@ -116,8 +175,43 @@ class LLMProvider:
             top_p = self.default_top_p
         if max_tokens is None:
             max_tokens = self.default_max_tokens
+        # 扩展参数默认值注入
+        if top_k is None:
+            top_k = self.default_top_k
+        if repetition_penalty is None:
+            repetition_penalty = self.default_repetition_penalty
+        if seed is None:
+            seed = self.default_seed
+        if stop is None:
+            stop = self.default_stop
+        if tool_choice is None:
+            tool_choice = self.default_tool_choice
+        if response_format is None:
+            response_format = self.default_response_format
+        if enable_thinking is None:
+            enable_thinking = self.default_enable_thinking
+        if logprobs is None:
+            logprobs = self.default_logprobs
+        if top_logprobs is None:
+            top_logprobs = self.default_top_logprobs
+        if presence_penalty is None:
+            presence_penalty = self.default_presence_penalty
+        if frequency_penalty is None:
+            frequency_penalty = self.default_frequency_penalty
+        if enable_search is None:
+            enable_search = self.default_enable_search
+        if thinking_budget is None:
+            thinking_budget = self.default_thinking_budget
+        if incremental_output is None:
+            incremental_output = self.default_incremental_output
             
-        logger.debug(f"API调用开始 - 模型: {self._model_name}, 温度: {temperature}, top_p: {top_p}, max_tokens: {max_tokens}, 最大重试: {max_retries}")
+        logger.debug(
+            f"API调用开始 - 模型: {self._model_name}, 温度: {temperature}, top_p: {top_p}, max_tokens: {max_tokens}, "
+            f"top_k: {top_k}, repetition_penalty: {repetition_penalty}, seed: {seed}, stop: {stop}, "
+            f"tool_choice: {tool_choice}, response_format: {response_format}, enable_thinking: {enable_thinking}, "
+            f"logprobs: {logprobs}, top_logprobs: {top_logprobs}, presence_penalty: {presence_penalty}, frequency_penalty: {frequency_penalty}, "
+            f"enable_search: {enable_search}, thinking_budget: {thinking_budget}, incremental_output: {incremental_output}, 最大重试: {max_retries}"
+        )
         logger.debug(f"API配置 - 客户端: {self._client}, 基础URL: {self._client.base_url}")
         
         for attempt in range(max_retries):
@@ -125,13 +219,52 @@ class LLMProvider:
                 # 全局并发限流
                 self._rate_limiter.acquire()
                 logger.debug(f"第 {attempt + 1} 次API调用尝试")
-                response = self._client.chat.completions.create(
-                    model=self._model_name,
-                    messages=messages,
-                    temperature=temperature,
-                    top_p=top_p,
-                    max_tokens=max_tokens,
-                )
+                # 组织标准参数
+                request_kwargs: Dict[str, Any] = {
+                    "model": self._model_name,
+                    "messages": messages,
+                    "temperature": temperature,
+                    "top_p": top_p,
+                    "max_tokens": max_tokens,
+                }
+                if stop is not None:
+                    request_kwargs["stop"] = stop
+                if tools is not None:
+                    request_kwargs["tools"] = tools
+                if tool_choice is not None:
+                    request_kwargs["tool_choice"] = tool_choice
+                if response_format is not None:
+                    request_kwargs["response_format"] = response_format
+                if logprobs is not None:
+                    request_kwargs["logprobs"] = logprobs
+                if top_logprobs is not None:
+                    request_kwargs["top_logprobs"] = top_logprobs
+                if seed is not None:
+                    request_kwargs["seed"] = seed
+                if presence_penalty is not None:
+                    request_kwargs["presence_penalty"] = presence_penalty
+                if frequency_penalty is not None:
+                    request_kwargs["frequency_penalty"] = frequency_penalty
+
+                # 组织额外体（Qwen/DashScope特有）
+                extra_body: Dict[str, Any] = {}
+                if top_k is not None:
+                    extra_body["top_k"] = top_k
+                if repetition_penalty is not None:
+                    extra_body["repetition_penalty"] = repetition_penalty
+                if enable_thinking is not None:
+                    extra_body["enable_thinking"] = enable_thinking
+                if enable_search is not None:
+                    extra_body["enable_search"] = enable_search
+                if thinking_budget is not None:
+                    extra_body["thinking_budget"] = thinking_budget
+                if incremental_output is not None:
+                    extra_body["incremental_output"] = incremental_output
+
+                if extra_body:
+                    request_kwargs["extra_body"] = extra_body
+
+                response = self._client.chat.completions.create(**request_kwargs)
                 logger.debug(f"API调用成功 - 尝试次数: {attempt + 1}")
                 # 更新token统计（兼容无usage场景）
                 try:
@@ -216,6 +349,22 @@ class LLMProvider:
         temperature: float = None,
         top_p: float = None,
         max_tokens: int = None,
+        # 扩展参数
+        top_k: Optional[int] = None,
+        repetition_penalty: Optional[float] = None,
+        seed: Optional[int] = None,
+        stop: Optional[Union[str, List[str]]] = None,
+        tools: Optional[List[Dict[str, Any]]] = None,
+        tool_choice: Optional[str] = None,
+        response_format: Optional[Union[str, Dict[str, Any]]] = None,
+        enable_thinking: Optional[bool] = None,
+        logprobs: Optional[bool] = None,
+        top_logprobs: Optional[int] = None,
+        presence_penalty: Optional[float] = None,
+        frequency_penalty: Optional[float] = None,
+        enable_search: Optional[bool] = None,
+        thinking_budget: Optional[int] = None,
+        incremental_output: Optional[bool] = None,
         max_retries: int = 2,
         wait_time: int = 1,
         return_raw: bool = False,
@@ -239,6 +388,21 @@ class LLMProvider:
             temperature=temperature,
             top_p=top_p,
             max_tokens=max_tokens,
+            top_k=top_k,
+            repetition_penalty=repetition_penalty,
+            seed=seed,
+            stop=stop,
+            tools=tools,
+            tool_choice=tool_choice,
+            response_format=response_format,
+            enable_thinking=enable_thinking,
+            logprobs=logprobs,
+            top_logprobs=top_logprobs,
+            presence_penalty=presence_penalty,
+            frequency_penalty=frequency_penalty,
+            enable_search=enable_search,
+            thinking_budget=thinking_budget,
+            incremental_output=incremental_output,
             max_retries=max_retries,
             wait_time=wait_time,
             return_raw=return_raw,
@@ -1067,7 +1231,7 @@ def create_light_llm_provider(description: str = "", username: str = "TEST") -> 
         username=username,
         temperature=temperature,
         top_p=top_p,
-        max_tokens=max_tokens
+        max_tokens=max_tokens,
     )
 
 

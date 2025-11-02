@@ -135,19 +135,19 @@
     </div>
 
     <!-- Token使用统计 -->
-    <div v-if="tokenUsage.totalTokens > 0" class="streamlit-section">
+    <div v-if="tokenUsage.total_tokens > 0" class="streamlit-section">
       <h2 class="streamlit-subheader">💰 使用统计</h2>
       <div class="token-grid">
         <div class="token-item">
-          <div class="token-value">{{ tokenUsage.inputTokens }}</div>
+          <div class="token-value">{{ tokenUsage.input_tokens }}</div>
           <div class="token-label">输入Token</div>
         </div>
         <div class="token-item">
-          <div class="token-value">{{ tokenUsage.outputTokens }}</div>
+          <div class="token-value">{{ tokenUsage.output_tokens }}</div>
           <div class="token-label">输出Token</div>
         </div>
         <div class="token-item">
-          <div class="token-value">{{ tokenUsage.totalTokens }}</div>
+          <div class="token-value">{{ tokenUsage.total_tokens }}</div>
           <div class="token-label">总Token</div>
         </div>
       </div>
@@ -304,7 +304,7 @@ const isDescriptionLocked = ref(false);
 const runningMessage = ref("");
 const matchCompleted = ref(false);
 const results = ref<{ id: string; name: string; score: number }[]>([]);
-const tokenUsage = ref({ inputTokens: 0, outputTokens: 0, totalTokens: 0 });
+const tokenUsage = ref({ input_tokens: 0, output_tokens: 0, total_tokens: 0 });
 const stats = ref<{ total_records?: number; unique_users?: number } | null>(null);
 const recordsCollapsed = ref(true);
 const toggleRecordsCollapse = () => {
@@ -410,13 +410,13 @@ const startMatching = async () => {
       top_n: topN.value,
     });
     if (resp.success && resp.data) {
-      results.value = resp.data.results.map((r) => ({ id: r.id, name: r.name, score: r.score }));
-      const tu = resp.data.token_usage;
-      tokenUsage.value = {
-        inputTokens: tu.input_tokens,
-        outputTokens: tu.output_tokens,
-        totalTokens: tu.total_tokens,
-      };
+      const resList = Array.isArray(resp.data.results) ? resp.data.results : [];
+      results.value = resList.map((r) => ({ id: r.id, name: r.name, score: r.score }));
+      const tuRaw = resp.data.token_usage || {};
+      const input_tokens = (tuRaw as any).input_tokens ?? 0;
+      const output_tokens = (tuRaw as any).output_tokens ?? 0;
+      const total_tokens = (tuRaw as any).total_tokens ?? 0;
+      tokenUsage.value = { input_tokens, output_tokens, total_tokens };
       matchCompleted.value = true;
       // 匹配成功后刷新数据列表
       await refreshData();

@@ -49,6 +49,10 @@
           <div class="stat-value">{{ lightProviderLabel }}</div>
           <div class="stat-label">轻量模型提供方</div>
         </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ heavyProviderLabel }}</div>
+          <div class="stat-label">主模型提供方</div>
+        </div>
       </div>
     </div>
 
@@ -86,7 +90,6 @@
           {{ s }}
         </button>
       </div>
-      <div class="streamlit-help">提示：点击上方标签快速切换分组；保存操作集中在页面底部。</div>
       <div class="streamlit-divider"></div>
     </div>
 
@@ -94,22 +97,30 @@
     <div class="streamlit-section">
       <h2 class="streamlit-subheader">{{ selectedSection }}</h2>
 
-      <!-- 推荐值与快速应用 -->
-      <div class="action-row">
-        <button
-          class="streamlit-button streamlit-button-small"
-          :disabled="isLoading"
-          @click="applyPreset(selectedSection)"
-        >
-          ⚡ 应用推荐值
-        </button>
-        <div class="streamlit-help" v-if="recommendedSummary[selectedSection]">
-          推荐摘要：{{ recommendedSummary[selectedSection] }}
-        </div>
-      </div>
 
-      <!-- 🔑 API配置 -->
-      <div v-if="selectedSection === '🔑 API配置'" class="form-grid">
+      <!-- 🤖 模型与API配置（合并） -->
+      <div v-if="selectedSection === '🤖 模型与API配置'" class="form-grid">
+        <!-- 🧭 功能映射：为不同功能选择提供方 -->
+        <div class="form-item">
+          <label>分类匹配使用提供方（LIGHT_MODEL_PROVIDER）</label>
+          <select v-model="configChanges.LIGHT_MODEL_PROVIDER" class="streamlit-select">
+            <option value="dashscope">dashscope</option>
+            <option value="ollama">ollama</option>
+          </select>
+          <div class="streamlit-help">用于 Top-N 分类评分的轻量推理；dashscope=通义千问。</div>
+        </div>
+        <div class="form-item">
+          <label>正文分析与报告使用提供方（HEAVY_MODEL_PROVIDER）</label>
+          <select v-model="configChanges.HEAVY_MODEL_PROVIDER" class="streamlit-select">
+            <option value="dashscope">dashscope</option>
+            <option value="ollama">ollama</option>
+          </select>
+          <div class="streamlit-help">用于详细分析与报告生成的主模型；可选本地 Ollama。</div>
+        </div>
+
+        <div class="streamlit-divider"></div>
+
+        <!-- 🔑 DashScope API 与模型 -->
         <div class="form-item">
           <label>DASHSCOPE_API_KEY</label>
           <div class="password-field">
@@ -134,16 +145,20 @@
           <input type="text" v-model="configChanges.DASHSCOPE_BASE_URL" class="streamlit-input" />
           <div class="streamlit-help">通义服务的基地址，通常保留默认即可。</div>
         </div>
-        <div class="form-item" v-if="configChanges.LIGHT_MODEL_PROVIDER === 'qwen'">
+        <div class="form-item" v-if="configChanges.HEAVY_MODEL_PROVIDER === 'dashscope'">
           <label>QWEN_MODEL</label>
           <input type="text" v-model="configChanges.QWEN_MODEL" class="streamlit-input" />
           <div class="streamlit-help">主推荐使用的模型（重任务）。</div>
         </div>
-        <div class="form-item" v-if="configChanges.LIGHT_MODEL_PROVIDER === 'qwen'">
+        <div class="form-item" v-if="configChanges.LIGHT_MODEL_PROVIDER === 'dashscope'">
           <label>QWEN_MODEL_LIGHT</label>
           <input type="text" v-model="configChanges.QWEN_MODEL_LIGHT" class="streamlit-input" />
           <div class="streamlit-help">轻量任务使用的模型（更快）。</div>
         </div>
+
+        <div class="streamlit-divider"></div>
+
+        <!-- 🧩 Ollama 服务与模型 -->
         <div class="form-item">
           <label>OLLAMA_BASE_URL</label>
           <input type="text" v-model="configChanges.OLLAMA_BASE_URL" class="streamlit-input" />
@@ -154,13 +169,10 @@
           <input type="text" v-model="configChanges.OLLAMA_MODEL_LIGHT" class="streamlit-input" />
           <div class="streamlit-help">轻量模型名称，例如 `qwen2.5:7b`。</div>
         </div>
-        <div class="form-item">
-          <label>LIGHT_MODEL_PROVIDER</label>
-          <select v-model="configChanges.LIGHT_MODEL_PROVIDER" class="streamlit-select">
-            <option value="qwen">qwen</option>
-            <option value="ollama">ollama</option>
-          </select>
-          <div class="streamlit-help">选择轻量推理的提供方（影响展示的参数项）。</div>
+        <div class="form-item" v-if="configChanges.HEAVY_MODEL_PROVIDER === 'ollama'">
+          <label>OLLAMA_MODEL_HEAVY</label>
+          <input type="text" v-model="configChanges.OLLAMA_MODEL_HEAVY" class="streamlit-input" />
+          <div class="streamlit-help">主模型名称，例如 `qwen2:7b` 或 `llama3.1:8b`。</div>
         </div>
         <div class="form-item" v-if="configChanges.LIGHT_MODEL_PROVIDER === 'ollama'">
           <label>OLLAMA_MODEL_LIGHT_TEMPERATURE</label>
@@ -197,7 +209,48 @@
           />
           <div class="streamlit-help">轻量模型的最大生成长度，过大将影响性能。</div>
         </div>
+
+        <div class="streamlit-divider"></div>
+
+        <!-- 🤖 LLM常用参数（DashScope） -->
+        <div class="form-item">
+          <label>MAX_WORKERS</label>
+          <input type="number" v-model="configChanges.MAX_WORKERS" class="streamlit-input" />
+        </div>
+        <div class="form-item">
+          <label>QWEN_MODEL_TEMPERATURE</label>
+          <input type="number" step="0.1" v-model="configChanges.QWEN_MODEL_TEMPERATURE" class="streamlit-input" />
+          <div class="streamlit-help">主模型温度（越高越发散）。适用于 DashScope。</div>
+        </div>
+        <div class="form-item">
+          <label>QWEN_MODEL_TOP_P</label>
+          <input type="number" step="0.05" v-model="configChanges.QWEN_MODEL_TOP_P" class="streamlit-input" />
+          <div class="streamlit-help">主模型采样阈值 Top P。适用于 DashScope。</div>
+        </div>
+        <div class="form-item">
+          <label>QWEN_MODEL_MAX_TOKENS</label>
+          <input type="number" v-model="configChanges.QWEN_MODEL_MAX_TOKENS" class="streamlit-input" />
+          <div class="streamlit-help">主模型最大生成长度。适用于 DashScope。</div>
+        </div>
+
+        <div class="streamlit-help">轻量 Qwen 常用参数</div>
+        <div class="form-item">
+          <label>QWEN_MODEL_LIGHT_TEMPERATURE</label>
+          <input type="number" step="0.1" v-model="configChanges.QWEN_MODEL_LIGHT_TEMPERATURE" class="streamlit-input" />
+          <div class="streamlit-help">轻量模型温度（适用于 DashScope）。</div>
+        </div>
+        <div class="form-item">
+          <label>QWEN_MODEL_LIGHT_TOP_P</label>
+          <input type="number" step="0.05" v-model="configChanges.QWEN_MODEL_LIGHT_TOP_P" class="streamlit-input" />
+          <div class="streamlit-help">轻量模型采样阈值 Top P。</div>
+        </div>
+        <div class="form-item">
+          <label>QWEN_MODEL_LIGHT_MAX_TOKENS</label>
+          <input type="number" v-model="configChanges.QWEN_MODEL_LIGHT_MAX_TOKENS" class="streamlit-input" />
+          <div class="streamlit-help">轻量模型最大生成长度。</div>
+        </div>
       </div>
+
 
       <!-- 📚 ArXiv配置 -->
       <div v-if="selectedSection === '📚 ArXiv配置'" class="form-grid">
@@ -247,13 +300,6 @@
         </div>
       </div>
 
-      <!-- 🤖 LLM配置 -->
-      <div v-if="selectedSection === '🤖 LLM配置'" class="form-grid">
-        <div class="form-item">
-          <label>MAX_WORKERS</label>
-          <input type="number" v-model="configChanges.MAX_WORKERS" class="streamlit-input" />
-        </div>
-      </div>
 
       <!-- 📁 文件路径配置 -->
       <div v-if="selectedSection === '📁 文件路径配置'" class="form-grid">
@@ -455,11 +501,10 @@ const store = useArxivStore();
 
 // 分组列表
 const sections = [
-  // 连接优先（API 与邮件），再到数据抓取、推理、输出、时间
-  "🔑 API配置",
+  // 将 API、功能映射与 LLM 合并为单一分组
+  "🤖 模型与API配置",
   "📧 邮件配置",
   "📚 ArXiv配置",
-  "🤖 LLM配置",
   "📁 文件路径配置",
   "📝 日志配置",
   "🕐 时区格式配置",
@@ -487,6 +532,9 @@ const debugEnabled = computed(
 );
 const lightProviderLabel = computed(
   () => String(configChanges.value?.LIGHT_MODEL_PROVIDER || "").trim() || "未设置"
+);
+const heavyProviderLabel = computed(
+  () => String(configChanges.value?.HEAVY_MODEL_PROVIDER || "").trim() || "未设置"
 );
 
 // 计算未保存更改
@@ -575,77 +623,6 @@ const saveConfig = async () => {
 };
 
 // 推荐预设（按分组）
-const recommendedPresets: Record<string, Record<string, string>> = {
-  "🔑 API配置": {
-    DASHSCOPE_BASE_URL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
-    LIGHT_MODEL_PROVIDER: "qwen",
-    QWEN_MODEL: "qwen-plus",
-    QWEN_MODEL_LIGHT: "qwen3-30b-a3b-instruct-2507",
-    OLLAMA_BASE_URL: "http://localhost:11434/v1",
-    OLLAMA_MODEL_LIGHT: "llama3.2:3b",
-    OLLAMA_MODEL_LIGHT_TEMPERATURE: "0.7",
-    OLLAMA_MODEL_LIGHT_TOP_P: "0.9",
-    OLLAMA_MODEL_LIGHT_MAX_TOKENS: "2000",
-  },
-  "📚 ArXiv配置": {
-    ARXIV_BASE_URL: "http://export.arxiv.org/api/query",
-    ARXIV_RETRIES: "3",
-    ARXIV_DELAY: "5",
-    ARXIV_CATEGORIES: "cs.CV,cs.LG",
-    MAX_ENTRIES: "50",
-    NUM_DETAILED_PAPERS: "3",
-    NUM_BRIEF_PAPERS: "7",
-  },
-  "🤖 LLM配置": {
-    MAX_WORKERS: "5",
-  },
-  "📁 文件路径配置": {
-    USER_CATEGORIES_FILE: "data/users/user_categories.json",
-    SAVE_DIRECTORY: "arxiv_history",
-    SAVE_MARKDOWN: "true",
-  },
-  "📧 邮件配置": {
-    SEND_EMAIL: "false",
-    SMTP_PORT: "587",
-    USE_SSL: "false",
-    USE_TLS: "true",
-    SUBJECT_PREFIX: "每日arXiv",
-  },
-  "🕐 时区格式配置": {
-    TIMEZONE: "Asia/Shanghai",
-    DATE_FORMAT: "%Y-%m-%d",
-    TIME_FORMAT: "%H:%M:%S",
-    ENABLE_MCP_TIME_SERVICE: "false",
-    DEBUG_MODE: "false",
-  },
-  "📝 日志配置": {
-    LOG_LEVEL: "INFO",
-    LOG_FILE: "logs/arxiv_recommender.log",
-    LOG_TO_CONSOLE: "true",
-    LOG_MAX_SIZE: "10",
-    LOG_BACKUP_COUNT: "5",
-  },
-};
-
-// 推荐摘要文案（用于界面提示）
-const recommendedSummary: Record<string, string> = {
-  "🔑 API配置":
-    "优先使用 DashScope；主模型 qwen-plus；轻量 qwen3-30b；Ollama 默认 http://localhost:11434/v1",
-  "📚 ArXiv配置": "重试 3 次、延迟 5 秒；分类 cs.CV,cs.LG；每次最多 50 篇；详细 3、简要 7",
-  "🤖 LLM配置": "并发工作线程 5",
-  "📁 文件路径配置": "用户分类 data/users/user_categories.json；目录 arxiv_history；保存 Markdown",
-  "📧 邮件配置": "默认不发送；端口 587；TLS 开启、SSL 关闭；标题前缀 每日arXiv",
-  "🕐 时区格式配置": "Asia/Shanghai；日期 %Y-%m-%d；时间 %H:%M:%S；关闭 MCP 时间；关闭调试",
-  "📝 日志配置": "INFO；logs/arxiv_recommender.log；开启控制台；滚动大小 10MB；保留 5 个",
-};
-
-const applyPreset = (section: string) => {
-  const preset = recommendedPresets[section];
-  if (!preset) return;
-  Object.entries(preset).forEach(([k, v]) => {
-    configChanges.value[k] = v;
-  });
-};
 
 const reloadConfig = async () => {
   isLoading.value = true;
@@ -687,17 +664,30 @@ const restoreDefault = async () => {
 
 // 当前分组字段映射，用于分组重置
 const sectionFields: Record<string, string[]> = {
-  "🔑 API配置": [
+  "🤖 模型与API配置": [
+    // 功能映射
+    "LIGHT_MODEL_PROVIDER",
+    "HEAVY_MODEL_PROVIDER",
+    // DashScope API 与模型
     "DASHSCOPE_API_KEY",
     "DASHSCOPE_BASE_URL",
     "QWEN_MODEL",
     "QWEN_MODEL_LIGHT",
+    // Ollama 服务与模型
     "OLLAMA_BASE_URL",
     "OLLAMA_MODEL_LIGHT",
-    "LIGHT_MODEL_PROVIDER",
+    "OLLAMA_MODEL_HEAVY",
     "OLLAMA_MODEL_LIGHT_TEMPERATURE",
     "OLLAMA_MODEL_LIGHT_TOP_P",
     "OLLAMA_MODEL_LIGHT_MAX_TOKENS",
+    // LLM 常用参数（DashScope）
+    "MAX_WORKERS",
+    "QWEN_MODEL_TEMPERATURE",
+    "QWEN_MODEL_TOP_P",
+    "QWEN_MODEL_MAX_TOKENS",
+    "QWEN_MODEL_LIGHT_TEMPERATURE",
+    "QWEN_MODEL_LIGHT_TOP_P",
+    "QWEN_MODEL_LIGHT_MAX_TOKENS",
   ],
   "📚 ArXiv配置": [
     "ARXIV_BASE_URL",
@@ -708,7 +698,6 @@ const sectionFields: Record<string, string[]> = {
     "NUM_DETAILED_PAPERS",
     "NUM_BRIEF_PAPERS",
   ],
-  "🤖 LLM配置": ["MAX_WORKERS"],
   "📁 文件路径配置": ["USER_CATEGORIES_FILE", "SAVE_DIRECTORY", "SAVE_MARKDOWN"],
   "📧 邮件配置": [
     "SEND_EMAIL",

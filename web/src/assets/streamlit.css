@@ -332,10 +332,11 @@ input[type="range"] {
   margin: 8px 0 16px 0;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   text-align: center;
   gap: 32px;
-  max-width: 800px;
+  width: 100%;
+  box-sizing: border-box;
 }
 .stat-item { flex: 1; }
 .stat-value { font-size: 2.2rem; font-weight: 700; color: #2563eb; margin-bottom: 8px; }

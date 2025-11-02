@@ -249,6 +249,7 @@ const previewContent = ref("");
 
 // 计算属性（使用 storeToRefs 保持响应性）
 const {
+  config,
   userProfiles,
   researchInterests,
   selectedProfileName,
@@ -365,7 +366,11 @@ const runMainRecommendation = async () => {
   }
 
   if (!hasValidConfig.value) {
-    store.setError("DashScope API Key 未配置，请检查 .env 文件！");
+    const provider = (config.value?.heavy_model_provider || 'dashscope').toLowerCase()
+    const msg = provider === 'ollama'
+      ? 'Ollama 未配置，请设置 OLLAMA_BASE_URL 并确保服务可用（或切换 HEAVY_MODEL_PROVIDER）。'
+      : 'DashScope API Key 未配置，请检查 .env 文件（或切换 HEAVY_MODEL_PROVIDER）。'
+    store.setError(msg)
     return;
   }
 

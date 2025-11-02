@@ -144,13 +144,13 @@ class CategoryMatcherService:
             username=username
         )
 
-        # 返回结构化结果及token使用情况
+        # 返回结构化结果及 token 使用情况（统一蛇形命名）
         token_usage = None
         if hasattr(self.matcher, 'total_tokens'):
             token_usage = {
-                'inputTokens': getattr(self.matcher, 'total_input_tokens', 0),
-                'outputTokens': getattr(self.matcher, 'total_output_tokens', 0),
-                'totalTokens': getattr(self.matcher, 'total_tokens', 0),
+                'input_tokens': getattr(self.matcher, 'total_input_tokens', 0),
+                'output_tokens': getattr(self.matcher, 'total_output_tokens', 0),
+                'total_tokens': getattr(self.matcher, 'total_tokens', 0),
             }
 
         return [{

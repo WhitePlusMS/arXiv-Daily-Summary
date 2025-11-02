@@ -188,6 +188,47 @@ python start.py
 4. **结果展示**：在 Web 界面展示推荐结果
 5. **历史存档**：自动保存推荐记录到本地文件
 
+### 模型参数配置（Qwen/OpenAI 兼容）
+
+- 位置：编辑项目根目录下的 `.env` 文件中的 Qwen 参数段。
+- 支持参数：
+  - 基本采样：`QWEN_MODEL_TEMPERATURE`, `QWEN_MODEL_TOP_P`, `QWEN_MODEL_MAX_TOKENS`
+  - 采样增强：`QWEN_MODEL_TOP_K`
+  - 重复惩罚：`QWEN_MODEL_REPETITION_PENALTY`
+  - 随机种子：`QWEN_MODEL_SEED`
+  - 停止词：`QWEN_MODEL_STOPS`（JSON 数组或用 `||` 分隔）
+  - 工具调用：`QWEN_MODEL_TOOL_CHOICE`（`auto`/`none`/`required`）
+  - 响应格式：`QWEN_MODEL_RESPONSE_FORMAT`（`text`/`json_object`）
+  - 思考过程：`QWEN_MODEL_ENABLE_THINKING`（Qwen3 专属）
+  - 概率输出：`QWEN_MODEL_LOGPROBS`, `QWEN_MODEL_TOP_LOGPROBS`
+  - 其他罚则：`QWEN_MODEL_PRESENCE_PENALTY`, `QWEN_MODEL_FREQUENCY_PENALTY`
+  - DashScope 特性：`QWEN_MODEL_ENABLE_SEARCH`, `QWEN_MODEL_THINKING_BUDGET`, `QWEN_MODEL_INCREMENTAL_OUTPUT`
+
+示例（.env）：
+
+```
+QWEN_MODEL=qwen-plus
+DASHSCOPE_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+DASHSCOPE_API_KEY=YOUR_KEY
+QWEN_MODEL_TEMPERATURE=0.7
+QWEN_MODEL_TOP_P=0.9
+QWEN_MODEL_MAX_TOKENS=4000
+QWEN_MODEL_TOP_K=50
+QWEN_MODEL_REPETITION_PENALTY=1.05
+QWEN_MODEL_SEED=42
+QWEN_MODEL_STOPS=["END"]
+QWEN_MODEL_TOOL_CHOICE=auto
+QWEN_MODEL_RESPONSE_FORMAT=json_object
+QWEN_MODEL_ENABLE_THINKING=false
+QWEN_MODEL_LOGPROBS=false
+QWEN_MODEL_TOP_LOGPROBS=0
+```
+
+说明：
+- 未填写的参数会使用代码中的合理默认或不启用（None）。
+- 轻量模型（`QWEN_MODEL_LIGHT_*`）支持同样的参数命名（在 `.env.example` 中已列出）。
+- 所有扩展参数通过 OpenAI 兼容接口调用；DashScope 专属参数通过 `extra_body` 传递，保持兼容。
+
 ## ⚙️ 使用方法
 
 ### 1. 用户创建

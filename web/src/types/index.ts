@@ -37,6 +37,13 @@ export interface FrontendConfig {
   dashscope_api_key?: string
   dashscope_base_url?: string
   qwen_model?: string
+  // Provider mapping
+  heavy_model_provider?: string
+  light_model_provider?: string
+  ollama_base_url?: string
+  ollama_model_heavy?: string
+  ollama_model_light?: string
+  qwen_model_light?: string
 
   // ArXiv
   arxiv_base_url?: string
