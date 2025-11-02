@@ -1,8 +1,6 @@
 import requests
 from typing import List, Dict, Any, Union, Optional
 import feedparser
-import fitz  # PyMuPDF
-import io
 import time
 import json
 from loguru import logger
@@ -24,28 +22,7 @@ class ArxivFetcher:
         })
         logger.success(f"ArxivFetcher初始化完成 - URL: {base_url}, 重试: {retries}次, 延迟: {delay}秒")
 
-    def fetch_pdf_text(self, pdf_url: str) -> str:
-        if not pdf_url:
-            logger.warning("PDF获取跳过 - URL为空")
-            return "PDF URL不可用。"
-        
-        logger.debug(f"PDF获取开始 - {pdf_url}")
-        try:
-            pdf_response = self.session.get(pdf_url, timeout=30)
-            pdf_response.raise_for_status()
-            pdf_bytes = io.BytesIO(pdf_response.content)
-            logger.debug(f"PDF下载完成 - 大小: {len(pdf_response.content)} 字节")
-            
-            with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
-                text = "".join(page.get_text() for page in doc)
-            logger.debug(f"PDF文本提取完成 - 长度: {len(text)} 字符")
-            return text.strip()
-        except requests.RequestException as e:
-            logger.error(f"PDF下载失败 - {pdf_url}: {e}")
-            return f"下载PDF失败: {e}"
-        except Exception as e:
-            logger.error(f"PDF处理失败 - {pdf_url}: {e}")
-            return f"处理PDF失败: {e}"
+    
 
     def _parse_api_entry(self, entry, category: str = None) -> Dict[str, Any]:
         try:

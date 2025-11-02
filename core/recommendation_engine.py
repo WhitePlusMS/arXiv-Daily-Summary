@@ -12,6 +12,7 @@ from loguru import logger
 
 from .arxiv_fetcher import ArxivFetcher
 from .llm_provider import LLMProvider, create_light_llm_provider
+from .pdf_text_extractor import PDFTextExtractor
 
 
 class RecommendationEngine:
@@ -35,6 +36,7 @@ class RecommendationEngine:
         arxiv_fetcher: Optional[ArxivFetcher] = None,
         llm_provider: Optional[LLMProvider] = None,
         light_llm_provider: Optional[LLMProvider] = None,
+        pdf_text_extractor: Optional[PDFTextExtractor] = None,
     ):
         """初始化推荐引擎。
         
@@ -82,6 +84,8 @@ class RecommendationEngine:
             description=description,
             username=username,
         )
+        # PDF 文本解析器（独立模块，减少 ArxivFetcher 职责）
+        self.pdf_text_extractor = pdf_text_extractor or PDFTextExtractor()
         
         self.temperature = temperature
         self.top_p = top_p
@@ -234,7 +238,7 @@ class RecommendationEngine:
         title_short = paper['title'][:50] + '...' if len(paper['title']) > 50 else paper['title']
         try:
             logger.debug(f"获取PDF全文 - {title_short}")
-            full_text = self.arxiv_fetcher.fetch_pdf_text(paper['pdf_url'])
+            full_text = self.pdf_text_extractor.extract_pdf_text(paper['pdf_url'])
             
             if "下载PDF失败" in full_text or "处理PDF失败" in full_text:
                 logger.warning(f"PDF获取失败，跳过详细分析 - {title_short}")
