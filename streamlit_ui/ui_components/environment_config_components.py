@@ -113,7 +113,7 @@ def render_api_config(config_manager):
             current_model = model_options[0]
         
         model = st.selectbox(
-            "主模型（生成报告/详细分析）",
+            "正文分析与报告模型",
             options=model_options,
             index=model_options.index(current_model) if current_model in model_options else 0,
             help="选择要使用的通义千问模型"
@@ -128,10 +128,10 @@ def render_api_config(config_manager):
             current_provider = provider_options[0]
             
         light_provider = st.selectbox(
-            "轻量模型提供商",
+            "分类匹配模型提供方",
             options=provider_options,
             index=provider_options.index(current_provider) if current_provider in provider_options else 0,
-            help="选择轻量模型的提供商：通义千问或OLLAMA本地模型"
+            help="选择分类匹配模型的提供方：通义千问或OLLAMA本地模型"
         )
         st.session_state.config_changes['LIGHT_MODEL_PROVIDER'] = light_provider
         
@@ -145,17 +145,17 @@ def render_api_config(config_manager):
                 current_light_model = model_options[0]
                 
             light_model = st.selectbox(
-                "轻量模型（分类匹配）",
+                "分类匹配模型",
                 options=model_options,
                 index=model_options.index(current_light_model) if current_light_model in model_options else (1 if len(model_options) > 1 else 0),
-                help="选择轻量级通义千问模型"
+                help="选择用于分类匹配的通义千问模型"
             )
             st.session_state.config_changes['QWEN_MODEL_LIGHT'] = light_model
         else:  # ollama
             ollama_model = st.text_input(
-                "OLLAMA轻量模型名称",
+                "OLLAMA 分类匹配模型名称",
                 value=st.session_state.config_changes.get('OLLAMA_MODEL_LIGHT', ''),
-                help="输入OLLAMA本地模型名称，如：llama3.2:3b, qwen2.5:7b等"
+                help="输入用于分类匹配的 OLLAMA 本地模型名称，如：llama3.2:3b, qwen2.5:7b等"
             )
             st.session_state.config_changes['OLLAMA_MODEL_LIGHT'] = ollama_model
             
@@ -256,7 +256,7 @@ def render_llm_config(config_manager):
     
     with col1:
         qwen_temp = st.slider(
-            "主模型温度",
+            "正文分析与报告模型温度",
             min_value=0.0,
             max_value=2.0,
             value=float(st.session_state.config_changes.get('QWEN_MODEL_TEMPERATURE', 0.0)),
@@ -268,7 +268,7 @@ def render_llm_config(config_manager):
         track_config_change('QWEN_MODEL_TEMPERATURE', str(qwen_temp))
         
         qwen_top_p = st.slider(
-            "主模型Top-p",
+            "正文分析与报告模型 Top-p",
             min_value=0.0,
             max_value=1.0,
             value=float(st.session_state.config_changes.get('QWEN_MODEL_TOP_P', 0.0)),
@@ -280,7 +280,7 @@ def render_llm_config(config_manager):
         track_config_change('QWEN_MODEL_TOP_P', str(qwen_top_p))
         
         qwen_max_tokens = st.number_input(
-            "主模型最大令牌数",
+            "正文分析与报告模型最大令牌数",
             min_value=100,
             max_value=8000,
             value=int(st.session_state.config_changes.get('QWEN_MODEL_MAX_TOKENS', 100)),
@@ -292,35 +292,35 @@ def render_llm_config(config_manager):
     
     with col2:
         qwen_light_temp = st.slider(
-            "轻量模型温度",
+            "分类匹配模型温度",
             min_value=0.0,
             max_value=2.0,
             value=float(st.session_state.config_changes.get('QWEN_MODEL_LIGHT_TEMPERATURE', 0.0)),
             step=0.1,
-            help="轻量模型的温度参数",
+            help="分类匹配模型的温度参数",
             key="qwen_light_temp_slider"
         )
         # 使用辅助函数跟踪配置更改
         track_config_change('QWEN_MODEL_LIGHT_TEMPERATURE', str(qwen_light_temp))
         
         qwen_light_top_p = st.slider(
-            "轻量模型Top-p",
+            "分类匹配模型 Top-p",
             min_value=0.0,
             max_value=1.0,
             value=float(st.session_state.config_changes.get('QWEN_MODEL_LIGHT_TOP_P', 0.0)),
             step=0.05,
-            help="轻量模型的Top-p参数",
+            help="分类匹配模型的 Top-p 参数",
             key="qwen_light_top_p_slider"
         )
         # 使用辅助函数跟踪配置更改
         track_config_change('QWEN_MODEL_LIGHT_TOP_P', str(qwen_light_top_p))
         
         qwen_light_max_tokens = st.number_input(
-            "轻量模型最大令牌数",
+            "分类匹配模型最大令牌数",
             min_value=50,
             max_value=2000,
             value=int(st.session_state.config_changes.get('QWEN_MODEL_LIGHT_MAX_TOKENS', 50)),
-            help="轻量模型生成文本的最大长度",
+            help="分类匹配模型生成文本的最大长度",
             key="qwen_light_max_tokens_input"
         )
         # 使用辅助函数跟踪配置更改
@@ -333,24 +333,24 @@ def render_llm_config(config_manager):
         
         with col3:
             ollama_temp = st.slider(
-                "OLLAMA温度",
+                "分类匹配模型温度（OLLAMA）",
                 min_value=0.0,
                 max_value=2.0,
                 value=float(st.session_state.config_changes.get('OLLAMA_MODEL_LIGHT_TEMPERATURE', 0.0)),
                 step=0.1,
-                help="OLLAMA模型的温度参数",
+                help="用于分类匹配的 OLLAMA 模型温度参数",
                 key="ollama_temp_slider"
             )
             # 使用辅助函数跟踪配置更改
             track_config_change('OLLAMA_MODEL_LIGHT_TEMPERATURE', str(ollama_temp))
             
             ollama_top_p = st.slider(
-                "OLLAMA Top-p",
+                "分类匹配模型 Top-p（OLLAMA）",
                 min_value=0.0,
                 max_value=1.0,
                 value=float(st.session_state.config_changes.get('OLLAMA_MODEL_LIGHT_TOP_P', 0.0)),
                 step=0.05,
-                help="OLLAMA模型的Top-p参数",
+                help="用于分类匹配的 OLLAMA 模型 Top-p 参数",
                 key="ollama_top_p_slider"
             )
             # 使用辅助函数跟踪配置更改
@@ -358,11 +358,11 @@ def render_llm_config(config_manager):
         
         with col4:
             ollama_max_tokens = st.number_input(
-                "OLLAMA最大令牌数",
+                "分类匹配模型最大令牌数（OLLAMA）",
                 min_value=50,
                 max_value=2000,
                 value=int(st.session_state.config_changes.get('OLLAMA_MODEL_LIGHT_MAX_TOKENS', 50)),
-                help="OLLAMA模型生成文本的最大长度",
+                help="用于分类匹配的 OLLAMA 模型生成文本的最大长度",
                 key="ollama_max_tokens_input"
             )
             # 使用辅助函数跟踪配置更改

@@ -368,8 +368,8 @@ const runMainRecommendation = async () => {
   if (!hasValidConfig.value) {
     const provider = (config.value?.heavy_model_provider || 'dashscope').toLowerCase()
     const msg = provider === 'ollama'
-      ? 'Ollama 未配置，请设置 OLLAMA_BASE_URL 并确保服务可用（或切换 HEAVY_MODEL_PROVIDER）。'
-      : 'DashScope API Key 未配置，请检查 .env 文件（或切换 HEAVY_MODEL_PROVIDER）。'
+      ? 'Ollama 未配置，请设置 OLLAMA_BASE_URL 并确保服务可用（或切换 正文分析与报告模型提供方）。'
+      : 'DashScope API Key 未配置，请检查 .env 文件（或切换 正文分析与报告模型提供方）。'
     store.setError(msg)
     return;
   }
