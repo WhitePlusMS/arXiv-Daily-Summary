@@ -298,12 +298,14 @@ class FastAPIWebLauncher:
     def install_web_dependencies(self) -> bool:
         lockfile = self.web_dir / "package-lock.json"
         try:
+            # 使用已探测到的 npm 路径，避免在虚拟环境中找不到可执行文件
+            npm_exec = self.npm_path or ("npm.cmd" if platform.system() == "Windows" else "npm")
             if lockfile.exists():
                 Logger.info("安装前端依赖（npm ci）...")
-                subprocess.run(["npm", "ci"], cwd=self.web_dir, check=True)
+                subprocess.run([npm_exec, "ci"], cwd=self.web_dir, check=True)
             else:
                 Logger.info("安装前端依赖（npm install）...")
-                subprocess.run(["npm", "install"], cwd=self.web_dir, check=True)
+                subprocess.run([npm_exec, "install"], cwd=self.web_dir, check=True)
             Logger.success("前端依赖安装完成")
             return True
         except subprocess.CalledProcessError as e:

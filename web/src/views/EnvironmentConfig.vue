@@ -98,156 +98,168 @@
       <h2 class="streamlit-subheader">{{ selectedSection }}</h2>
 
 
-      <!-- 🤖 模型与API配置（合并） -->
+      <!-- 🤖 模型与API配置（卡片布局重构） -->
       <div v-if="selectedSection === '🤖 模型与API配置'" class="form-grid">
-        <!-- 🧭 功能映射：为不同功能选择提供方 -->
-        <div class="form-item">
-          <label>分类匹配使用提供方（LIGHT_MODEL_PROVIDER）</label>
-          <select v-model="configChanges.LIGHT_MODEL_PROVIDER" class="streamlit-select">
-            <option value="dashscope">dashscope</option>
-            <option value="ollama">ollama</option>
-          </select>
-          <div class="streamlit-help">用于 Top-N 分类评分的轻量推理；dashscope=通义千问。</div>
-        </div>
-        <div class="form-item">
-          <label>正文分析与报告使用提供方（HEAVY_MODEL_PROVIDER）</label>
-          <select v-model="configChanges.HEAVY_MODEL_PROVIDER" class="streamlit-select">
-            <option value="dashscope">dashscope</option>
-            <option value="ollama">ollama</option>
-          </select>
-          <div class="streamlit-help">用于详细分析与报告生成的主模型；可选本地 Ollama。</div>
-        </div>
-
-        <div class="streamlit-divider"></div>
-
-        <!-- 🔑 DashScope API 与模型 -->
-        <div class="form-item">
-          <label>DASHSCOPE_API_KEY</label>
-          <div class="password-field">
-            <input
-              :type="showDashscopeKey ? 'text' : 'password'"
-              v-model="configChanges.DASHSCOPE_API_KEY"
-              class="streamlit-input"
-              autocomplete="new-password"
-            />
-            <button
-              type="button"
-              class="toggle-visibility"
-              @click="showDashscopeKey = !showDashscopeKey"
-            >
-              {{ showDashscopeKey ? "隐藏" : "显示" }}
-            </button>
+        <!-- 卡片1：提供商基础配置（始终显示） -->
+        <div class="form-card" style="padding:16px; border:1px solid #eaecef; border-radius:8px; background:#fbfbfb; margin-bottom:16px;">
+          <h3 class="streamlit-subheader">提供商基础配置</h3>
+          <div class="form-item">
+            <label>DASHSCOPE_API_KEY</label>
+            <div class="password-field">
+              <input
+                :type="showDashscopeKey ? 'text' : 'password'"
+                v-model="configChanges.DASHSCOPE_API_KEY"
+                class="streamlit-input"
+                autocomplete="new-password"
+              />
+              <button
+                type="button"
+                class="toggle-visibility"
+                @click="showDashscopeKey = !showDashscopeKey"
+              >
+                {{ showDashscopeKey ? "隐藏" : "显示" }}
+              </button>
+            </div>
+            <div class="streamlit-help">用于访问通义千问的密钥；请妥善保管。</div>
           </div>
-          <div class="streamlit-help">用于访问通义千问的密钥；请妥善保管。</div>
-        </div>
-        <div class="form-item">
-          <label>DASHSCOPE_BASE_URL</label>
-          <input type="text" v-model="configChanges.DASHSCOPE_BASE_URL" class="streamlit-input" />
-          <div class="streamlit-help">通义服务的基地址，通常保留默认即可。</div>
-        </div>
-        <div class="form-item" v-if="configChanges.HEAVY_MODEL_PROVIDER === 'dashscope'">
-          <label>QWEN_MODEL</label>
-          <input type="text" v-model="configChanges.QWEN_MODEL" class="streamlit-input" />
-          <div class="streamlit-help">主推荐使用的模型（重任务）。</div>
-        </div>
-        <div class="form-item" v-if="configChanges.LIGHT_MODEL_PROVIDER === 'dashscope'">
-          <label>QWEN_MODEL_LIGHT</label>
-          <input type="text" v-model="configChanges.QWEN_MODEL_LIGHT" class="streamlit-input" />
-          <div class="streamlit-help">轻量任务使用的模型（更快）。</div>
-        </div>
-
-        <div class="streamlit-divider"></div>
-
-        <!-- 🧩 Ollama 服务与模型 -->
-        <div class="form-item">
-          <label>OLLAMA_BASE_URL</label>
-          <input type="text" v-model="configChanges.OLLAMA_BASE_URL" class="streamlit-input" />
-          <div class="streamlit-help">本地/远程 Ollama 服务地址；仅在选择 ollama 时生效。</div>
-        </div>
-        <div class="form-item" v-if="configChanges.LIGHT_MODEL_PROVIDER === 'ollama'">
-          <label>OLLAMA_MODEL_LIGHT</label>
-          <input type="text" v-model="configChanges.OLLAMA_MODEL_LIGHT" class="streamlit-input" />
-          <div class="streamlit-help">轻量模型名称，例如 `qwen2.5:7b`。</div>
-        </div>
-        <div class="form-item" v-if="configChanges.HEAVY_MODEL_PROVIDER === 'ollama'">
-          <label>OLLAMA_MODEL_HEAVY</label>
-          <input type="text" v-model="configChanges.OLLAMA_MODEL_HEAVY" class="streamlit-input" />
-          <div class="streamlit-help">主模型名称，例如 `qwen2:7b` 或 `llama3.1:8b`。</div>
-        </div>
-        <div class="form-item" v-if="configChanges.LIGHT_MODEL_PROVIDER === 'ollama'">
-          <label>OLLAMA_MODEL_LIGHT_TEMPERATURE</label>
-          <input
-            type="range"
-            min="0"
-            max="1.5"
-            step="0.1"
-            v-model.number="configChanges.OLLAMA_MODEL_LIGHT_TEMPERATURE"
-          />
-          <div class="streamlit-help">
-            当前值：{{ configChanges.OLLAMA_MODEL_LIGHT_TEMPERATURE }}（更大更发散）
+          <div class="form-item">
+            <label>DASHSCOPE_BASE_URL</label>
+            <input type="text" v-model="configChanges.DASHSCOPE_BASE_URL" class="streamlit-input" />
+            <div class="streamlit-help">通义服务的基地址，通常保留默认即可。</div>
+          </div>
+          <div class="form-item">
+            <label>OLLAMA_BASE_URL</label>
+            <input type="text" v-model="configChanges.OLLAMA_BASE_URL" class="streamlit-input" />
+            <div class="streamlit-help">Ollama 服务地址（本地/远程），例如 http://localhost:11434。</div>
           </div>
         </div>
-        <div class="form-item" v-if="configChanges.LIGHT_MODEL_PROVIDER === 'ollama'">
-          <label>OLLAMA_MODEL_LIGHT_TOP_P</label>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.05"
-            v-model.number="configChanges.OLLAMA_MODEL_LIGHT_TOP_P"
-          />
-          <div class="streamlit-help">
-            当前值：{{ configChanges.OLLAMA_MODEL_LIGHT_TOP_P }}（采样概率阈值）
+
+        <!-- 卡片2：分类匹配（LIGHT）提供方与参数 -->
+        <div class="form-card" style="padding:16px; border:1px solid #eaecef; border-radius:8px; background:#fbfbfb; margin-bottom:16px;">
+          <h3 class="streamlit-subheader">分类匹配（LIGHT）提供方与参数</h3>
+          <div class="form-item">
+            <label>分类匹配使用提供方（LIGHT_MODEL_PROVIDER）</label>
+            <select v-model="configChanges.LIGHT_MODEL_PROVIDER" class="streamlit-select">
+              <option value="dashscope">dashscope</option>
+              <option value="ollama">ollama</option>
+            </select>
+            <div class="streamlit-help">用于 Top-N 分类评分的轻量推理；dashscope=通义千问。</div>
+          </div>
+
+          <!-- DashScope 轻量参数，仅当 LIGHT 选择 dashscope 时显示 -->
+          <div v-if="configChanges.LIGHT_MODEL_PROVIDER === 'dashscope'">
+            <div class="form-item">
+              <label>QWEN_MODEL_LIGHT</label>
+              <input type="text" v-model="configChanges.QWEN_MODEL_LIGHT" class="streamlit-input" />
+              <div class="streamlit-help">轻量任务使用的模型（更快）。</div>
+            </div>
+            <div class="form-item">
+              <label>QWEN_MODEL_LIGHT_TEMPERATURE</label>
+              <input type="number" step="0.1" v-model="configChanges.QWEN_MODEL_LIGHT_TEMPERATURE" class="streamlit-input" />
+              <div class="streamlit-help">轻量模型温度（适用于 DashScope）。</div>
+            </div>
+            <div class="form-item">
+              <label>QWEN_MODEL_LIGHT_TOP_P</label>
+              <input type="number" step="0.05" v-model="configChanges.QWEN_MODEL_LIGHT_TOP_P" class="streamlit-input" />
+              <div class="streamlit-help">轻量模型采样阈值 Top P。</div>
+            </div>
+            <div class="form-item">
+              <label>QWEN_MODEL_LIGHT_MAX_TOKENS</label>
+              <input type="number" v-model="configChanges.QWEN_MODEL_LIGHT_MAX_TOKENS" class="streamlit-input" />
+              <div class="streamlit-help">轻量模型最大生成长度。</div>
+            </div>
+          </div>
+
+          <!-- Ollama 轻量参数，仅当 LIGHT 选择 ollama 时显示 -->
+          <div v-if="configChanges.LIGHT_MODEL_PROVIDER === 'ollama'">
+            <div class="form-item">
+              <label>OLLAMA_MODEL_LIGHT</label>
+              <input type="text" v-model="configChanges.OLLAMA_MODEL_LIGHT" class="streamlit-input" />
+              <div class="streamlit-help">轻量模型名称，例如 `qwen2.5:7b`。</div>
+            </div>
+            <div class="form-item">
+              <label>OLLAMA_MODEL_LIGHT_TEMPERATURE</label>
+              <input type="range" min="0" max="1.5" step="0.1" v-model.number="configChanges.OLLAMA_MODEL_LIGHT_TEMPERATURE" />
+              <div class="streamlit-help">当前值：{{ configChanges.OLLAMA_MODEL_LIGHT_TEMPERATURE }}（更大更发散）</div>
+            </div>
+            <div class="form-item">
+              <label>OLLAMA_MODEL_LIGHT_TOP_P</label>
+              <input type="range" min="0" max="1" step="0.05" v-model.number="configChanges.OLLAMA_MODEL_LIGHT_TOP_P" />
+              <div class="streamlit-help">当前值：{{ configChanges.OLLAMA_MODEL_LIGHT_TOP_P }}（采样概率阈值）</div>
+            </div>
+            <div class="form-item">
+              <label>OLLAMA_MODEL_LIGHT_MAX_TOKENS</label>
+              <input type="number" v-model="configChanges.OLLAMA_MODEL_LIGHT_MAX_TOKENS" class="streamlit-input" />
+              <div class="streamlit-help">轻量模型的最大生成长度，过大将影响性能。</div>
+            </div>
           </div>
         </div>
-        <div class="form-item">
-          <label>OLLAMA_MODEL_LIGHT_MAX_TOKENS</label>
-          <input
-            type="number"
-            v-model="configChanges.OLLAMA_MODEL_LIGHT_MAX_TOKENS"
-            class="streamlit-input"
-          />
-          <div class="streamlit-help">轻量模型的最大生成长度，过大将影响性能。</div>
+
+        <!-- 卡片3：正文分析与报告（HEAVY）提供方与参数 -->
+        <div class="form-card" style="padding:16px; border:1px solid #eaecef; border-radius:8px; background:#fbfbfb; margin-bottom:16px;">
+          <h3 class="streamlit-subheader">正文分析与报告（HEAVY）提供方与参数</h3>
+          <div class="form-item">
+            <label>正文分析与报告使用提供方（HEAVY_MODEL_PROVIDER）</label>
+            <select v-model="configChanges.HEAVY_MODEL_PROVIDER" class="streamlit-select">
+              <option value="dashscope">dashscope</option>
+              <option value="ollama">ollama</option>
+            </select>
+            <div class="streamlit-help">用于详细分析与报告生成的主模型；可选本地 Ollama。</div>
+          </div>
+
+          <!-- DashScope 重模型参数，仅当 HEAVY 选择 dashscope 时显示 -->
+          <div v-if="configChanges.HEAVY_MODEL_PROVIDER === 'dashscope'">
+            <div class="form-item">
+              <label>QWEN_MODEL</label>
+              <input type="text" v-model="configChanges.QWEN_MODEL" class="streamlit-input" />
+              <div class="streamlit-help">主推荐使用的模型（重任务）。</div>
+            </div>
+            <div class="form-item">
+              <label>QWEN_MODEL_TEMPERATURE</label>
+              <input type="number" step="0.1" v-model="configChanges.QWEN_MODEL_TEMPERATURE" class="streamlit-input" />
+              <div class="streamlit-help">主模型温度（越高越发散）。适用于 DashScope。</div>
+            </div>
+            <div class="form-item">
+              <label>QWEN_MODEL_TOP_P</label>
+              <input type="number" step="0.05" v-model="configChanges.QWEN_MODEL_TOP_P" class="streamlit-input" />
+              <div class="streamlit-help">主模型采样阈值 Top P。适用于 DashScope。</div>
+            </div>
+            <div class="form-item">
+              <label>QWEN_MODEL_MAX_TOKENS</label>
+              <input type="number" v-model="configChanges.QWEN_MODEL_MAX_TOKENS" class="streamlit-input" />
+              <div class="streamlit-help">主模型最大生成长度。适用于 DashScope。</div>
+            </div>
+          </div>
+
+          <!-- Ollama 重模型参数，仅当 HEAVY 选择 ollama 时显示 -->
+          <div v-if="configChanges.HEAVY_MODEL_PROVIDER === 'ollama'">
+            <div class="form-item">
+              <label>OLLAMA_MODEL_HEAVY</label>
+              <input type="text" v-model="configChanges.OLLAMA_MODEL_HEAVY" class="streamlit-input" />
+              <div class="streamlit-help">主模型名称，例如 `qwen2:7b` 或 `llama3.1:8b`。</div>
+            </div>
+            <div class="form-item">
+              <label>OLLAMA_MODEL_HEAVY_TEMPERATURE</label>
+              <input type="range" min="0" max="1.5" step="0.1" v-model.number="configChanges.OLLAMA_MODEL_HEAVY_TEMPERATURE" />
+              <div class="streamlit-help">当前值：{{ configChanges.OLLAMA_MODEL_HEAVY_TEMPERATURE }}（重模型温度）</div>
+            </div>
+            <div class="form-item">
+              <label>OLLAMA_MODEL_HEAVY_TOP_P</label>
+              <input type="range" min="0" max="1" step="0.05" v-model.number="configChanges.OLLAMA_MODEL_HEAVY_TOP_P" />
+              <div class="streamlit-help">当前值：{{ configChanges.OLLAMA_MODEL_HEAVY_TOP_P }}（重模型采样阈值）</div>
+            </div>
+            <div class="form-item">
+              <label>OLLAMA_MODEL_HEAVY_MAX_TOKENS</label>
+              <input type="number" v-model="configChanges.OLLAMA_MODEL_HEAVY_MAX_TOKENS" class="streamlit-input" />
+              <div class="streamlit-help">重模型最大生成长度，建议比轻量更大。</div>
+            </div>
+          </div>
         </div>
 
-        <div class="streamlit-divider"></div>
-
-        <!-- 🤖 LLM常用参数（DashScope） -->
+        <!-- 通用线程/并发设置（保持原有键） -->
         <div class="form-item">
           <label>MAX_WORKERS</label>
           <input type="number" v-model="configChanges.MAX_WORKERS" class="streamlit-input" />
-        </div>
-        <div class="form-item">
-          <label>QWEN_MODEL_TEMPERATURE</label>
-          <input type="number" step="0.1" v-model="configChanges.QWEN_MODEL_TEMPERATURE" class="streamlit-input" />
-          <div class="streamlit-help">主模型温度（越高越发散）。适用于 DashScope。</div>
-        </div>
-        <div class="form-item">
-          <label>QWEN_MODEL_TOP_P</label>
-          <input type="number" step="0.05" v-model="configChanges.QWEN_MODEL_TOP_P" class="streamlit-input" />
-          <div class="streamlit-help">主模型采样阈值 Top P。适用于 DashScope。</div>
-        </div>
-        <div class="form-item">
-          <label>QWEN_MODEL_MAX_TOKENS</label>
-          <input type="number" v-model="configChanges.QWEN_MODEL_MAX_TOKENS" class="streamlit-input" />
-          <div class="streamlit-help">主模型最大生成长度。适用于 DashScope。</div>
-        </div>
-
-        <div class="streamlit-help">轻量 Qwen 常用参数</div>
-        <div class="form-item">
-          <label>QWEN_MODEL_LIGHT_TEMPERATURE</label>
-          <input type="number" step="0.1" v-model="configChanges.QWEN_MODEL_LIGHT_TEMPERATURE" class="streamlit-input" />
-          <div class="streamlit-help">轻量模型温度（适用于 DashScope）。</div>
-        </div>
-        <div class="form-item">
-          <label>QWEN_MODEL_LIGHT_TOP_P</label>
-          <input type="number" step="0.05" v-model="configChanges.QWEN_MODEL_LIGHT_TOP_P" class="streamlit-input" />
-          <div class="streamlit-help">轻量模型采样阈值 Top P。</div>
-        </div>
-        <div class="form-item">
-          <label>QWEN_MODEL_LIGHT_MAX_TOKENS</label>
-          <input type="number" v-model="configChanges.QWEN_MODEL_LIGHT_MAX_TOKENS" class="streamlit-input" />
-          <div class="streamlit-help">轻量模型最大生成长度。</div>
         </div>
       </div>
 

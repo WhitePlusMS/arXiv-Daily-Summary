@@ -82,6 +82,13 @@ class ArxivRecommenderCLI:
             'ollama_base_url': os.getenv('OLLAMA_BASE_URL', 'http://localhost:11434/v1'),
             'ollama_model_heavy': os.getenv('OLLAMA_MODEL_HEAVY', ''),
             'ollama_model_light': os.getenv('OLLAMA_MODEL_LIGHT', ''),
+            # Ollama 轻/重模型参数（用于独立配置）
+            'ollama_model_light_temperature': float(os.getenv('OLLAMA_MODEL_LIGHT_TEMPERATURE', os.getenv('QWEN_MODEL_LIGHT_TEMPERATURE', '0.5'))),
+            'ollama_model_light_top_p': float(os.getenv('OLLAMA_MODEL_LIGHT_TOP_P', os.getenv('QWEN_MODEL_LIGHT_TOP_P', '0.8'))),
+            'ollama_model_light_max_tokens': int(os.getenv('OLLAMA_MODEL_LIGHT_MAX_TOKENS', os.getenv('QWEN_MODEL_LIGHT_MAX_TOKENS', '2000'))),
+            'ollama_model_heavy_temperature': float(os.getenv('OLLAMA_MODEL_HEAVY_TEMPERATURE', os.getenv('QWEN_MODEL_TEMPERATURE', '0.7'))),
+            'ollama_model_heavy_top_p': float(os.getenv('OLLAMA_MODEL_HEAVY_TOP_P', os.getenv('QWEN_MODEL_TOP_P', '0.9'))),
+            'ollama_model_heavy_max_tokens': int(os.getenv('OLLAMA_MODEL_HEAVY_MAX_TOKENS', os.getenv('QWEN_MODEL_MAX_TOKENS', '4000'))),
             'qwen_model_light': os.getenv('QWEN_MODEL_LIGHT', ''),
             
             # ArXiv获取器配置
@@ -607,13 +614,13 @@ class ArxivRecommenderCLI:
             # 初始化LLM提供商（按重型模型提供方选择）
             heavy_provider = os.getenv('HEAVY_MODEL_PROVIDER', 'dashscope').lower()
             if heavy_provider == 'ollama':
-                heavy_model = os.getenv('OLLAMA_MODEL_HEAVY', os.getenv('OLLAMA_MODEL_LIGHT', 'llama3.2:3b'))
-                heavy_base_url = os.getenv('OLLAMA_BASE_URL', 'http://localhost:11434/v1')
+                heavy_model = os.getenv('OLLAMA_MODEL_HEAVY', self.config.get('ollama_model_heavy') or os.getenv('OLLAMA_MODEL_LIGHT', self.config.get('ollama_model_light') or 'llama3.2:3b'))
+                heavy_base_url = os.getenv('OLLAMA_BASE_URL', self.config.get('ollama_base_url', 'http://localhost:11434/v1'))
                 heavy_api_key = 'ollama'
-                # 采样参数复用通义配置（若未来增加Ollama重型参数，可替换为相应环境变量）
-                heavy_temperature = self.config['qwen_model_temperature']
-                heavy_top_p = self.config['qwen_model_top_p']
-                heavy_max_tokens = self.config['qwen_model_max_tokens']
+                # 使用 Ollama 独立的重模型参数（若缺失则回退到Qwen参数）
+                heavy_temperature = self.config.get('ollama_model_heavy_temperature', self.config['qwen_model_temperature'])
+                heavy_top_p = self.config.get('ollama_model_heavy_top_p', self.config['qwen_model_top_p'])
+                heavy_max_tokens = self.config.get('ollama_model_heavy_max_tokens', self.config['qwen_model_max_tokens'])
             else:
                 heavy_model = os.getenv('QWEN_MODEL', self.config['qwen_model'])
                 heavy_base_url = os.getenv('DASHSCOPE_BASE_URL', self.config['dashscope_base_url'])
