@@ -12,6 +12,7 @@ from openai import OpenAI
 import threading
 from typing import Optional, Dict, Any, List, Union
 from loguru import logger
+from core.env_config import get_int, get_float, get_str
 
 
 class LLMProvider:
@@ -78,12 +79,9 @@ class LLMProvider:
         # 用量统计锁，保证并发下的原子累加与一致读取
         self._usage_lock = threading.Lock()
         # 并发限流（统一入口，类级共享信号量，跨实例统一限流）
-        try:
-            max_concurrency = int(os.getenv('LLM_MAX_CONCURRENCY', '2'))
-            if max_concurrency < 1:
-                max_concurrency = 1
-        except Exception:
-            max_concurrency = 2
+        max_concurrency = get_int('LLM_MAX_CONCURRENCY', 2)
+        if max_concurrency < 1:
+            max_concurrency = 1
         self._max_concurrency = max_concurrency
         if not hasattr(LLMProvider, "_global_rate_limiter") or LLMProvider._global_rate_limiter is None:
             LLMProvider._global_rate_limiter = threading.BoundedSemaphore(self._max_concurrency)
@@ -646,14 +644,8 @@ Output only a number 0-100. No text.
 
     def compute_cost_yuan(self, input_price_per_1k: float = None, output_price_per_1k: float = None) -> Dict[str, float]:
         """根据定价计算费用（人民币）。缺省按通义千问Plus：输入0.008/千token，输出0.02/千token。"""
-        try:
-            default_in = float(os.getenv('PRICE_INPUT_PER_1K', '0.008'))
-        except Exception:
-            default_in = 0.008
-        try:
-            default_out = float(os.getenv('PRICE_OUTPUT_PER_1K', '0.02'))
-        except Exception:
-            default_out = 0.02
+        default_in = get_float('PRICE_INPUT_PER_1K', 0.008)
+        default_out = get_float('PRICE_OUTPUT_PER_1K', 0.02)
         input_price = input_price_per_1k if input_price_per_1k is not None else default_in
         output_price = output_price_per_1k if output_price_per_1k is not None else default_out
         stats = self.get_usage_stats()
@@ -1015,9 +1007,8 @@ Output only a number 0-100. No text.
         """
         # Token感知截断：优先按token估算，再用字符长度兜底
         full_text = paper.get('full_text', '')
-        from core.common_utils import get_env_int
-        max_tokens_text = get_env_int('FULLTEXT_MAX_TOKENS', 4000)
-        max_chars_fallback = get_env_int('FULLTEXT_MAX_CHARS', 15000)
+        max_tokens_text = get_int('FULLTEXT_MAX_TOKENS', 4000)
+        max_chars_fallback = get_int('FULLTEXT_MAX_CHARS', 15000)
         full_text = self._truncate_by_tokens(full_text, max_tokens_text, max_chars_fallback)
 
         return f"""
@@ -1139,16 +1130,12 @@ Output only a number 0-100. No text.
 
 def main():
     """独立测试函数。"""""
-    import os
-    from dotenv import load_dotenv
+    from core.env_config import get_str
 
-    # 加载.env文件中的环境变量
-    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
-
-    # 从环境变量读取通义千问配置
-    test_model = os.getenv("QWEN_MODEL")
-    test_base_url = os.getenv("DASHSCOPE_BASE_URL")
-    test_api_key = os.getenv("DASHSCOPE_API_KEY")
+    # 从集中化配置读取通义千问配置
+    test_model = get_str("QWEN_MODEL", "")
+    test_base_url = get_str("DASHSCOPE_BASE_URL", "")
+    test_api_key = get_str("DASHSCOPE_API_KEY", "")
 
     # 检查环境变量是否都已设置
     if not all([test_model, test_base_url, test_api_key]):
@@ -1200,26 +1187,26 @@ def create_light_llm_provider(description: str = "", username: str = "TEST") -> 
         配置好的LLM提供者实例
     """
     # 获取轻量模型提供商类型
-    provider_type = os.getenv('LIGHT_MODEL_PROVIDER', 'qwen').lower()
+    provider_type = get_str('LIGHT_MODEL_PROVIDER', 'qwen').lower()
     
     if provider_type == 'ollama':
         # OLLAMA配置
-        model = os.getenv('OLLAMA_MODEL_LIGHT', 'llama3.2:3b')
-        base_url = os.getenv('OLLAMA_BASE_URL', 'http://localhost:11434/v1')
+        model = get_str('OLLAMA_MODEL_LIGHT', 'llama3.2:3b')
+        base_url = get_str('OLLAMA_BASE_URL', 'http://localhost:11434/v1')
         api_key = 'ollama'  # OLLAMA通常不需要真实的API密钥
-        temperature = float(os.getenv('OLLAMA_MODEL_LIGHT_TEMPERATURE', '0.7'))
-        top_p = float(os.getenv('OLLAMA_MODEL_LIGHT_TOP_P', '0.9'))
-        max_tokens = int(os.getenv('OLLAMA_MODEL_LIGHT_MAX_TOKENS', '2000'))
+        temperature = get_float('OLLAMA_MODEL_LIGHT_TEMPERATURE', 0.7)
+        top_p = get_float('OLLAMA_MODEL_LIGHT_TOP_P', 0.9)
+        max_tokens = get_int('OLLAMA_MODEL_LIGHT_MAX_TOKENS', 2000)
         
         logger.info(f"创建OLLAMA轻量模型提供者 - 模型: {model}, URL: {base_url}")
     else:
         # 通义千问配置（默认）
-        model = os.getenv('QWEN_MODEL_LIGHT', 'qwen3-30b-a3b-instruct-2507')
-        base_url = os.getenv('DASHSCOPE_BASE_URL', 'https://dashscope.aliyuncs.com/compatible-mode/v1')
-        api_key = os.getenv('DASHSCOPE_API_KEY', '')
-        temperature = float(os.getenv('QWEN_MODEL_LIGHT_TEMPERATURE', '0.5'))
-        top_p = float(os.getenv('QWEN_MODEL_LIGHT_TOP_P', '0.8'))
-        max_tokens = int(os.getenv('QWEN_MODEL_LIGHT_MAX_TOKENS', '2000'))
+        model = get_str('QWEN_MODEL_LIGHT', 'qwen3-30b-a3b-instruct-2507')
+        base_url = get_str('DASHSCOPE_BASE_URL', 'https://dashscope.aliyuncs.com/compatible-mode/v1')
+        api_key = get_str('DASHSCOPE_API_KEY', '')
+        temperature = get_float('QWEN_MODEL_LIGHT_TEMPERATURE', 0.5)
+        top_p = get_float('QWEN_MODEL_LIGHT_TOP_P', 0.8)
+        max_tokens = get_int('QWEN_MODEL_LIGHT_MAX_TOKENS', 2000)
         
         logger.info(f"创建通义千问轻量模型提供者 - 模型: {model}")
     

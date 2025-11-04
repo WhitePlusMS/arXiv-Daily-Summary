@@ -412,22 +412,19 @@ class RecommendationEngine:
 def main():
     """独立测试函数。"""
     import os
-    from dotenv import load_dotenv
+    from core.env_config import get_str, get_int, get_float, get_list
     
-    # 加载环境变量
-    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
-    
-    # 从环境变量获取配置
-    api_key = os.getenv("DASHSCOPE_API_KEY")
-    base_url = os.getenv("DASHSCOPE_BASE_URL")
-    model = os.getenv("QWEN_MODEL")
+    # 从集中化配置获取
+    api_key = get_str("DASHSCOPE_API_KEY", "")
+    base_url = get_str("DASHSCOPE_BASE_URL", "")
+    model = get_str("QWEN_MODEL", "")
     
     if not all([api_key, base_url, model]):
         logger.error("错误：请确保设置了DASHSCOPE_API_KEY、DASHSCOPE_BASE_URL和QWEN_MODEL环境变量")
         return
     
     # 读取研究兴趣描述
-    description_path = os.getenv("USER_CATEGORIES_FILE", "data/users/user_categories.json")
+    description_path = get_str("USER_CATEGORIES_FILE", "data/users/user_categories.json")
     try:
         import json
         with open(description_path, "r", encoding="utf-8") as f:
@@ -452,13 +449,13 @@ def main():
         return
     
     # 初始化推荐引擎
-    categories = os.getenv("ARXIV_CATEGORIES", "cs.CL,cs.IR,cs.LG").split(',')
-    max_entries = int(os.getenv("MAX_ENTRIES", "50"))
-    num_detailed_papers = int(os.getenv("NUM_DETAILED_PAPERS", "3"))
-    num_brief_papers = int(os.getenv("NUM_BRIEF_PAPERS", "7"))
-    temperature = float(os.getenv("QWEN_MODEL_TEMPERATURE", "0.7"))
-    top_p = float(os.getenv("QWEN_MODEL_TOP_P", "0.9"))
-    max_tokens = int(os.getenv("QWEN_MODEL_MAX_TOKENS", "4000"))
+    categories = get_list("ARXIV_CATEGORIES", default=["cs.CL","cs.IR","cs.LG"]) 
+    max_entries = get_int("MAX_ENTRIES", 50)
+    num_detailed_papers = get_int("NUM_DETAILED_PAPERS", 3)
+    num_brief_papers = get_int("NUM_BRIEF_PAPERS", 7)
+    temperature = get_float("QWEN_MODEL_TEMPERATURE", 0.7)
+    top_p = get_float("QWEN_MODEL_TOP_P", 0.9)
+    max_tokens = get_int("QWEN_MODEL_MAX_TOKENS", 4000)
     
     engine = RecommendationEngine(
         categories=categories,
@@ -469,7 +466,7 @@ def main():
         base_url=base_url,
         api_key=api_key,
         description=description,
-        num_workers=int(os.getenv("MAX_WORKERS", "2")),
+        num_workers=get_int("MAX_WORKERS", 2),
         temperature=temperature,
         top_p=top_p,
         max_tokens=max_tokens

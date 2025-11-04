@@ -427,13 +427,12 @@ class CategoryMatcher:
 
 def main():
     """演示函数 - 支持多用户数据存储和JSON输出"""
-    # 从环境变量读取配置（需要先设置.env文件）
-    from dotenv import load_dotenv
-    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '.env'))
+    # 从集中化配置读取
+    from core.env_config import get_str
     
-    model = os.getenv("QWEN_MODEL_LIGHT", "qwen-plus")
-    base_url = os.getenv("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
-    api_key = os.getenv("DASHSCOPE_API_KEY")
+    model = get_str("QWEN_MODEL_LIGHT", "qwen-plus")
+    base_url = get_str("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
+    api_key = get_str("DASHSCOPE_API_KEY", "")
     
     if not api_key:
         print("错误：请在.env文件中设置DASHSCOPE_API_KEY")

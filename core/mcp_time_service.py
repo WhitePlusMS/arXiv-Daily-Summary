@@ -5,10 +5,10 @@
 
 import openai
 import os
-from dotenv import load_dotenv
 from datetime import datetime
 from loguru import logger
 from typing import Union, Optional
+from core.env_config import get_bool, get_str
 
 
 class MCPTimeService:
@@ -22,16 +22,13 @@ class MCPTimeService:
             base_url: API基础URL，如果为None则从环境变量获取
             model: 模型名称，如果为None则从环境变量获取
         """
-        # 加载环境变量
-        load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
+        # 检查是否启用MCP时间服务（集中化配置）
+        self.mcp_enabled = get_bool("ENABLE_MCP_TIME_SERVICE", False)
         
-        # 检查是否启用MCP时间服务
-        self.mcp_enabled = os.getenv("ENABLE_MCP_TIME_SERVICE", "false").lower() == "true"
-        
-        # 获取配置
-        self.api_key = api_key or os.getenv("DASHSCOPE_API_KEY")
-        self.base_url = base_url or os.getenv("DASHSCOPE_BASE_URL")
-        self.model = model or os.getenv("QWEN_MODEL")
+        # 获取配置（集中化配置）
+        self.api_key = api_key or get_str("DASHSCOPE_API_KEY", "")
+        self.base_url = base_url or get_str("DASHSCOPE_BASE_URL", "")
+        self.model = model or get_str("QWEN_MODEL", "")
         
         logger.info("MCPTimeService初始化开始")
         

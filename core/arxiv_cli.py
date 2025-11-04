@@ -8,7 +8,6 @@
 import os
 import sys
 import json
-from dotenv import load_dotenv
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
@@ -21,7 +20,8 @@ from core.template_renderer import TemplateRenderer
 from core.mcp_time_service import MCPTimeService
 from core.mcp_time_service import get_current_time
 from core.output_manager import OutputManager
-from core.common_utils import sanitize_username, get_env_int, get_env_bool
+from core.common_utils import sanitize_username
+from core.env_config import get_str, get_int, get_bool, get_list, get_float
 import re
 
 # 项目根目录路径（用于文件读取）
@@ -65,78 +65,78 @@ class ArxivRecommenderCLI:
             logger.warning(f"MCP时间服务调用失败: {e}，将使用本地时间")
         
     def _load_config(self) -> Dict[str, Any]:
-        """从环境变量加载配置。
+        """从集中化 env 配置模块加载配置。
         
         Returns:
             配置字典
         """
         config = {
             # API配置
-            'dashscope_api_key': os.getenv('DASHSCOPE_API_KEY', ''),
-            'dashscope_base_url': os.getenv('DASHSCOPE_BASE_URL', 'https://dashscope.aliyuncs.com/compatible-mode/v1'),
-            'qwen_model': os.getenv('QWEN_MODEL', 'qwen-plus'),
+            'dashscope_api_key': get_str('DASHSCOPE_API_KEY', ''),
+            'dashscope_base_url': get_str('DASHSCOPE_BASE_URL', 'https://dashscope.aliyuncs.com/compatible-mode/v1'),
+            'qwen_model': get_str('QWEN_MODEL', 'qwen-plus'),
 
             # 提供方与模型映射（前端需要感知）
-            'heavy_model_provider': os.getenv('HEAVY_MODEL_PROVIDER', 'dashscope'),
-            'light_model_provider': os.getenv('LIGHT_MODEL_PROVIDER', os.getenv('HEAVY_MODEL_PROVIDER', 'dashscope')),
-            'ollama_base_url': os.getenv('OLLAMA_BASE_URL', 'http://localhost:11434/v1'),
-            'ollama_model_heavy': os.getenv('OLLAMA_MODEL_HEAVY', ''),
-            'ollama_model_light': os.getenv('OLLAMA_MODEL_LIGHT', ''),
+            'heavy_model_provider': get_str('HEAVY_MODEL_PROVIDER', 'dashscope'),
+            'light_model_provider': get_str('LIGHT_MODEL_PROVIDER', get_str('HEAVY_MODEL_PROVIDER', 'dashscope')),
+            'ollama_base_url': get_str('OLLAMA_BASE_URL', 'http://localhost:11434/v1'),
+            'ollama_model_heavy': get_str('OLLAMA_MODEL_HEAVY', ''),
+            'ollama_model_light': get_str('OLLAMA_MODEL_LIGHT', ''),
             # Ollama 轻/重模型参数（用于独立配置）
-            'ollama_model_light_temperature': float(os.getenv('OLLAMA_MODEL_LIGHT_TEMPERATURE', os.getenv('QWEN_MODEL_LIGHT_TEMPERATURE', '0.5'))),
-            'ollama_model_light_top_p': float(os.getenv('OLLAMA_MODEL_LIGHT_TOP_P', os.getenv('QWEN_MODEL_LIGHT_TOP_P', '0.8'))),
-            'ollama_model_light_max_tokens': int(os.getenv('OLLAMA_MODEL_LIGHT_MAX_TOKENS', os.getenv('QWEN_MODEL_LIGHT_MAX_TOKENS', '2000'))),
-            'ollama_model_heavy_temperature': float(os.getenv('OLLAMA_MODEL_HEAVY_TEMPERATURE', os.getenv('QWEN_MODEL_TEMPERATURE', '0.7'))),
-            'ollama_model_heavy_top_p': float(os.getenv('OLLAMA_MODEL_HEAVY_TOP_P', os.getenv('QWEN_MODEL_TOP_P', '0.9'))),
-            'ollama_model_heavy_max_tokens': int(os.getenv('OLLAMA_MODEL_HEAVY_MAX_TOKENS', os.getenv('QWEN_MODEL_MAX_TOKENS', '4000'))),
-            'qwen_model_light': os.getenv('QWEN_MODEL_LIGHT', ''),
+            'ollama_model_light_temperature': get_float('OLLAMA_MODEL_LIGHT_TEMPERATURE', get_float('QWEN_MODEL_LIGHT_TEMPERATURE', 0.5)),
+            'ollama_model_light_top_p': get_float('OLLAMA_MODEL_LIGHT_TOP_P', get_float('QWEN_MODEL_LIGHT_TOP_P', 0.8)),
+            'ollama_model_light_max_tokens': get_int('OLLAMA_MODEL_LIGHT_MAX_TOKENS', get_int('QWEN_MODEL_LIGHT_MAX_TOKENS', 2000)),
+            'ollama_model_heavy_temperature': get_float('OLLAMA_MODEL_HEAVY_TEMPERATURE', get_float('QWEN_MODEL_TEMPERATURE', 0.7)),
+            'ollama_model_heavy_top_p': get_float('OLLAMA_MODEL_HEAVY_TOP_P', get_float('QWEN_MODEL_TOP_P', 0.9)),
+            'ollama_model_heavy_max_tokens': get_int('OLLAMA_MODEL_HEAVY_MAX_TOKENS', get_int('QWEN_MODEL_MAX_TOKENS', 4000)),
+            'qwen_model_light': get_str('QWEN_MODEL_LIGHT', ''),
             
             # ArXiv获取器配置
-            'arxiv_base_url': os.getenv('ARXIV_BASE_URL', 'http://export.arxiv.org/api/query'),
-            'arxiv_retries': int(os.getenv('ARXIV_RETRIES', '3')),
-            'arxiv_delay': int(os.getenv('ARXIV_DELAY', '5')),
-            'arxiv_categories': os.getenv('ARXIV_CATEGORIES', 'cs.CV,cs.LG').split(','),
-            'max_entries': int(os.getenv('MAX_ENTRIES', '50')),
-            'num_brief_papers': int(os.getenv('NUM_BRIEF_PAPERS', '7')),
-            'num_detailed_papers': int(os.getenv('NUM_DETAILED_PAPERS', '3')),
+            'arxiv_base_url': get_str('ARXIV_BASE_URL', 'http://export.arxiv.org/api/query'),
+            'arxiv_retries': get_int('ARXIV_RETRIES', 3),
+            'arxiv_delay': get_int('ARXIV_DELAY', 5),
+            'arxiv_categories': get_list('ARXIV_CATEGORIES', default=['cs.CV', 'cs.LG']),
+            'max_entries': get_int('MAX_ENTRIES', 50),
+            'num_brief_papers': get_int('NUM_BRIEF_PAPERS', 7),
+            'num_detailed_papers': get_int('NUM_DETAILED_PAPERS', 3),
             
             # LLM配置
 
-            'qwen_model_temperature': float(os.getenv('QWEN_MODEL_TEMPERATURE', '0.7')),
-            'qwen_model_top_p': float(os.getenv('QWEN_MODEL_TOP_P', '0.9')),
-            'qwen_model_max_tokens': int(os.getenv('QWEN_MODEL_MAX_TOKENS', '4000')),
-            'qwen_model_light_temperature': float(os.getenv('QWEN_MODEL_LIGHT_TEMPERATURE', '0.5')),
-            'qwen_model_light_top_p': float(os.getenv('QWEN_MODEL_LIGHT_TOP_P', '0.8')),
-            'qwen_model_light_max_tokens': int(os.getenv('QWEN_MODEL_LIGHT_MAX_TOKENS', '2000')),
-            'max_workers': int(os.getenv('MAX_WORKERS', '5')),
+            'qwen_model_temperature': get_float('QWEN_MODEL_TEMPERATURE', 0.7),
+            'qwen_model_top_p': get_float('QWEN_MODEL_TOP_P', 0.9),
+            'qwen_model_max_tokens': get_int('QWEN_MODEL_MAX_TOKENS', 4000),
+            'qwen_model_light_temperature': get_float('QWEN_MODEL_LIGHT_TEMPERATURE', 0.5),
+            'qwen_model_light_top_p': get_float('QWEN_MODEL_LIGHT_TOP_P', 0.8),
+            'qwen_model_light_max_tokens': get_int('QWEN_MODEL_LIGHT_MAX_TOKENS', 2000),
+            'max_workers': get_int('MAX_WORKERS', 5),
             
             # 文件路径配置
-            'user_categories_file': os.getenv('USER_CATEGORIES_FILE', 'data/users/user_categories.json'),
-            'save_directory': os.getenv('SAVE_DIRECTORY', 'arxiv_history'),
-            'save_markdown': os.getenv('SAVE_MARKDOWN', 'true').lower() == 'true',
+            'user_categories_file': get_str('USER_CATEGORIES_FILE', 'data/users/user_categories.json'),
+            'save_directory': get_str('SAVE_DIRECTORY', 'arxiv_history'),
+            'save_markdown': get_bool('SAVE_MARKDOWN', True),
             
             # 邮件配置
-            'send_email': os.getenv('SEND_EMAIL', 'false').lower() == 'true',
-            'sender_email': os.getenv('SENDER_EMAIL', ''),
-            'receiver_email': os.getenv('RECEIVER_EMAIL', ''),
-            'email_password': os.getenv('EMAIL_PASSWORD', ''),
-            'smtp_server': os.getenv('SMTP_SERVER', ''),
-            'smtp_port': int(os.getenv('SMTP_PORT', '587')),
-            'use_ssl': os.getenv('USE_SSL', 'false').lower() == 'true',
-            'use_tls': os.getenv('USE_TLS', 'true').lower() == 'true',
-            'subject_prefix': os.getenv('SUBJECT_PREFIX', '每日arXiv'),
+            'send_email': get_bool('SEND_EMAIL', False),
+            'sender_email': get_str('SENDER_EMAIL', ''),
+            'receiver_email': get_str('RECEIVER_EMAIL', ''),
+            'email_password': get_str('EMAIL_PASSWORD', ''),
+            'smtp_server': get_str('SMTP_SERVER', ''),
+            'smtp_port': get_int('SMTP_PORT', 587),
+            'use_ssl': get_bool('USE_SSL', False),
+            'use_tls': get_bool('USE_TLS', True),
+            'subject_prefix': get_str('SUBJECT_PREFIX', '每日arXiv'),
             
             # 时区和格式配置
-            'timezone': os.getenv('TIMEZONE', 'Asia/Shanghai'),
-            'date_format': os.getenv('DATE_FORMAT', '%Y-%m-%d'),
-            'time_format': os.getenv('TIME_FORMAT', '%H:%M:%S'),
+            'timezone': get_str('TIMEZONE', 'Asia/Shanghai'),
+            'date_format': get_str('DATE_FORMAT', '%Y-%m-%d'),
+            'time_format': get_str('TIME_FORMAT', '%H:%M:%S'),
             
             # 日志配置
-            'log_level': os.getenv('LOG_LEVEL', 'INFO'),
-            'log_file': os.getenv('LOG_FILE', 'logs/arxiv_recommender.log'),
-            'log_to_console': get_env_bool('LOG_TO_CONSOLE', True),
-            'log_max_size': get_env_int('LOG_MAX_SIZE', 10),
-            'log_backup_count': get_env_int('LOG_BACKUP_COUNT', 5),
+            'log_level': get_str('LOG_LEVEL', 'INFO'),
+            'log_file': get_str('LOG_FILE', 'logs/arxiv_recommender.log'),
+            'log_to_console': get_bool('LOG_TO_CONSOLE', True),
+            'log_max_size': get_int('LOG_MAX_SIZE', 10),
+            'log_backup_count': get_int('LOG_BACKUP_COUNT', 5),
         }
         
         return config
@@ -612,19 +612,19 @@ class ArxivRecommenderCLI:
             logger.debug(f"ArXiv获取器初始化完成 - URL: {self.config['arxiv_base_url']}, 重试: {self.config['arxiv_retries']}, 延迟: {self.config['arxiv_delay']}s")
             
             # 初始化LLM提供商（按重型模型提供方选择）
-            heavy_provider = os.getenv('HEAVY_MODEL_PROVIDER', 'dashscope').lower()
+            heavy_provider = get_str('HEAVY_MODEL_PROVIDER', 'dashscope').lower()
             if heavy_provider == 'ollama':
-                heavy_model = os.getenv('OLLAMA_MODEL_HEAVY', self.config.get('ollama_model_heavy') or os.getenv('OLLAMA_MODEL_LIGHT', self.config.get('ollama_model_light') or 'llama3.2:3b'))
-                heavy_base_url = os.getenv('OLLAMA_BASE_URL', self.config.get('ollama_base_url', 'http://localhost:11434/v1'))
+                heavy_model = get_str('OLLAMA_MODEL_HEAVY', self.config.get('ollama_model_heavy') or get_str('OLLAMA_MODEL_LIGHT', self.config.get('ollama_model_light') or 'llama3.2:3b'))
+                heavy_base_url = get_str('OLLAMA_BASE_URL', self.config.get('ollama_base_url', 'http://localhost:11434/v1'))
                 heavy_api_key = 'ollama'
                 # 使用 Ollama 独立的重模型参数（若缺失则回退到Qwen参数）
                 heavy_temperature = self.config.get('ollama_model_heavy_temperature', self.config['qwen_model_temperature'])
                 heavy_top_p = self.config.get('ollama_model_heavy_top_p', self.config['qwen_model_top_p'])
                 heavy_max_tokens = self.config.get('ollama_model_heavy_max_tokens', self.config['qwen_model_max_tokens'])
             else:
-                heavy_model = os.getenv('QWEN_MODEL', self.config['qwen_model'])
-                heavy_base_url = os.getenv('DASHSCOPE_BASE_URL', self.config['dashscope_base_url'])
-                heavy_api_key = os.getenv('DASHSCOPE_API_KEY', self.config['dashscope_api_key'])
+                heavy_model = get_str('QWEN_MODEL', self.config['qwen_model'])
+                heavy_base_url = get_str('DASHSCOPE_BASE_URL', self.config['dashscope_base_url'])
+                heavy_api_key = get_str('DASHSCOPE_API_KEY', self.config['dashscope_api_key'])
                 heavy_temperature = self.config['qwen_model_temperature']
                 heavy_top_p = self.config['qwen_model_top_p']
                 heavy_max_tokens = self.config['qwen_model_max_tokens']
@@ -1107,15 +1107,12 @@ class ArxivRecommenderCLI:
 def main():
     """主程序入口。"""
     try:
-        # 加载环境变量以获取日志配置
-        load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '.env'), override=True)
-        
-        # 配置日志
+        # 配置日志（使用集中化 env 配置模块）
         logger.remove()  # 移除默认处理器
         
-        log_level = os.getenv('LOG_LEVEL', 'INFO')
-        log_to_console = get_env_bool('LOG_TO_CONSOLE', True)
-        log_file = os.getenv('LOG_FILE', 'logs/arxiv_recommender.log')
+        log_level = get_str('LOG_LEVEL', 'INFO')
+        log_to_console = get_bool('LOG_TO_CONSOLE', True)
+        log_file = get_str('LOG_FILE', 'logs/arxiv_recommender.log')
         
         # 控制台日志
         if log_to_console:
@@ -1132,8 +1129,8 @@ def main():
             if log_dir and not os.path.exists(log_dir):
                 os.makedirs(log_dir, exist_ok=True)
             
-            log_max_size = get_env_int('LOG_MAX_SIZE', 10) * 1024 * 1024  # 转换为字节
-            log_backup_count = get_env_int('LOG_BACKUP_COUNT', 5)
+            log_max_size = get_int('LOG_MAX_SIZE', 10) * 1024 * 1024  # 转换为字节
+            log_backup_count = get_int('LOG_BACKUP_COUNT', 5)
             
             logger.add(
                 log_file,

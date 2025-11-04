@@ -4,6 +4,7 @@ import json
 import os
 from typing import Callable, Optional, Any
 from loguru import logger
+from core.env_config import get_int as env_get_int, get_bool as env_get_bool
 
 # 星级评分的统一阈值（与现有逻辑保持一致）
 STAR_LOW_THRESHOLD = 2
@@ -69,30 +70,6 @@ def write_json(file_path: str, data: Any, ensure_ascii: bool = False, indent: in
     with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=ensure_ascii, indent=indent)
 
-
-def get_env_int(name: str, default: int) -> int:
-    """读取整数环境变量，解析失败返回默认值。
-
-    行为与现有 try/except 转 int 完全一致：不可解析或缺失时返回默认。
-    """
-    try:
-        val = os.getenv(name, None)
-        if val is None:
-            return default
-        return int(val)
-    except Exception:
-        return default
-
-def get_env_bool(name: str, default: bool) -> bool:
-    """以与现有代码一致的方式解析布尔环境变量。
-
-    规则与当前实现保持一致：仅当值（不区分大小写）为 'true' 时返回 True；
-    否则返回 False；若变量不存在则返回默认值。
-    """
-    val = os.getenv(name, None)
-    if val is None:
-        return default
-    return val.lower() == 'true'
 
 
 def backoff_sleep(attempt: int, base: float, factor: int = 2) -> None:
