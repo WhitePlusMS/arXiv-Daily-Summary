@@ -182,14 +182,22 @@ class ArxivRecommenderService(BaseService):
                 'debug_mode': True
             }
     
-    async def run_recommendation(self, profile_name: str, debug_mode: bool = False) -> ServiceResponse:
+    async def run_recommendation(
+        self,
+        profile_name: str,
+        debug_mode: bool = False,
+        target_date: Optional[str] = None,
+    ) -> ServiceResponse:
         """运行推荐系统（调用CLI核心逻辑）
         
         Args:
             profile_name: 用户配置名称
             debug_mode: 是否启用调试模式
+            target_date: 指定日期（YYYY-MM-DD），可选
         """
-        self.log_info("开始运行推荐系统", profile_name=profile_name, debug_mode=debug_mode)
+        self.log_info(
+            "开始运行推荐系统", profile_name=profile_name, debug_mode=debug_mode, target_date=target_date
+        )
         try:
             # 检查是否启用调试模式
             if debug_mode:
@@ -201,7 +209,7 @@ class ArxivRecommenderService(BaseService):
                 self.cli_app = ArxivRecommenderCLI()
             
             # 调用CLI的完整推荐流程
-            success, result_data, error_msg = self.cli_app.run_full_recommendation(None)
+            success, result_data, error_msg = self.cli_app.run_full_recommendation(target_date)
             
             if success:
                 self.log_info("推荐系统运行成功", target_date=result_data['target_date'])

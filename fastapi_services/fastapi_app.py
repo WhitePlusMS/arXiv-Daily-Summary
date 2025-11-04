@@ -152,9 +152,15 @@ async def run_recommendation(
     service: ArxivRecommenderService = Depends(get_arxiv_service)
 ):
     """运行推荐系统"""
-    logger.info(f"API调用: 运行推荐系统 - 配置: {request.profile_name}, 调试模式: {request.debug_mode}")
+    logger.info(
+        f"API调用: 运行推荐系统 - 配置: {request.profile_name}, 调试模式: {request.debug_mode}, 目标日期: {getattr(request, 'target_date', None)}"
+    )
     try:
-        result = await service.run_recommendation(request.profile_name, request.debug_mode)
+        result = await service.run_recommendation(
+            request.profile_name,
+            request.debug_mode,
+            getattr(request, "target_date", None),
+        )
         return result
     except Exception as e:
         logger.error(f"运行推荐系统失败: {str(e)}")

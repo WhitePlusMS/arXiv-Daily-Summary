@@ -20,6 +20,8 @@ class RecommendationRequest(BaseModel):
     """推荐请求模型"""
     profile_name: str
     debug_mode: bool = False
+    # 新增：指定日期（YYYY-MM-DD），可选
+    target_date: Optional[str] = None
 
 
 class RecommendationResult(BaseModel):

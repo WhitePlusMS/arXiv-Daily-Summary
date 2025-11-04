@@ -14,10 +14,8 @@
     <!-- 配置与统计（参考Sidebar功能） -->
     <div class="streamlit-section">
       <h2 class="streamlit-subheader">⚙️ 配置与统计</h2>
-      <div v-if="hasValidConfig" class="streamlit-success">✅ DashScope API 密钥已配置</div>
-      <div v-else class="streamlit-error">
-        ❌ DashScope API Key 未配置，请在后端 `.env` 中设置。
-      </div>
+      <div v-if="hasValidLightProviderConfig" class="streamlit-success">✅ {{ lightProviderLabel }} 已配置</div>
+      <div v-else class="streamlit-error">❌ {{ providerStatusMessage }}</div>
 
       <div class="status-grid">
         <div class="status-item">
@@ -293,7 +291,7 @@ import type { UserProfile } from "@/types";
 
 // Store
 const store = useArxivStore();
-const { isLoading, error, userProfiles, hasValidConfig } = storeToRefs(store);
+const { isLoading, error, userProfiles, config, hasValidLightProviderConfig } = storeToRefs(store);
 
 // 本地状态
 const username = ref("");
@@ -314,7 +312,14 @@ const toggleRecordsCollapse = () => {
   } catch {}
 };
 
-// 计算属性（从 store 引用 hasValidConfig，避免使用 any）
+// 计算属性：轻模型提供方名称与动态文案
+const lightProvider = computed(() => (config.value?.light_model_provider || 'dashscope').toLowerCase());
+const lightProviderLabel = computed(() => lightProvider.value === 'ollama' ? 'Ollama 基础地址' : 'DashScope API Key');
+const providerStatusMessage = computed(() => {
+  const p = lightProvider.value;
+  if (p === 'ollama') return 'Ollama 未配置，请设置 OLLAMA_BASE_URL 并确保服务可用（或切换 轻模型提供方）。';
+  return 'DashScope API Key 未配置，请在后端 .env 中设置（或切换 轻模型提供方）。';
+});
 
 // 用户数据管理
 const searchTerm = ref("");
@@ -343,22 +348,12 @@ const refreshData = async () => {
     if (configResponse.success && configResponse.data) {
       store.setConfig(configResponse.data);
     }
-    const matcherData = await api.getMatcherData();
-    const matcherList: UserProfile[] | undefined = matcherData.data as UserProfile[] | undefined;
-    if (matcherData.success && matcherList && matcherList.length > 0) {
-      // 后端返回 { success, data: UserProfile[], stats }
-      store.setUserProfiles(matcherList);
-      // 保存统计信息
-      if ("stats" in matcherData && matcherData.stats) {
-        stats.value = matcherData.stats as { total_records?: number; unique_users?: number } | null;
-      }
+    const res = await api.getMatcherDataOrProfiles();
+    if (res.success && res.data) {
+      store.setUserProfiles(res.data as UserProfile[]);
+      stats.value = (res as any).stats || null;
     } else {
-      // 兜底：使用传统用户配置列表接口
-      const profilesResponse = await api.getUserProfiles();
-      if (profilesResponse.success && profilesResponse.data) {
-        store.setUserProfiles(profilesResponse.data);
-        stats.value = null;
-      }
+      stats.value = null;
     }
   } catch (err) {
     store.setError("刷新数据时发生错误");

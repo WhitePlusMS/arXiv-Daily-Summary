@@ -16,16 +16,24 @@ export const useArxivStore = defineStore('arxiv', () => {
 
   // 计算属性
   const isDebugMode = computed(() => config.value?.debug_mode || false)
-  const hasValidConfig = computed(() => {
+  // 轻模型提供方有效性（用于分类匹配页、优化等）
+  const hasValidLightProviderConfig = computed(() => {
+    const cfg = config.value
+    if (!cfg) return false
+    const provider = (cfg.light_model_provider || 'dashscope').toLowerCase()
+    if (provider === 'ollama') return !!cfg.ollama_base_url
+    return !!cfg.dashscope_api_key
+  })
+  // 重模型提供方有效性（用于摘要/推荐等重任务）
+  const hasValidHeavyProviderConfig = computed(() => {
     const cfg = config.value
     if (!cfg) return false
     const provider = (cfg.heavy_model_provider || 'dashscope').toLowerCase()
-    if (provider === 'ollama') {
-      return !!cfg.ollama_base_url
-    }
-    // 默认按 DashScope 校验
+    if (provider === 'ollama') return !!cfg.ollama_base_url
     return !!cfg.dashscope_api_key
   })
+  // 保持向后兼容：原 hasValidConfig 等同于重模型配置有效性
+  const hasValidConfig = hasValidHeavyProviderConfig
   const hasResearchInterests = computed(() => researchInterests.value.length > 0)
 
   // 方法
@@ -94,6 +102,8 @@ export const useArxivStore = defineStore('arxiv', () => {
     
     // 计算属性
     isDebugMode,
+    hasValidLightProviderConfig,
+    hasValidHeavyProviderConfig,
     hasValidConfig,
     hasResearchInterests,
     

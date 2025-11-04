@@ -111,8 +111,16 @@ export const initializeComponents = async (request: {
 export const runRecommendation = async (request: {
   profile_name: string;
   debug_mode: boolean;
+  target_date?: string;
 }): Promise<ApiResponse<RecommendationResult>> => {
-  const response = await api.post("/api/run-recommendation", request, {
+  const payload: Record<string, unknown> = {
+    profile_name: request.profile_name,
+    debug_mode: request.debug_mode,
+  };
+  if (request.target_date) {
+    payload.target_date = request.target_date;
+  }
+  const response = await api.post("/api/run-recommendation", payload, {
     timeout: 300000,
     signal: getAbortSignal("POST /api/run-recommendation"),
   });
@@ -314,6 +322,22 @@ export const deleteMatcherScoreFile = async (params: {
     signal: getAbortSignal("DELETE /api/matcher/scores"),
   });
   return response.data;
+};
+
+// 聚合：获取匹配数据（优先 /api/matcher/data，失败则回退 /api/user-profiles）
+export const getMatcherDataOrProfiles = async (): Promise<
+  ApiResponse<UserProfile[]> & { stats?: Record<string, unknown> }
+> => {
+  try {
+    const res = await getMatcherData();
+    if (res?.success) return res;
+  } catch (e) {
+    // 忽略，进入回退
+  }
+  const fallback = await getUserProfiles();
+  return { ...fallback, stats: undefined } as ApiResponse<UserProfile[]> & {
+    stats?: Record<string, unknown>;
+  };
 };
 
 export default api;

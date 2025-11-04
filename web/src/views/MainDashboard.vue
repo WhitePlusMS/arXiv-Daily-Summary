@@ -243,7 +243,7 @@ const prevStr = ref("");
 const showAdvancedOptions = ref(false);
 const isRunning = ref(false);
 const runningMessage = ref("");
-const selectedProfile = ref(null);
+// 使用 store 中的选中配置，避免本地重复状态
 const showPreviewModal = ref(false);
 const previewContent = ref("");
 
@@ -252,6 +252,7 @@ const {
   config,
   userProfiles,
   researchInterests,
+  selectedProfile,
   selectedProfileName,
   isLoading,
   error,
@@ -314,21 +315,6 @@ const updateDates = () => {
 
 const handleProfileChange = () => {
   store.setSelectedProfile(selectedProfileName.value);
-
-  // 查找选中的配置
-  if (selectedProfileName.value !== "自定义") {
-    selectedProfile.value = userProfiles.value.find(
-      (p) => p.username === selectedProfileName.value
-    );
-
-    // 更新研究兴趣
-    if (selectedProfile.value && selectedProfile.value.user_input) {
-      const interests = selectedProfile.value.user_input.split("\n").filter((line) => line.trim());
-      store.setResearchInterests(interests);
-    }
-  } else {
-    selectedProfile.value = null;
-  }
 };
 
 const toggleAdvancedOptions = () => {
@@ -422,6 +408,15 @@ const runSpecificDateRecommendation = async () => {
     return;
   }
 
+  if (!hasValidConfig.value) {
+    const provider = (config.value?.heavy_model_provider || 'dashscope').toLowerCase()
+    const msg = provider === 'ollama'
+      ? 'Ollama 未配置，请设置 OLLAMA_BASE_URL 并确保服务可用（或切换 正文分析与报告模型提供方）。'
+      : 'DashScope API Key 未配置，请检查 .env 文件（或切换 正文分析与报告模型提供方）。'
+    store.setError(msg)
+    return;
+  }
+
   // 先初始化组件
   const initSuccess = await initializeComponents();
   if (!initSuccess) return;
@@ -434,6 +429,7 @@ const runSpecificDateRecommendation = async () => {
     const response = await api.runRecommendation({
       profile_name: selectedProfileName.value,
       debug_mode: isDebugMode.value,
+      target_date: selectedDate.value,
     });
 
     store.setLastRecommendationResult(response);
@@ -593,7 +589,7 @@ onMounted(async () => {
       if (!selectedProfileName.value) {
         selectedProfileName.value = "自定义";
       }
-      // 同步选中配置的相关显示
+      // 同步选中配置（默认“自定义”不加载具体配置）
       handleProfileChange();
     }
 
