@@ -1,41 +1,20 @@
+<!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <template>
   <div class="streamlit-dashboard">
     <!-- 页面头部 -->
     <div class="streamlit-header">
       <h1 class="streamlit-title">📚 ArXiv 分类匹配器</h1>
+      <div class="guide-card" style="margin-top: 8px">
+        <div class="sub-desc">
+          步骤：1）填写用户名与研究描述 → 2）可选AI优化 → 3）开始匹配 → 4）查看结果与使用统计 →
+          5）管理与导出历史记录
+        </div>
+      </div>
     </div>
 
     <!-- 错误提示 -->
     <div v-if="error" class="streamlit-error">
       {{ error }}
-    </div>
-
-    <!-- 配置与统计（参考Sidebar功能） -->
-    <div class="streamlit-section">
-      <h2 class="streamlit-subheader">⚙️ 配置与统计</h2>
-      <div v-if="hasValidLightProviderConfig" class="streamlit-success">✅ {{ lightProviderLabel }} 已配置</div>
-      <div v-else class="streamlit-error">❌ {{ providerStatusMessage }}</div>
-
-      <div class="status-grid">
-        <div class="status-item">
-          <div class="status-label">返回结果数量</div>
-          <input type="range" min="1" max="10" v-model.number="topN" />
-          <div class="status-value">Top {{ topN }}</div>
-        </div>
-
-        <div v-if="stats" class="status-item">
-          <div class="status-label">总记录数</div>
-          <div class="status-value">{{ stats.total_records }}</div>
-        </div>
-        <div v-if="stats" class="status-item">
-          <div class="status-label">用户数量</div>
-          <div class="status-value">{{ stats.unique_users }}</div>
-        </div>
-
-        <button class="streamlit-button" :disabled="isLoading" @click="refreshData">
-          🔄 刷新数据
-        </button>
-      </div>
     </div>
 
     <!-- 研究信息输入 -->
@@ -76,12 +55,16 @@
           ✨ AI优化描述
         </button>
       </div>
-
     </div>
 
     <!-- 匹配操作 -->
     <div class="streamlit-section">
       <h2 class="streamlit-subheader">🚀 开始匹配</h2>
+      <div class="streamlit-text-input" style="max-width: 600px; margin-bottom: 8px">
+        <label>返回结果数量</label>
+        <input type="range" min="1" max="10" v-model.number="topN" />
+        <div class="streamlit-help">Top {{ topN }}</div>
+      </div>
       <button
         class="streamlit-button streamlit-button-primary"
         :disabled="isMatching"
@@ -128,150 +111,179 @@
       </div>
     </div>
 
-    <!-- Token使用统计 -->
-    <div v-if="tokenUsage.total_tokens > 0" class="streamlit-section">
-      <h2 class="streamlit-subheader">💰 使用统计</h2>
-      <div class="token-grid">
-        <div class="token-item">
-          <div class="token-value">{{ tokenUsage.input_tokens }}</div>
-          <div class="token-label">输入Token</div>
+    <!-- 统计（置于页面下方，统一样式） -->
+    <div class="streamlit-expander">
+      <div class="streamlit-expander-header" @click="toggleStatsCollapse">
+        <strong>📊 统计</strong>
+        <span style="float: right; color: var(--color-text-soft)">{{
+          statsCollapsed ? "展开" : "折叠"
+        }}</span>
+      </div>
+      <div class="streamlit-expander-content" v-show="!statsCollapsed">
+        <div v-if="tokenUsage.total_tokens > 0" style="margin-bottom: 12px">
+          <div class="token-grid">
+            <div class="token-item">
+              <div class="token-value">{{ tokenUsage.input_tokens }}</div>
+              <div class="token-label">输入Token</div>
+            </div>
+            <div class="token-item">
+              <div class="token-value">{{ tokenUsage.output_tokens }}</div>
+              <div class="token-label">输出Token</div>
+            </div>
+            <div class="token-item">
+              <div class="token-value">{{ tokenUsage.total_tokens }}</div>
+              <div class="token-label">总Token</div>
+            </div>
+          </div>
         </div>
-        <div class="token-item">
-          <div class="token-value">{{ tokenUsage.output_tokens }}</div>
-          <div class="token-label">输出Token</div>
-        </div>
-        <div class="token-item">
-          <div class="token-value">{{ tokenUsage.total_tokens }}</div>
-          <div class="token-label">总Token</div>
+        <div class="status-grid">
+          <div v-if="stats" class="status-item">
+            <div class="status-label">总记录数</div>
+            <div class="status-value">{{ stats.total_records }}</div>
+          </div>
+          <div v-if="stats" class="status-item">
+            <div class="status-label">用户数量</div>
+            <div class="status-value">{{ stats.unique_users }}</div>
+          </div>
+          <button class="streamlit-button" :disabled="isLoading" @click="refreshData">
+            🔄 刷新数据
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- 用户数据管理 -->
-    <div class="streamlit-section">
-      <h2 class="streamlit-subheader">👥 用户数据管理</h2>
-
-      <div class="streamlit-text-input">
-        <label>🔍 搜索用户或内容</label>
-        <input
-          type="text"
-          v-model="searchTerm"
-          :disabled="isMatching"
-          class="streamlit-input"
-          placeholder="输入用户名或研究内容关键词…"
-        />
+    <!-- 用户数据管理（可折叠） -->
+    <div class="streamlit-expander">
+      <div class="streamlit-expander-header" @click="toggleManagementCollapse">
+        <strong>👥 用户数据管理</strong>
+        <span style="float: right; color: var(--color-text-soft)">{{
+          managementCollapsed ? "展开" : "折叠"
+        }}</span>
       </div>
-
-      <div class="action-row">
-        <button class="streamlit-button" :disabled="isMatching" @click="selectAll">✅ 全选</button>
-        <button class="streamlit-button" :disabled="isMatching" @click="clearSelection">
-          ❌ 取消全选
-        </button>
-        <button
-          class="streamlit-button streamlit-button-danger"
-          @click="batchDelete"
-          :disabled="isMatching || selectedIndices.size === 0"
-        >
-          🗑️ 批量删除
-        </button>
-        <button class="streamlit-button" :disabled="isMatching" @click="exportJSON">
-          📥 导出JSON
-        </button>
-      </div>
-
-      <div class="streamlit-help">提示：当前前端仅展示与管理数据，编辑与删除需后端API支持。</div>
-
-      <div class="records-list" v-if="filteredProfiles.length > 0">
-        <div class="records-header">
-          <h3 class="streamlit-subheader">📄 用户记录</h3>
-          <button
-            class="streamlit-button streamlit-button-small"
+      <div class="streamlit-expander-content" v-show="!managementCollapsed">
+        <div class="streamlit-text-input" style="margin-bottom: 10px">
+          <label>🔍 搜索用户或内容</label>
+          <input
+            type="text"
+            v-model="searchTerm"
             :disabled="isMatching"
-            @click="toggleRecordsCollapse"
+            class="streamlit-input"
+            placeholder="输入用户名或研究内容关键词…"
+          />
+        </div>
+
+        <div class="button-row" style="margin-bottom: 8px">
+          <button class="streamlit-button" :disabled="isMatching" @click="selectAll">
+            ✅ 全选
+          </button>
+          <button class="streamlit-button" :disabled="isMatching" @click="clearSelection">
+            ❌ 取消全选
+          </button>
+          <button
+            class="streamlit-button streamlit-button-danger"
+            @click="batchDelete"
+            :disabled="isMatching || selectedIndices.size === 0"
           >
-            {{ recordsCollapsed ? "展开" : "折叠" }}
+            🗑️ 批量删除
+          </button>
+          <button class="streamlit-button" :disabled="isMatching" @click="exportJSON">
+            📥 导出JSON
           </button>
         </div>
-        <div v-show="recordsCollapsed" class="records-collapsed-list">
-          <div class="record-summary" v-for="(item, i) in filteredProfiles" :key="'summary-' + i">
-            记录 {{ i + 1 }}: {{ item.username || "Unknown" }}
-          </div>
+
+        <div class="streamlit-help" style="margin-top: 10px; margin-bottom: 10px">
+          提示：当前前端仅展示与管理数据，编辑与删除需后端API支持。
         </div>
-        <div v-show="!recordsCollapsed">
-          <div v-for="(item, i) in filteredProfiles" :key="i" class="record-item">
-            <div class="record-header">
-              <label>
-                <input
-                  type="checkbox"
-                  :disabled="isMatching"
-                  :checked="selectedIndices.has(i)"
-                  @change="toggleSelection(i, $event)"
-                />
-                记录 {{ i + 1 }}: {{ item.username || "Unknown" }}
-              </label>
-              <div class="record-actions">
-                <button
-                  class="streamlit-button streamlit-button-small"
-                  :disabled="isMatching"
-                  @click="toggleEdit(i)"
-                >
-                  {{ editModes.has(i) ? "💾 保存" : "✏️ 编辑" }}
-                </button>
-                <button
-                  class="streamlit-button streamlit-button-small"
-                  :disabled="isMatching || !editModes.has(i)"
-                  @click="cancelEdit(i)"
-                >
-                  ❌ 取消
-                </button>
-                <button
-                  class="streamlit-button streamlit-button-small streamlit-button-danger"
-                  :disabled="isMatching"
-                  @click="deleteRecord(i)"
-                >
-                  🗑️ 删除
-                </button>
+
+        <div class="records-list" v-if="filteredProfiles.length > 0">
+          <div class="streamlit-expander">
+            <div class="streamlit-expander-header" @click="toggleRecordsCollapse">
+              <strong>📄 用户记录</strong>
+              <span style="float: right; color: var(--color-text-soft)">{{
+                recordsCollapsed ? "展开" : "折叠"
+              }}</span>
+            </div>
+            <div class="streamlit-expander-content" v-show="!recordsCollapsed">
+              <div v-for="(item, i) in filteredProfiles" :key="i" class="record-item">
+                <div class="record-header">
+                  <label>
+                    <input
+                      type="checkbox"
+                      :disabled="isMatching"
+                      :checked="selectedIndices.has(i)"
+                      @change="toggleSelection(i, $event)"
+                    />
+                    记录 {{ i + 1 }}: {{ item.username || "Unknown" }}
+                  </label>
+                  <div class="record-actions">
+                    <button
+                      class="streamlit-button streamlit-button-small"
+                      :disabled="isMatching"
+                      @click="toggleEdit(i)"
+                    >
+                      {{ editModes.has(i) ? "💾 保存" : "✏️ 编辑" }}
+                    </button>
+                    <button
+                      class="streamlit-button streamlit-button-small"
+                      :disabled="isMatching || !editModes.has(i)"
+                      @click="cancelEdit(i)"
+                    >
+                      ❌ 取消
+                    </button>
+                    <button
+                      class="streamlit-button streamlit-button-small streamlit-button-danger"
+                      :disabled="isMatching"
+                      @click="deleteRecord(i)"
+                    >
+                      🗑️ 删除
+                    </button>
+                  </div>
+                </div>
+                <div class="record-body">
+                  <template v-if="editModes.has(i)">
+                    <div class="record-edit-grid">
+                      <div class="edit-field">
+                        <label>用户名</label>
+                        <input
+                          type="text"
+                          class="streamlit-input"
+                          v-model="editDrafts[i].username"
+                        />
+                      </div>
+                      <div class="edit-field">
+                        <label>分类ID</label>
+                        <input
+                          type="text"
+                          class="streamlit-input"
+                          v-model="editDrafts[i].category_id"
+                        />
+                      </div>
+                      <div class="edit-field">
+                        <label>研究内容描述</label>
+                        <textarea
+                          class="streamlit-textarea"
+                          v-model="editDrafts[i].user_input"
+                        ></textarea>
+                      </div>
+                    </div>
+                  </template>
+                  <template v-else>
+                    <div class="record-field">
+                      <strong>分类标签：</strong><code>{{ item.category_id || "未设置" }}</code>
+                    </div>
+                    <div class="record-field">
+                      <strong>研究兴趣：</strong>
+                      <pre class="research-interests-code">{{ item.user_input || "未设置" }}</pre>
+                    </div>
+                  </template>
+                </div>
               </div>
             </div>
-            <div class="record-body">
-              <template v-if="editModes.has(i)">
-                <div class="record-edit-grid">
-                  <div class="edit-field">
-                    <label>用户名</label>
-                    <input type="text" class="streamlit-input" v-model="editDrafts[i].username" />
-                  </div>
-                  <div class="edit-field">
-                    <label>分类ID</label>
-                    <input
-                      type="text"
-                      class="streamlit-input"
-                      v-model="editDrafts[i].category_id"
-                    />
-                  </div>
-                  <div class="edit-field">
-                    <label>研究内容描述</label>
-                    <textarea
-                      class="streamlit-textarea"
-                      v-model="editDrafts[i].user_input"
-                    ></textarea>
-                  </div>
-                </div>
-              </template>
-              <template v-else>
-                <div class="record-field">
-                  <strong>分类标签：</strong><code>{{ item.category_id || "未设置" }}</code>
-                </div>
-                <div class="record-field">
-                  <strong>研究兴趣：</strong>
-                  <pre class="research-interests-code">{{ item.user_input || "未设置" }}</pre>
-                </div>
-              </template>
-            </div>
           </div>
         </div>
-      </div>
-      <div v-else class="streamlit-info">
-        📝 暂无数据记录，请先进行分类匹配或在后端添加用户配置。
+        <div v-else class="streamlit-info">
+          📝 暂无数据记录，请先进行分类匹配或在后端添加用户配置。
+        </div>
       </div>
     </div>
   </div>
@@ -286,7 +298,7 @@ import type { UserProfile } from "@/types";
 
 // Store
 const store = useArxivStore();
-const { isLoading, error, userProfiles, config, hasValidLightProviderConfig } = storeToRefs(store);
+const { isLoading, error, userProfiles } = storeToRefs(store);
 
 // 本地状态
 const username = ref("");
@@ -307,14 +319,21 @@ const toggleRecordsCollapse = () => {
   } catch {}
 };
 
-// 计算属性：轻模型提供方名称与动态文案
-const lightProvider = computed(() => (config.value?.light_model_provider || 'dashscope').toLowerCase());
-const lightProviderLabel = computed(() => lightProvider.value === 'ollama' ? 'Ollama 基础地址' : 'DashScope API Key');
-const providerStatusMessage = computed(() => {
-  const p = lightProvider.value;
-  if (p === 'ollama') return 'Ollama 未配置，请设置 OLLAMA_BASE_URL 并确保服务可用（或切换 轻模型提供方）。';
-  return 'DashScope API Key 未配置，请在后端 .env 中设置（或切换 轻模型提供方）。';
-});
+// 可折叠分区：配置与统计、用户数据管理
+const statsCollapsed = ref(false);
+const managementCollapsed = ref(false);
+const toggleStatsCollapse = () => {
+  statsCollapsed.value = !statsCollapsed.value;
+  try {
+    localStorage.setItem("matcher_stats_collapsed", statsCollapsed.value ? "1" : "0");
+  } catch {}
+};
+const toggleManagementCollapse = () => {
+  managementCollapsed.value = !managementCollapsed.value;
+  try {
+    localStorage.setItem("matcher_management_collapsed", managementCollapsed.value ? "1" : "0");
+  } catch {}
+};
 
 // 用户数据管理
 const searchTerm = ref("");
@@ -346,7 +365,8 @@ const refreshData = async () => {
     const res = await api.getMatcherDataOrProfiles();
     if (res.success && res.data) {
       store.setUserProfiles(res.data as UserProfile[]);
-      stats.value = (res as any).stats || null;
+      stats.value =
+        (res as { stats?: { total_records?: number; unique_users?: number } }).stats || null;
     } else {
       stats.value = null;
     }
@@ -374,15 +394,18 @@ const optimizeDescription = async () => {
       isDescriptionLocked.value = true;
     } else {
       // 模板错误友好提示
-      const tmpl = (resp as any).template_error as {
-        friendly_message?: string;
-        fix_suggestions?: string[];
-        details?: Record<string, unknown>;
-      } | undefined;
+      const tmpl = (resp as any).template_error as
+        | {
+            friendly_message?: string;
+            fix_suggestions?: string[];
+            details?: Record<string, unknown>;
+          }
+        | undefined;
       if (tmpl?.friendly_message) {
-        const tips = Array.isArray(tmpl.fix_suggestions) && tmpl.fix_suggestions.length
-          ? `\n修复建议：\n• ${tmpl.fix_suggestions.join("\n• ")}`
-          : "";
+        const tips =
+          Array.isArray(tmpl.fix_suggestions) && tmpl.fix_suggestions.length
+            ? `\n修复建议：\n• ${tmpl.fix_suggestions.join("\n• ")}`
+            : "";
         store.setError(`${tmpl.friendly_message}${tips}`);
       } else {
         store.setError("优化描述失败");
@@ -425,15 +448,18 @@ const startMatching = async () => {
       await refreshData();
     } else {
       // 模板错误友好提示
-      const tmpl = (resp as any).template_error as {
-        friendly_message?: string;
-        fix_suggestions?: string[];
-        details?: Record<string, unknown>;
-      } | undefined;
+      const tmpl = (resp as any).template_error as
+        | {
+            friendly_message?: string;
+            fix_suggestions?: string[];
+            details?: Record<string, unknown>;
+          }
+        | undefined;
       if (tmpl?.friendly_message) {
-        const tips = Array.isArray(tmpl.fix_suggestions) && tmpl.fix_suggestions.length
-          ? `\n修复建议：\n• ${tmpl.fix_suggestions.join("\n• ")}`
-          : "";
+        const tips =
+          Array.isArray(tmpl.fix_suggestions) && tmpl.fix_suggestions.length
+            ? `\n修复建议：\n• ${tmpl.fix_suggestions.join("\n• ")}`
+            : "";
         store.setError(`${tmpl.friendly_message}${tips}`);
       } else {
         store.setError("分类匹配失败");
@@ -576,6 +602,12 @@ onMounted(async () => {
     const saved = localStorage.getItem("matcher_records_collapsed");
     if (saved === "1") recordsCollapsed.value = true;
     else if (saved === "0") recordsCollapsed.value = false;
+    const s1 = localStorage.getItem("matcher_stats_collapsed");
+    if (s1 === "1") statsCollapsed.value = true;
+    else if (s1 === "0") statsCollapsed.value = false;
+    const s2 = localStorage.getItem("matcher_management_collapsed");
+    if (s2 === "1") managementCollapsed.value = true;
+    else if (s2 === "0") managementCollapsed.value = false;
   } catch {}
 
   // 初始化服务与数据
