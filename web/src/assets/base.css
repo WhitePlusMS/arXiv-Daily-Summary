@@ -35,6 +35,20 @@
   --color-text-soft: var(--vt-c-text-light-2);
 
   --section-gap: 160px;
+
+  /* 统一字体系统 */
+  --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-family-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+  /* 统一字号系统（基于 15px 根字体，使用 rem 单位） */
+  --font-size-base: 15px; /* 基础字号 */
+  --font-size-xs: 0.8rem; /* 12px - 极小文本、帮助信息 */
+  --font-size-sm: 0.867rem; /* 13px - 小文本、辅助信息 */
+  --font-size-base-rem: 1rem; /* 15px - 正文 */
+  --font-size-md: 1.067rem; /* 16px - 中等文本 */
+  --font-size-lg: 1.2rem; /* 18px - 副标题 */
+  --font-size-xl: 1.6rem; /* 24px - 主标题 */
+  --font-size-2xl: 2.2rem; /* 33px - 超大标题（统计数字等） */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -68,21 +82,24 @@ body {
     color 0.5s,
     background-color 0.5s;
   line-height: 1.6;
-  font-family:
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    'Fira Sans',
-    'Droid Sans',
-    'Helvetica Neue',
-    sans-serif;
-  font-size: 15px;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* 确保所有表单元素使用与正文相同的字体 */
+input,
+select,
+textarea,
+button {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base-rem);
+}
+
+/* 确保 pre 标签也使用正文字体（除非明确指定为代码） */
+pre {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base-rem);
 }

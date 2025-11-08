@@ -51,7 +51,7 @@ onUnmounted(() => {
   display: flex;
   gap: 0;
   background: #ffffff;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-family-base);
 }
 .app-main {
   flex: 1;

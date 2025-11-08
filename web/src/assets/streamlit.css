@@ -16,8 +16,7 @@
   margin: 0;
   padding: 0 24px;
   box-sizing: border-box;
-  font-family: "Source Sans Pro", "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto,
-    Ubuntu, Cantarell, "Noto Sans", sans-serif;
+  font-family: var(--font-family-base);
 }
 
 .streamlit-header {
@@ -25,14 +24,14 @@
 }
 
 .streamlit-title {
-  font-size: 24px;
+  font-size: var(--font-size-xl);
   line-height: 1.3;
   margin: 0 0 8px;
 }
 
 .streamlit-caption {
   color: var(--color-text-soft);
-  font-size: 13px;
+  font-size: var(--font-size-sm);
 }
 
 .streamlit-section {
@@ -44,7 +43,7 @@
 }
 
 .streamlit-subheader {
-  font-size: 18px;
+  font-size: var(--font-size-lg);
   margin: 0 0 12px;
 }
 
@@ -69,6 +68,8 @@
   background: var(--color-background);
   color: var(--color-text);
   box-sizing: border-box;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base-rem);
 }
 
 .streamlit-textarea {
@@ -78,7 +79,7 @@
 
 .streamlit-help {
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   margin-top: 6px;
 }
 
@@ -157,7 +158,7 @@
 
 .streamlit-button-small {
   padding: 6px 10px;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
 }
 
 /* Common rows */
@@ -239,7 +240,7 @@
 .report-date,
 .report-size {
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 }
 .report-actions {
   display: flex;
@@ -250,7 +251,7 @@
 .streamlit-footer {
   margin-top: 16px;
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 }
 
 /* Modal preview */
@@ -286,7 +287,7 @@
   cursor: pointer;
   border: none;
   background: transparent;
-  font-size: 20px;
+  font-size: var(--font-size-md);
 }
 .modal-body {
   padding: 12px;
@@ -310,7 +311,7 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-soft);
 }
 .toggle-visibility:focus {
@@ -350,6 +351,8 @@
   border-radius: var(--st-radius);
   background: var(--color-background);
   color: var(--color-text);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base-rem);
 }
 .streamlit-input:focus,
 .streamlit-select:focus,
@@ -414,7 +417,7 @@ input[type="range"] {
   flex: 1;
 }
 .stat-value {
-  font-size: 2.2rem;
+  font-size: var(--font-size-2xl);
   font-weight: 700;
   color: #2563eb;
   margin-bottom: 8px;
@@ -427,7 +430,7 @@ input[type="range"] {
 }
 .stat-label {
   color: #4b5563;
-  font-size: 1.05rem;
+  font-size: var(--font-size-base-rem);
   font-weight: 500;
 }
 .stat-divider {
@@ -468,8 +471,8 @@ input[type="range"] {
   color: #1e40af;
   padding: 6px 12px;
   border-radius: 8px;
-  font-family: "Monaco", "Menlo", monospace;
-  font-size: 1rem;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-base-rem);
   font-weight: 700;
   min-width: 70px;
   text-align: center;
@@ -477,17 +480,17 @@ input[type="range"] {
 .sub-title {
   font-weight: 700;
   color: #111827;
-  font-size: 1.1rem;
+  font-size: var(--font-size-md);
 }
 .sub-desc {
   color: #374151;
   line-height: 1.6;
-  font-size: 1.05rem;
+  font-size: var(--font-size-base-rem);
 }
 .sub-desc-cn {
   color: #4b5563;
   line-height: 1.6;
-  font-size: 1rem;
+  font-size: var(--font-size-base-rem);
   margin-top: 6px;
   border-top: 1px solid #e5e7eb;
   padding-top: 6px;
@@ -501,7 +504,7 @@ input[type="range"] {
 .expander-icon {
   font-weight: 600;
   color: var(--color-text);
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm);
   transition: transform 0.2s;
 }
 .footer-content {
@@ -525,7 +528,7 @@ input[type="range"] {
 }
 .status-label {
   color: #374151;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
 }
 .status-value {
   color: #111827;
@@ -565,12 +568,12 @@ input[type="range"] {
   text-align: center;
 }
 .token-value {
-  font-size: 1.2rem;
+  font-size: var(--font-size-lg);
   font-weight: 700;
   color: #1f2937;
 }
 .token-label {
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm);
   color: #6b7280;
 }
 
@@ -600,6 +603,8 @@ input[type="range"] {
   padding: 4px 8px;
   border-radius: 6px;
   white-space: pre-wrap;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base-rem);
 }
 .record-edit-grid {
   display: grid;
@@ -634,11 +639,24 @@ code {
   background-color: #f1f3f4;
   padding: 2px 4px;
   border-radius: 4px;
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-  font-size: 0.875em;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
 }
 .success-content {
   line-height: 1.8;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base-rem);
+}
+
+/* 确保 success-content 内部所有元素使用统一的字号 */
+.success-content * {
+  font-size: inherit;
+}
+
+/* success-content 中的 code 标签也使用正文字号 */
+.success-content code {
+  font-size: var(--font-size-base-rem);
+  font-family: var(--font-family-base);
 }
 .result-details {
   margin-top: 8px;
@@ -647,10 +665,7 @@ code {
 }
 .result-details p {
   margin: 4px 0;
-  font-size: 0.875rem;
-}
-.about {
-  /* 保持简单布局，适配关于页 */
+  font-size: var(--font-size-sm);
 }
 @media (min-width: 1024px) {
   .about {
@@ -687,13 +702,13 @@ code {
   gap: 8px;
 }
 .toast-text {
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   line-height: 1.4;
 }
 .toast-close {
   border: none;
   background: transparent;
-  font-size: 16px;
+  font-size: var(--font-size-md);
   cursor: pointer;
   color: #666;
 }
@@ -769,5 +784,5 @@ code {
   font-weight: 600;
 }
 .icon {
-  font-size: 1rem;
+  font-size: var(--font-size-base-rem);
 }

@@ -1118,7 +1118,7 @@ onBeforeUnmount(() => {
   border: 1px solid #eaecef;
   border-radius: 4px;
   padding: 8px 12px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: var(--font-family-mono);
   line-height: 1.6;
 }
 
@@ -1134,6 +1134,6 @@ onBeforeUnmount(() => {
   min-height: 360px;
   resize: vertical;
   box-sizing: border-box;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: var(--font-family-mono);
 }
 </style>
