@@ -99,6 +99,8 @@ class ArxivRecommenderCLI:
             'max_entries': get_int('MAX_ENTRIES', 50),
             'num_brief_papers': get_int('NUM_BRIEF_PAPERS', 7),
             'num_detailed_papers': get_int('NUM_DETAILED_PAPERS', 3),
+            # 相关性过滤阈值（用于剔除低分项）
+            'relevance_filter_threshold': get_int('RELEVANCE_FILTER_THRESHOLD', 6),
             
             # LLM配置
 
@@ -655,6 +657,7 @@ class ArxivRecommenderCLI:
                 max_entries=self.config['max_entries'],
                 num_brief_papers=self.config['num_brief_papers'],
                 num_detailed_papers=self.config['num_detailed_papers'],
+                relevance_filter_threshold=self.config.get('relevance_filter_threshold', 6),
                 model=heavy_model,
                 base_url=heavy_base_url,
                 api_key=heavy_api_key,

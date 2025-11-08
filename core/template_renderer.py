@@ -54,14 +54,15 @@ class TemplateRenderer:
         """添加自定义Jinja2过滤器。"""
         
         def format_score_stars(score: float) -> str:
-            """将评分转换为星级显示。"""
-            if score <= STAR_LOW_THRESHOLD:
-                return ""
-            elif score >= STAR_HIGH_THRESHOLD:
-                return "⭐" * 5
-            else:
-                star_count = int((score - STAR_LOW_THRESHOLD) / 1.2)
-                return "⭐" * min(star_count, 5)
+            """将评分直接映射为星级显示（0–10）。
+            规则：多少分就显示多少星（取整），下限0，上限10。"""
+            try:
+                # 保护性转换并裁剪范围到 [0, 10]
+                star_count = int(float(score))
+            except Exception:
+                star_count = 0
+            star_count = max(0, min(star_count, 10))
+            return "⭐" * star_count
         
         def truncate_text(text: str, length: int = 100) -> str:
             """截断文本到指定长度。"""

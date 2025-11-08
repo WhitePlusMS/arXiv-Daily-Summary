@@ -411,6 +411,18 @@
           <input type="number" v-model="configChanges.NUM_BRIEF_PAPERS" class="streamlit-input" />
           <div class="streamlit-help">简要推荐的论文数量。</div>
         </div>
+        <div class="form-item">
+          <label>RELEVANCE_FILTER_THRESHOLD</label>
+          <input
+            type="number"
+            min="0"
+            max="10"
+            step="1"
+            v-model="configChanges.RELEVANCE_FILTER_THRESHOLD"
+            class="streamlit-input"
+          />
+          <div class="streamlit-help">相关性过滤阈值（0–10）：低于该分数的论文将被剔除。推荐值 6。</div>
+        </div>
       </div>
 
       <!-- 📁 文件路径配置 -->
@@ -1008,6 +1020,7 @@ const sectionFields: Record<string, string[]> = {
     "MAX_ENTRIES",
     "NUM_DETAILED_PAPERS",
     "NUM_BRIEF_PAPERS",
+    "RELEVANCE_FILTER_THRESHOLD",
   ],
   "📁 文件路径配置": ["USER_CATEGORIES_FILE", "SAVE_DIRECTORY", "SAVE_MARKDOWN"],
   "📧 邮件配置": [

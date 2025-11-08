@@ -24,6 +24,7 @@ class RecommendationEngine:
         max_entries: int,
         num_detailed_papers: int,
         num_brief_papers: int,
+        relevance_filter_threshold: int ,
         model: str,
         base_url: str,
         api_key: str,
@@ -62,6 +63,7 @@ class RecommendationEngine:
         self.num_brief_papers = num_brief_papers
         self.description = description
         self.num_workers = num_workers
+        self.relevance_filter_threshold = relevance_filter_threshold
         
         # 初始化ArXiv获取器和LLM提供商（支持依赖注入，减少重复构造与耦合）
         logger.debug("初始化ArXiv获取器和LLM提供商")
@@ -212,9 +214,12 @@ class RecommendationEngine:
                     if "API调用失败" in str(exc):
                         raise  # 重新抛出API失败异常
 
-        # 过滤掉相关性评分低于6分的论文和API失败标记
-        recommended_papers = [paper for paper in recommended_papers 
-                          if paper.get('relevance_score', 0) >= 0 and not paper.get("__api_failed")]
+        # 过滤掉相关性评分低于阈值的论文和API失败标记（阈值来自 .env 配置）
+        threshold = self.relevance_filter_threshold if isinstance(self.relevance_filter_threshold, (int, float)) else 0
+        recommended_papers = [
+            paper for paper in recommended_papers
+            if paper.get('relevance_score', 0) >= threshold and not paper.get("__api_failed")
+        ]
         
         # 按相关性评分排序
         recommended_papers.sort(key=lambda x: x['relevance_score'], reverse=True)
@@ -318,7 +323,7 @@ class RecommendationEngine:
                 # 格式化输出
                 brief_analysis = f"""
 ## {i}. {paper['title']}
-- **相关性评分**: {'⭐' * min(int(paper['relevance_score']), 5)} ({paper['relevance_score']}/10)
+- **相关性评分**: {'⭐' * max(0, min(int(paper['relevance_score']), 10))} ({paper['relevance_score']}/10)
 - **ArXiv ID**: {paper['arXiv_id']}
 - **作者**: {', '.join(paper['authors'])}
 - **论文链接**: <a href="{paper['pdf_url']}" class="link-btn pdf-link" target="_blank">PDF</a> <a href="{paper['abstract_url']}" class="link-btn arxiv-link" target="_blank">ArXiv</a>
@@ -339,7 +344,7 @@ class RecommendationEngine:
                 logger.error(f"简要分析失败 - {title_short}: {e}")
                 brief_analysis = f"""
 ## {i}. {paper['title']}
-- **相关性评分**: {'⭐' * min(int(paper['relevance_score']), 5)} ({paper['relevance_score']}/10)
+- **相关性评分**: {'⭐' * max(0, min(int(paper['relevance_score']), 10))} ({paper['relevance_score']}/10)
 - **ArXiv ID**: {paper['arXiv_id']}
 - **作者**: {', '.join(paper['authors'])}
 - **TLDR**: 生成摘要失败
