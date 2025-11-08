@@ -656,7 +656,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useArxivStore } from "@/stores/arxiv";
 import * as api from "@/services/api";
 import type { PromptItem } from "@/types";
@@ -744,6 +744,19 @@ const normalizeConfig = (cfg: Record<string, string>) => {
   return out;
 };
 
+// 将字符串数值裁剪为指定整数范围（返回字符串以匹配 .env 格式）
+const clampIntString = (val: string | number | undefined, min: number, max: number): string => {
+  let n = 0;
+  try {
+    n = Math.trunc(Number(val));
+  } catch {
+    n = min;
+  }
+  if (!Number.isFinite(n)) n = min;
+  const clamped = Math.min(max, Math.max(min, n));
+  return String(clamped);
+};
+
 const loadConfig = async () => {
   isLoading.value = true;
   store.clearError();
@@ -773,7 +786,16 @@ const saveConfig = async () => {
   isLoading.value = true;
   store.clearError();
   try {
-    const res = await api.saveEnvConfig({ config: configChanges.value });
+    // 保存前对关键数值进行前端规范化
+    const payload: Record<string, string> = { ...configChanges.value };
+    if (Object.prototype.hasOwnProperty.call(payload, "RELEVANCE_FILTER_THRESHOLD")) {
+      payload.RELEVANCE_FILTER_THRESHOLD = clampIntString(
+        payload.RELEVANCE_FILTER_THRESHOLD,
+        0,
+        10
+      );
+    }
+    const res = await api.saveEnvConfig({ config: payload });
     if (res.success) {
       await loadConfig();
     } else {
@@ -786,6 +808,19 @@ const saveConfig = async () => {
     isLoading.value = false;
   }
 };
+
+// 前端实时输入限制：阈值始终维持在 0–10 的整数
+watch(
+  () => configChanges.value?.RELEVANCE_FILTER_THRESHOLD,
+  (nv) => {
+    if (nv === undefined || nv === null) return;
+    const current = String(nv);
+    const clamped = clampIntString(current, 0, 10);
+    if (clamped !== current) {
+      configChanges.value.RELEVANCE_FILTER_THRESHOLD = clamped;
+    }
+  }
+);
 
 // 推荐预设（按分组）
 

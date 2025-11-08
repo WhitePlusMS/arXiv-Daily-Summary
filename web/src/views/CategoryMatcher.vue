@@ -2,276 +2,141 @@
   <div class="streamlit-dashboard">
     <!-- 页面头部 -->
     <div class="streamlit-header">
-      <h1 class="streamlit-title">📚 ArXiv 分类匹配器</h1>
+      <h1 class="streamlit-title">🎯 分类匹配</h1>
+      <p class="streamlit-caption">输入研究兴趣 → AI推荐最相关ArXiv分类</p>
     </div>
 
     <!-- 错误提示 -->
-    <div v-if="error" class="streamlit-error">
-      {{ error }}
-    </div>
+    <div v-if="error" class="streamlit-error">{{ error }}</div>
 
-    <!-- 配置与统计（参考Sidebar功能） -->
+    <!-- 步骤① 配置与输入 -->
     <div class="streamlit-section">
-      <h2 class="streamlit-subheader">⚙️ 配置与统计</h2>
-      <div v-if="hasValidLightProviderConfig" class="streamlit-success">✅ {{ lightProviderLabel }} 已配置</div>
-      <div v-else class="streamlit-error">❌ {{ providerStatusMessage }}</div>
-
-      <div class="status-grid">
-        <div class="status-item">
-          <div class="status-label">返回结果数量</div>
-          <input type="range" min="1" max="10" v-model.number="topN" />
-          <div class="status-value">Top {{ topN }}</div>
+      <div class="streamlit-expander">
+        <div class="streamlit-expander-header" @click="toggleConfigExpand">
+          <span class="expander-icon">{{ configExpanded ? '▼' : '▶' }}</span>
+          <span>模型配置与统计</span>
+          <span v-if="!hasValidLightProviderConfig" class="streamlit-error" style="margin-left:auto;font-size:12px;">❌ 未就绪</span>
         </div>
-
-        <div v-if="stats" class="status-item">
-          <div class="status-label">总记录数</div>
-          <div class="status-value">{{ stats.total_records }}</div>
-        </div>
-        <div v-if="stats" class="status-item">
-          <div class="status-label">用户数量</div>
-          <div class="status-value">{{ stats.unique_users }}</div>
-        </div>
-
-        <button class="streamlit-button" :disabled="isLoading" @click="refreshData">
-          🔄 刷新数据
-        </button>
-      </div>
-    </div>
-
-    <!-- 研究信息输入 -->
-    <div class="streamlit-section">
-      <h2 class="streamlit-subheader">📝 输入研究信息</h2>
-      <div class="streamlit-text-input">
-        <label>用户名</label>
-        <input
-          type="text"
-          v-model="username"
-          :disabled="isMatching"
-          class="streamlit-input"
-          placeholder="请输入您的用户名"
-        />
-      </div>
-
-      <div v-if="isMatching" class="streamlit-warning">
-        ⚠️ 正在进行分类匹配，请等待完成后再修改输入内容
-      </div>
-
-      <div class="streamlit-text-area">
-        <label>研究内容描述</label>
-        <textarea
-          v-model="researchDescription"
-          :disabled="isMatching || isDescriptionLocked"
-          class="streamlit-textarea"
-          placeholder="请详细描述您的研究方向和兴趣领域…"
-        ></textarea>
-        <div class="streamlit-help">支持Markdown格式，请尽可能详细地描述您的研究方向</div>
-      </div>
-
-      <div class="action-row">
-        <button
-          class="streamlit-button"
-          :disabled="isMatching || !researchDescription.trim()"
-          @click="optimizeDescription"
-        >
-          ✨ AI优化描述
-        </button>
-      </div>
-
-    </div>
-
-    <!-- 匹配操作 -->
-    <div class="streamlit-section">
-      <h2 class="streamlit-subheader">🚀 开始匹配</h2>
-      <button
-        class="streamlit-button streamlit-button-primary"
-        :disabled="isMatching"
-        @click="startMatching"
-      >
-        {{ isMatching ? "正在匹配中…" : "开始匹配分类" }}
-      </button>
-      <div class="streamlit-help">将根据研究描述匹配最相关的ArXiv分类</div>
-    </div>
-
-    <!-- 运行状态 -->
-    <div v-if="isMatching" class="streamlit-section">
-      <h2 class="streamlit-subheader">📋 运行状态</h2>
-      <div class="streamlit-spinner">
-        <div class="spinner"></div>
-        <span>{{ runningMessage }}</span>
-      </div>
-    </div>
-
-    <!-- 匹配完成提示 -->
-    <div v-if="matchCompleted" class="streamlit-success">
-      ✅ 匹配完成！结果已保存到数据库。<br />
-      📊 全部115个分类的详细评分已保存到 data/users/detailed_scores/ 目录。
-    </div>
-
-    <!-- 匹配结果 -->
-    <div v-if="results.length > 0" class="streamlit-section">
-      <h2 class="streamlit-subheader">🎯 匹配结果</h2>
-      <div class="results-table">
-        <div class="table-header">
-          <div>#</div>
-          <div>分类ID</div>
-          <div>分类名称</div>
-          <div>匹配评分</div>
-        </div>
-        <div v-for="(r, idx) in results" :key="r.id" class="table-row">
-          <div>{{ idx + 1 }}</div>
-          <div>
-            <code>{{ r.id }}</code>
+        <div v-show="configExpanded" class="streamlit-expander-content">
+          <div v-if="hasValidLightProviderConfig" class="streamlit-success">✅ {{ lightProviderLabel }} 已配置</div>
+          <div v-else class="streamlit-error">❌ {{ providerStatusMessage }}</div>
+          <div class="status-grid">
+            <div class="status-item">
+              <div class="status-label">返回结果数量</div>
+              <input type="range" min="1" max="10" v-model.number="topN" />
+              <div class="status-value">Top {{ topN }}</div>
+            </div>
+            <div v-if="stats" class="status-item">
+              <div class="status-label">总记录数</div>
+              <div class="status-value">{{ stats.total_records }}</div>
+            </div>
+            <div v-if="stats" class="status-item">
+              <div class="status-label">用户数量</div>
+              <div class="status-value">{{ stats.unique_users }}</div>
+            </div>
           </div>
-          <div>{{ r.name }}</div>
-          <div>{{ r.score }}</div>
+          <div class="button-row">
+            <button class="streamlit-button" :disabled="isLoading" @click="refreshData">🔄 刷新数据</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 用户名 & 研究描述 -->
+      <div class="form-grid" style="margin-top:12px;">
+        <div class="form-item">
+          <label>用户名</label>
+          <input type="text" v-model="username" :disabled="isMatching" class="streamlit-input" placeholder="请输入您的用户名" />
+        </div>
+        <div class="form-item">
+          <label>研究内容描述</label>
+          <textarea v-model="researchDescription" :disabled="isMatching || isDescriptionLocked" class="streamlit-textarea" placeholder="请尽可能详细地描述您的研究方向与兴趣领域…"></textarea>
+          <div class="streamlit-help">支持Markdown格式；描述越具体，匹配越精准。</div>
+        </div>
+      </div>
+
+      <div class="button-row">
+        <button class="streamlit-button" :disabled="isMatching || !researchDescription.trim()" @click="optimizeDescription">✨ AI优化描述</button>
+        <button class="streamlit-button streamlit-button-primary" :disabled="isMatching" @click="startMatching">{{ isMatching ? "匹配中…" : "开始匹配" }}</button>
+      </div>
+
+      <!-- 运行状态 -->
+      <div v-if="isMatching" class="streamlit-spinner" style="margin-top:12px;">
+        <div class="spinner"></div><span>{{ runningMessage }}</span>
+      </div>
+      <div v-if="matchCompleted" class="streamlit-success" style="margin-top:12px;">
+        ✅ 匹配完成！结果已保存至数据库，详细评分见 <code>data/users/detailed_scores/</code>
+      </div>
+    </div>
+
+    <!-- 步骤② 结果展示 -->
+    <div v-if="results.length" class="streamlit-section">
+      <h2 class="streamlit-subheader">🎯 推荐分类</h2>
+      <div class="results-cards">
+        <div v-for="(r, idx) in results" :key="r.id" class="result-card">
+          <div class="result-header">
+            <div class="result-rank">#{{ idx + 1 }}</div>
+            <div class="result-score" :class="scoreClass(r.score)">{{ r.score }}</div>
+          </div>
+          <div class="result-body">
+            <div class="result-id"><code>{{ r.id }}</code></div>
+            <div class="result-name">{{ r.name }}</div>
+            <div class="result-desc">{{ r.reason || '暂无推荐理由' }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 步骤③ 用户记录管理 -->
+    <div class="streamlit-section">
+      <div class="streamlit-expander">
+        <div class="streamlit-expander-header" @click="toggleRecordsExpand">
+          <span class="expander-icon">{{ recordsExpanded ? '▼' : '▶' }}</span>
+          <span>用户记录管理</span>
+          <span style="margin-left:auto;font-size:12px;color:var(--color-text-soft);">共 {{ filteredProfiles.length }} 条</span>
+        </div>
+        <div v-show="recordsExpanded" class="streamlit-expander-content">
+          <div class="streamlit-text-input">
+            <input type="text" v-model="searchTerm" :disabled="isMatching" class="streamlit-input" placeholder="搜索用户名或研究内容…" />
+          </div>
+          <div class="button-row">
+            <button class="streamlit-button" :disabled="isMatching" @click="selectAll">全选</button>
+            <button class="streamlit-button" :disabled="isMatching" @click="clearSelection">取消</button>
+            <button class="streamlit-button streamlit-button-danger" :disabled="isMatching || !selectedIndices.size" @click="batchDelete">删除</button>
+            <button class="streamlit-button" :disabled="isMatching" @click="exportJSON">导出</button>
+          </div>
+          <div class="streamlit-help">提示：编辑/删除需后端API支持。</div>
+          <div v-if="!filteredProfiles.length" class="streamlit-info">暂无记录，请先完成一次匹配。</div>
+          <div v-else class="records-cards">
+            <div v-for="(item, i) in filteredProfiles" :key="i" class="record-card">
+              <div class="record-header">
+                <label><input type="checkbox" :disabled="isMatching" :checked="selectedIndices.has(i)" @change="toggleSelection(i, $event)" />{{ item.username || 'Unknown' }}</label>
+                <div class="record-actions">
+                  <button class="streamlit-button streamlit-button-small" :disabled="isMatching" @click="toggleEdit(i)">{{ editModes.has(i) ? '保存' : '编辑' }}</button>
+                  <button class="streamlit-button streamlit-button-small" :disabled="isMatching || !editModes.has(i)" @click="cancelEdit(i)">取消</button>
+                  <button class="streamlit-button streamlit-button-small streamlit-button-danger" :disabled="isMatching" @click="deleteRecord(i)">删除</button>
+                </div>
+              </div>
+              <div class="record-body">
+                <div class="record-category"><strong>推荐分类：</strong><code>{{ item.category_id || '未设置' }}</code></div>
+                <div class="record-interests"><strong>研究兴趣：</strong><pre>{{ item.user_input || '未设置' }}</pre></div>
+              </div>
+              <div v-if="editModes.has(i)" class="record-edit-panel">
+                <div class="form-item"><label>用户名</label><input type="text" class="streamlit-input" v-model="editDrafts[i].username" /></div>
+                <div class="form-item"><label>分类ID</label><input type="text" class="streamlit-input" v-model="editDrafts[i].category_id" /></div>
+                <div class="form-item"><label>研究内容描述</label><textarea class="streamlit-textarea" v-model="editDrafts[i].user_input"></textarea></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Token使用统计 -->
     <div v-if="tokenUsage.total_tokens > 0" class="streamlit-section">
-      <h2 class="streamlit-subheader">💰 使用统计</h2>
       <div class="token-grid">
-        <div class="token-item">
-          <div class="token-value">{{ tokenUsage.input_tokens }}</div>
-          <div class="token-label">输入Token</div>
-        </div>
-        <div class="token-item">
-          <div class="token-value">{{ tokenUsage.output_tokens }}</div>
-          <div class="token-label">输出Token</div>
-        </div>
-        <div class="token-item">
-          <div class="token-value">{{ tokenUsage.total_tokens }}</div>
-          <div class="token-label">总Token</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 用户数据管理 -->
-    <div class="streamlit-section">
-      <h2 class="streamlit-subheader">👥 用户数据管理</h2>
-
-      <div class="streamlit-text-input">
-        <label>🔍 搜索用户或内容</label>
-        <input
-          type="text"
-          v-model="searchTerm"
-          :disabled="isMatching"
-          class="streamlit-input"
-          placeholder="输入用户名或研究内容关键词…"
-        />
-      </div>
-
-      <div class="action-row">
-        <button class="streamlit-button" :disabled="isMatching" @click="selectAll">✅ 全选</button>
-        <button class="streamlit-button" :disabled="isMatching" @click="clearSelection">
-          ❌ 取消全选
-        </button>
-        <button
-          class="streamlit-button streamlit-button-danger"
-          @click="batchDelete"
-          :disabled="isMatching || selectedIndices.size === 0"
-        >
-          🗑️ 批量删除
-        </button>
-        <button class="streamlit-button" :disabled="isMatching" @click="exportJSON">
-          📥 导出JSON
-        </button>
-      </div>
-
-      <div class="streamlit-help">提示：当前前端仅展示与管理数据，编辑与删除需后端API支持。</div>
-
-      <div class="records-list" v-if="filteredProfiles.length > 0">
-        <div class="records-header">
-          <h3 class="streamlit-subheader">📄 用户记录</h3>
-          <button
-            class="streamlit-button streamlit-button-small"
-            :disabled="isMatching"
-            @click="toggleRecordsCollapse"
-          >
-            {{ recordsCollapsed ? "展开" : "折叠" }}
-          </button>
-        </div>
-        <div v-show="recordsCollapsed" class="records-collapsed-list">
-          <div class="record-summary" v-for="(item, i) in filteredProfiles" :key="'summary-' + i">
-            记录 {{ i + 1 }}: {{ item.username || "Unknown" }}
-          </div>
-        </div>
-        <div v-show="!recordsCollapsed">
-          <div v-for="(item, i) in filteredProfiles" :key="i" class="record-item">
-            <div class="record-header">
-              <label>
-                <input
-                  type="checkbox"
-                  :disabled="isMatching"
-                  :checked="selectedIndices.has(i)"
-                  @change="toggleSelection(i, $event)"
-                />
-                记录 {{ i + 1 }}: {{ item.username || "Unknown" }}
-              </label>
-              <div class="record-actions">
-                <button
-                  class="streamlit-button streamlit-button-small"
-                  :disabled="isMatching"
-                  @click="toggleEdit(i)"
-                >
-                  {{ editModes.has(i) ? "💾 保存" : "✏️ 编辑" }}
-                </button>
-                <button
-                  class="streamlit-button streamlit-button-small"
-                  :disabled="isMatching || !editModes.has(i)"
-                  @click="cancelEdit(i)"
-                >
-                  ❌ 取消
-                </button>
-                <button
-                  class="streamlit-button streamlit-button-small streamlit-button-danger"
-                  :disabled="isMatching"
-                  @click="deleteRecord(i)"
-                >
-                  🗑️ 删除
-                </button>
-              </div>
-            </div>
-            <div class="record-body">
-              <template v-if="editModes.has(i)">
-                <div class="record-edit-grid">
-                  <div class="edit-field">
-                    <label>用户名</label>
-                    <input type="text" class="streamlit-input" v-model="editDrafts[i].username" />
-                  </div>
-                  <div class="edit-field">
-                    <label>分类ID</label>
-                    <input
-                      type="text"
-                      class="streamlit-input"
-                      v-model="editDrafts[i].category_id"
-                    />
-                  </div>
-                  <div class="edit-field">
-                    <label>研究内容描述</label>
-                    <textarea
-                      class="streamlit-textarea"
-                      v-model="editDrafts[i].user_input"
-                    ></textarea>
-                  </div>
-                </div>
-              </template>
-              <template v-else>
-                <div class="record-field">
-                  <strong>分类标签：</strong><code>{{ item.category_id || "未设置" }}</code>
-                </div>
-                <div class="record-field">
-                  <strong>研究兴趣：</strong>
-                  <pre class="research-interests-code">{{ item.user_input || "未设置" }}</pre>
-                </div>
-              </template>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div v-else class="streamlit-info">
-        📝 暂无数据记录，请先进行分类匹配或在后端添加用户配置。
+        <div class="token-item"><div class="token-value">{{ tokenUsage.input_tokens }}</div><div class="token-label">输入Token</div></div>
+        <div class="token-item"><div class="token-value">{{ tokenUsage.output_tokens }}</div><div class="token-label">输出Token</div></div>
+        <div class="token-item"><div class="token-value">{{ tokenUsage.total_tokens }}</div><div class="token-label">总Token</div></div>
       </div>
     </div>
   </div>

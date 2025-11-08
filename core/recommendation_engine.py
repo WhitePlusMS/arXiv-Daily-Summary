@@ -214,8 +214,12 @@ class RecommendationEngine:
                     if "API调用失败" in str(exc):
                         raise  # 重新抛出API失败异常
 
-        # 过滤掉相关性评分低于阈值的论文和API失败标记（阈值来自 .env 配置）
-        threshold = self.relevance_filter_threshold if isinstance(self.relevance_filter_threshold, (int, float)) else 0
+        # 过滤掉相关性评分低于阈值的论文和API失败标记（阈值来自 .env 配置），并进行0–10范围裁剪
+        try:
+            threshold_raw = int(float(self.relevance_filter_threshold))
+        except Exception:
+            threshold_raw = 0
+        threshold = max(0, min(threshold_raw, 10))
         recommended_papers = [
             paper for paper in recommended_papers
             if paper.get('relevance_score', 0) >= threshold and not paper.get("__api_failed")
