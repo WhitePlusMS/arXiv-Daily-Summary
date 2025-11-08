@@ -15,7 +15,7 @@
       {{ error }}
     </div>
 
-    <!-- 用户配置区域 - 完全复制Streamlit布局 -->
+    <!-- 用户配置区域（简化：去除内层套叠） -->
     <div class="streamlit-section">
       <h2 class="streamlit-subheader">👤 用户配置</h2>
       <div class="streamlit-selectbox">
@@ -44,15 +44,6 @@
           <pre class="research-interests-code">{{ selectedProfile.user_input || "未设置" }}</pre>
         </div>
       </div>
-
-    
-      <!-- 分类标签显示 -->
-      <div v-if="selectedProfile && selectedProfile.category_id" class="streamlit-section">
-        <h2 class="streamlit-subheader">🏷️ 分类标签</h2>
-        <div class="streamlit-info">
-          <code>{{ selectedProfile.category_id.replace(",", " ") }}</code>
-        </div>
-      </div>
     </div>
 
     <!-- 研究兴趣区域 - 完全复制Streamlit样式 -->
@@ -66,11 +57,10 @@
           :disabled="isLoading"
           class="streamlit-textarea"
         ></textarea>
-        <div class="streamlit-help">输入您的研究方向，系统将基于这些方向推荐相关论文</div>
       </div>
     </div>
 
-    <!-- 推荐系统区域 - 完全复制Streamlit布局 -->
+    <!-- 推荐系统区域（简化：高级选项移出为独立分区） -->
     <div class="streamlit-section">
       <h2 class="streamlit-subheader">🚀 运行推荐系统</h2>
 
@@ -89,41 +79,41 @@
       </button>
       <div class="streamlit-help">系统将自动查找最近可用的论文并生成推荐报告</div>
 
-      <!-- 高级选项折叠区域 -->
-      <div class="streamlit-expander">
-        <div
-          class="streamlit-expander-header"
-          @click="toggleAdvancedOptions"
-          :class="{ expanded: showAdvancedOptions }"
-        >
-          <span class="expander-icon">{{ showAdvancedOptions ? "▼" : "▶" }}</span>
-          🔧 高级选项：查询特定日期的报告
-        </div>
+    </div>
 
-        <div v-if="showAdvancedOptions" class="streamlit-expander-content">
-          <div class="streamlit-markdown">
-            <p>💡 <strong>提示：</strong> 如果您需要查看特定日期的论文推荐，可以在这里指定日期。</p>
-            <p>
-              ⚠️ <strong>注意：</strong> ArXiv通常在周日至周四发布论文，周五和周六不发布新论文。
-            </p>
-          </div>
-
-          <div class="streamlit-date-input">
-            <label>选择查询日期</label>
-            <input type="date" v-model="selectedDate" :max="todayStr" class="streamlit-date" />
-            <div class="streamlit-help">选择您想要查询论文的日期</div>
-          </div>
-
-          <button
-            @click="runSpecificDateRecommendation"
-            :disabled="isLoading"
-            class="streamlit-button"
-          >
-            🔍 查询指定日期（{{ selectedDate }}）
-          </button>
-        </div>
+    <!-- 高级选项（独立分区，避免内层套叠） -->
+    <div class="streamlit-section">
+      <div
+        class="streamlit-expander-header"
+        @click="toggleAdvancedOptions"
+        :class="{ expanded: showAdvancedOptions }"
+        style="margin-bottom:8px;"
+      >
+        <span class="expander-icon">{{ showAdvancedOptions ? "▼" : "▶" }}</span>
+        🔧 高级选项：查询特定日期的报告
       </div>
+      <div v-show="showAdvancedOptions" class="streamlit-expander-content">
+        <div class="streamlit-markdown">
+          <p>💡 <strong>提示：</strong> 如果您需要查看特定日期的论文推荐，可以在这里指定日期。</p>
+          <p>
+            ⚠️ <strong>注意：</strong> ArXiv通常在周日至周四发布论文，周五和周六不发布新论文。
+          </p>
+        </div>
 
+        <div class="streamlit-date-input">
+          <label>选择查询日期</label>
+          <input type="date" v-model="selectedDate" :max="todayStr" class="streamlit-date" />
+          <div class="streamlit-help">选择您想要查询论文的日期</div>
+        </div>
+
+        <button
+          @click="runSpecificDateRecommendation"
+          :disabled="isLoading"
+          class="streamlit-button"
+        >
+          🔍 查询指定日期（{{ selectedDate }}）
+        </button>
+      </div>
     </div>
 
     <!-- 运行状态区域 -->

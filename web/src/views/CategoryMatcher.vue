@@ -196,15 +196,8 @@
         </div>
 
         <div class="records-list" v-if="filteredProfiles.length > 0">
-          <div class="streamlit-expander">
-            <div class="streamlit-expander-header" @click="toggleRecordsCollapse">
-              <strong>📄 用户记录</strong>
-              <span style="float: right; color: var(--color-text-soft)">{{
-                recordsCollapsed ? "展开" : "折叠"
-              }}</span>
-            </div>
-            <div class="streamlit-expander-content" v-show="!recordsCollapsed">
-              <div v-for="(item, i) in filteredProfiles" :key="i" class="record-item">
+          <h3 class="streamlit-subheader" style="margin-bottom:8px;">📄 用户记录</h3>
+          <div v-for="(item, i) in filteredProfiles" :key="i" class="record-item">
                 <div class="record-header">
                   <label>
                     <input
@@ -277,8 +270,6 @@
                     </div>
                   </template>
                 </div>
-              </div>
-            </div>
           </div>
         </div>
         <div v-else class="streamlit-info">
@@ -311,13 +302,7 @@ const matchCompleted = ref(false);
 const results = ref<{ id: string; name: string; score: number }[]>([]);
 const tokenUsage = ref({ input_tokens: 0, output_tokens: 0, total_tokens: 0 });
 const stats = ref<{ total_records?: number; unique_users?: number } | null>(null);
-const recordsCollapsed = ref(true);
-const toggleRecordsCollapse = () => {
-  recordsCollapsed.value = !recordsCollapsed.value;
-  try {
-    localStorage.setItem("matcher_records_collapsed", recordsCollapsed.value ? "1" : "0");
-  } catch {}
-};
+// 用户记录列表不再使用内部折叠，保持主面板简洁
 
 // 可折叠分区：配置与统计、用户数据管理
 const statsCollapsed = ref(false);
@@ -599,9 +584,6 @@ const deleteRecord = (i: number) => {
 onMounted(async () => {
   // 读取折叠状态持久化
   try {
-    const saved = localStorage.getItem("matcher_records_collapsed");
-    if (saved === "1") recordsCollapsed.value = true;
-    else if (saved === "0") recordsCollapsed.value = false;
     const s1 = localStorage.getItem("matcher_stats_collapsed");
     if (s1 === "1") statsCollapsed.value = true;
     else if (s1 === "0") statsCollapsed.value = false;
