@@ -23,7 +23,12 @@ from .models import (
     UpdateRecordRequest,
     BatchDeleteRequest,
 )
-from .service_container import get_arxiv_service, get_category_matcher_service, get_env_config_service
+from .service_container import (
+    get_arxiv_service,
+    get_category_matcher_service,
+    get_env_config_service,
+    get_prompt_service,
+)
 from .main_dashboard_service import ArxivRecommenderService
 from .environment_config_service import EnvConfigService
 from streamlit_ui.services.category_browser_service import CategoryService
@@ -38,6 +43,7 @@ app = FastAPI(
 # 添加CORS中间件
 app.add_middleware(
     CORSMiddleware,
+    # 开发环境允许所有本地端口的来源（localhost/127.0.0.1），避免前端端口变化导致通信中断
     allow_origins=[
         "http://localhost:3000",
         "http://localhost:5173",
@@ -46,10 +52,105 @@ app.add_middleware(
         "http://127.0.0.1:5173",
         "http://127.0.0.1:5174",
     ],
+    allow_origin_regex=r"http://(localhost|127\.0\.0\.1):\d+",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# =====================
+# 模板错误分类辅助函数
+# =====================
+def _classify_prompt_error(exc: Exception, prompt_id: Optional[str] = None) -> dict:
+    """将 Prompt 模板相关异常转换为可读的错误结构，用于 400 响应。"""
+    payload = {
+        "error_type": "template_error",
+        "message": "模板渲染错误",
+        "details": {"prompt_id": prompt_id} if prompt_id else {},
+    }
+
+    if isinstance(exc, KeyError):
+        msg = str(exc)
+        # 未找到模板: <prompt_id>
+        if msg.startswith("未找到模板"):
+            tpl_id = msg.split(":", 1)[-1].strip()
+            payload["error_type"] = "template_not_found"
+            payload["message"] = f"未找到模板: {tpl_id}"
+            payload["details"]["prompt_id"] = tpl_id
+        else:
+            # 缺少变量（KeyError 提供缺失键名）
+            missing_field = msg.strip("'\"")
+            payload["error_type"] = "variable_missing"
+            payload["message"] = f"模板变量缺失: {missing_field}"
+            payload["details"]["missing_field"] = missing_field
+            if prompt_id and "prompt_id" not in payload["details"]:
+                payload["details"]["prompt_id"] = prompt_id
+        return payload
+
+    if isinstance(exc, ValueError):
+        # 格式字符串错误（如花括号不匹配等）
+        payload["error_type"] = "invalid_format_string"
+        payload["message"] = "模板格式字符串错误"
+        payload["details"]["reason"] = str(exc)
+        return payload
+
+    payload["details"]["reason"] = str(exc)
+    return payload
+
+# 为错误详情增加友好文案与修复建议
+def _decorate_error_detail(detail: dict) -> dict:
+    error_type = (detail or {}).get("error_type")
+    d = (detail or {}).get("details") or {}
+
+    friendly_message = "模板处理出现异常"
+    fix_suggestions = [
+        "查看错误详情并修复模板或变量",
+        "如近期修改过模板，可在提示词管理中恢复默认模板",
+    ]
+
+    if error_type == "template_not_found":
+        pid = d.get("prompt_id")
+        friendly_message = f"提示词模板未找到：{pid}" if pid else "提示词模板未找到"
+        fix_suggestions = [
+            "在 config/prompts.json 中添加或修复对应模板 ID",
+            "若无自定义模板，可在提示词管理页面重置为默认",
+            "确认后端 PromptManager.get_template 能返回该模板",
+        ]
+    elif error_type == "variable_missing":
+        missing = d.get("missing_field") or "未知字段"
+        pid = d.get("prompt_id")
+        friendly_message = f"模板变量缺失：{missing}" + (f"（模板：{pid}）" if pid else "")
+        fix_suggestions = [
+            "检查模板占位符与后端提供的字段名一致",
+            "如通过 UI 修改模板，请校验占位符名称是否正确",
+        ]
+    elif error_type == "invalid_format_string":
+        reason = d.get("reason") or ""
+        if "Replacement index out of range" in str(reason):
+            friendly_message = "检测到位置占位符错误（如 {0} 或 {}），请改为命名占位符"
+            fix_suggestions = [
+                "避免使用位置占位符，统一使用命名占位符（例如 {user_description}）",
+                "如果存在 {0}/{1} 等，请替换为对应变量名",
+                "参考变量列表并对齐默认模板",
+            ]
+        elif "Single '}' encountered" in str(reason) or "unmatched '}'" in str(reason) or "expected '}'" in str(reason):
+            friendly_message = "花括号不配对或有多余/缺失的 { 或 }"
+            fix_suggestions = [
+                "检查所有 { 与 } 是否成对出现",
+                "避免同时混用 {{ }}（转义）与 {}（占位）",
+                "参考默认模板调整花括号位置",
+            ]
+        else:
+            friendly_message = "模板格式错误，可能存在花括号或占位符问题"
+            fix_suggestions = [
+                "检查模板中花括号 {} 是否配对、未被误用",
+                "避免不完整占位符（例如 {var 或混用 {{ }} 与 {}）",
+                "对比默认模板，修复格式差异后再试",
+            ]
+
+    detail["friendly_message"] = friendly_message
+    detail["fix_suggestions"] = fix_suggestions
+    return detail
 
 @app.on_event("startup")
 async def startup_event():
@@ -162,6 +263,19 @@ async def run_recommendation(
             getattr(request, "target_date", None),
         )
         return result
+    except (KeyError, ValueError) as e:
+        # 推荐流程中的提示词模板错误（摘要、详细、简要分析或系统消息）
+        logger.error(f"运行推荐系统失败（模板错误）: {str(e)}")
+        detail = _classify_prompt_error(e)
+        # 给前端一个可能相关的模板ID集合，便于定位
+        detail.setdefault("details", {})
+        detail["details"]["candidate_prompts"] = [
+            "summary_report",
+            "detailed_analysis",
+            "brief_analysis",
+            "scoring_system_message",
+        ]
+        raise HTTPException(status_code=400, detail=_decorate_error_detail(detail))
     except Exception as e:
         logger.error(f"运行推荐系统失败: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -239,6 +353,90 @@ async def restore_default_env_config(service: EnvConfigService = Depends(get_env
         return result
     except Exception as e:
         logger.error(f"恢复默认环境配置失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# =====================
+# 提示词管理相关 API
+# =====================
+
+@app.get("/api/prompts")
+async def list_prompts(service = Depends(get_prompt_service)):
+    """获取所有提示词列表"""
+    logger.info("API调用: 获取提示词列表")
+    try:
+        res = await service.get_all_prompts()
+        return res
+    except Exception as e:
+        logger.error(f"获取提示词列表失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/prompts/{prompt_id}")
+async def get_prompt(prompt_id: str, service = Depends(get_prompt_service)):
+    """获取单个提示词详情"""
+    logger.info(f"API调用: 获取提示词 - {prompt_id}")
+    try:
+        res = await service.get_prompt(prompt_id)
+        if not res.success:
+            raise HTTPException(status_code=res.status_code or 404, detail=res.message or "未找到提示词")
+        return res
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"获取提示词失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/prompts/{prompt_id}")
+async def update_prompt(prompt_id: str, request: dict, service = Depends(get_prompt_service)):
+    """更新提示词（允许更新 name/template）"""
+    logger.info(f"API调用: 更新提示词 - {prompt_id}")
+    try:
+        updates = request if isinstance(request, dict) else {}
+        res = await service.update_prompt(prompt_id, updates)
+        if not res.success:
+            # 将服务层消息统一规范为结构化模板错误详情
+            msg = res.message or res.error or "更新失败"
+            # 根据消息内容推断异常类型（缺失变量 vs 格式错误）
+            if msg and (msg.startswith("模板格式错误") or msg.startswith("模板占位符不匹配")):
+                detail = _decorate_error_detail(_classify_prompt_error(ValueError(msg), prompt_id))
+            elif msg and (msg.startswith("'") and msg.endswith("'")):
+                # KeyError("'field'") 的字符串形式，视为变量缺失
+                detail = _decorate_error_detail(_classify_prompt_error(KeyError(msg), prompt_id))
+            elif msg and msg.startswith("未找到指定的提示词"):
+                detail = _decorate_error_detail(_classify_prompt_error(KeyError(msg), prompt_id))
+            else:
+                detail = _decorate_error_detail(_classify_prompt_error(ValueError(msg), prompt_id))
+            raise HTTPException(status_code=res.status_code or 400, detail=detail)
+        return res
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"更新提示词失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/prompts/{prompt_id}/reset")
+async def reset_prompt(prompt_id: str, service = Depends(get_prompt_service)):
+    """重置单个提示词为默认版本"""
+    logger.info(f"API调用: 重置提示词 - {prompt_id}")
+    try:
+        res = await service.reset_prompt(prompt_id)
+        if not res.success:
+            raise HTTPException(status_code=res.status_code or 400, detail=res.message or "重置失败")
+        return res
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"重置提示词失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/prompts/reset")
+async def reset_all_prompts(service = Depends(get_prompt_service)):
+    """重置所有提示词为默认版本"""
+    logger.info("API调用: 重置所有提示词")
+    try:
+        res = await service.reset_all_prompts()
+        return res
+    except Exception as e:
+        logger.error(f"重置所有提示词失败: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # 辅助函数：解析报告文件路径
@@ -360,6 +558,11 @@ async def optimize_description(
     try:
         optimized = service.optimize_research_description(request.user_input)
         return {"success": True, "data": {"optimized": optimized}}
+    except (KeyError, ValueError) as e:
+        # 识别并返回模板相关错误（400）
+        logger.error(f"优化研究描述失败（模板错误）: {str(e)}")
+        detail = _classify_prompt_error(e, prompt_id="research_description_optimization")
+        raise HTTPException(status_code=400, detail=_decorate_error_detail(detail))
     except Exception as e:
         logger.error(f"优化研究描述失败: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -376,6 +579,15 @@ async def run_category_matching(
         # 保存结果
         service.save_matching_results(request.username, request.user_input, results)
         return {"success": True, "data": {"results": results, "token_usage": token_usage}}
+    except (KeyError, ValueError) as e:
+        # 分类匹配提示词模板错误：区分基础与增强模板ID
+        logger.error(f"执行分类匹配失败（模板错误）: {str(e)}")
+        detail = _classify_prompt_error(e)
+        detail.setdefault("details", {})
+        detail["details"]["candidate_prompts"] = [
+            "category_evaluation",
+        ]
+        raise HTTPException(status_code=400, detail=_decorate_error_detail(detail))
     except Exception as e:
         logger.error(f"执行分类匹配失败: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))

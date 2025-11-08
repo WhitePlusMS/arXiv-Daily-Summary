@@ -8,7 +8,6 @@
           arxivTimezone
         }})
       </div>
-      <div class="streamlit-divider"></div>
     </div>
 
     <!-- 错误提示 - Streamlit样式 -->
@@ -46,8 +45,7 @@
         </div>
       </div>
 
-      <div class="streamlit-divider"></div>
-
+    
       <!-- 分类标签显示 -->
       <div v-if="selectedProfile && selectedProfile.category_id" class="streamlit-section">
         <h2 class="streamlit-subheader">🏷️ 分类标签</h2>
@@ -70,7 +68,6 @@
         ></textarea>
         <div class="streamlit-help">输入您的研究方向，系统将基于这些方向推荐相关论文</div>
       </div>
-      <div class="streamlit-divider"></div>
     </div>
 
     <!-- 推荐系统区域 - 完全复制Streamlit布局 -->
@@ -127,7 +124,6 @@
         </div>
       </div>
 
-      <div class="streamlit-divider"></div>
     </div>
 
     <!-- 运行状态区域 -->
@@ -377,7 +373,20 @@ const runMainRecommendation = async () => {
     store.setLastRecommendationResult(response);
 
     if (!response.success) {
-      store.setError(response.message || "推荐执行失败");
+      // 模板错误友好提示（后端400）
+      const tmpl = (response as any).template_error as {
+        friendly_message?: string;
+        fix_suggestions?: string[];
+        details?: Record<string, unknown>;
+      } | undefined;
+      if (tmpl?.friendly_message) {
+        const tips = Array.isArray(tmpl.fix_suggestions) && tmpl.fix_suggestions.length
+          ? `\n修复建议：\n• ${tmpl.fix_suggestions.join("\n• ")}`
+          : "";
+        store.setError(`${tmpl.friendly_message}${tips}`);
+      } else {
+        store.setError(response.message || "推荐执行失败");
+      }
     } else {
       // 推荐成功后，自动刷新历史报告列表
       await loadRecentReports();
@@ -435,7 +444,19 @@ const runSpecificDateRecommendation = async () => {
     store.setLastRecommendationResult(response);
 
     if (!response.success) {
-      store.setError(response.message || "推荐执行失败");
+      const tmpl = (response as any).template_error as {
+        friendly_message?: string;
+        fix_suggestions?: string[];
+        details?: Record<string, unknown>;
+      } | undefined;
+      if (tmpl?.friendly_message) {
+        const tips = Array.isArray(tmpl.fix_suggestions) && tmpl.fix_suggestions.length
+          ? `\n修复建议：\n• ${tmpl.fix_suggestions.join("\n• ")}`
+          : "";
+        store.setError(`${tmpl.friendly_message}${tips}`);
+      } else {
+        store.setError(response.message || "推荐执行失败");
+      }
     } else {
       // 推荐成功后，自动刷新历史报告列表
       await loadRecentReports();

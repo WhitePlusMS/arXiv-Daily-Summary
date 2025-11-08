@@ -1,0 +1,5 @@
+{
+    "research_description_optimization": {
+        "template": "你是一位擅长学术写作的AI助手。请将以下研究兴趣描述改写为更清晰、结构化且适合LLM提示词使用的版本：\n\n原始描述：\n```text\n{user_description}\n```\n\n要求：\n- 保留原始语义与重点，不要引入新的研究方向\n- 使用简洁的中文，分条列出关键主题、任务或方法\n- 提供3-5个明确的关键词标签"
+    }
+}

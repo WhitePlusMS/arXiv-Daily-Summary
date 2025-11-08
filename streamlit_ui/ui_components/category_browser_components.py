@@ -17,7 +17,7 @@ def render_category_browser_header():
         initial_sidebar_state="collapsed"
     )
     
-    # 增强版标题和简介
+    # 页面标题和简介
     st.markdown("""
     <div style='text-align: center; padding: 1rem 0; width: 100%;'>
         <h1 style='color: #1e40af; margin-bottom: 0.5rem; font-size: 3rem; font-weight: 700;'>

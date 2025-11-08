@@ -175,7 +175,7 @@ class CategoryMatcherService:
             self.matcher.total_output_tokens = 0
         
         # 执行实际匹配
-        results = self.matcher.match_categories_enhanced(
+        results = self.matcher.match_categories(
             user_input, 
             top_n=top_n, 
             save_detailed=True, 

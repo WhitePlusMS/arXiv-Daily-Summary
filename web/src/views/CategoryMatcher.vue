@@ -3,7 +3,6 @@
     <!-- 页面头部 -->
     <div class="streamlit-header">
       <h1 class="streamlit-title">📚 ArXiv 分类匹配器</h1>
-      <div class="streamlit-divider"></div>
     </div>
 
     <!-- 错误提示 -->
@@ -37,7 +36,6 @@
           🔄 刷新数据
         </button>
       </div>
-      <div class="streamlit-divider"></div>
     </div>
 
     <!-- 研究信息输入 -->
@@ -79,7 +77,6 @@
         </button>
       </div>
 
-      <div class="streamlit-divider"></div>
     </div>
 
     <!-- 匹配操作 -->
@@ -93,7 +90,6 @@
         {{ isMatching ? "正在匹配中…" : "开始匹配分类" }}
       </button>
       <div class="streamlit-help">将根据研究描述匹配最相关的ArXiv分类</div>
-      <div class="streamlit-divider"></div>
     </div>
 
     <!-- 运行状态 -->
@@ -154,7 +150,6 @@
     <!-- 用户数据管理 -->
     <div class="streamlit-section">
       <h2 class="streamlit-subheader">👥 用户数据管理</h2>
-      <div class="streamlit-divider"></div>
 
       <div class="streamlit-text-input">
         <label>🔍 搜索用户或内容</label>
@@ -378,7 +373,20 @@ const optimizeDescription = async () => {
       // 优化后禁止再次编辑研究内容描述
       isDescriptionLocked.value = true;
     } else {
-      store.setError("优化描述失败");
+      // 模板错误友好提示
+      const tmpl = (resp as any).template_error as {
+        friendly_message?: string;
+        fix_suggestions?: string[];
+        details?: Record<string, unknown>;
+      } | undefined;
+      if (tmpl?.friendly_message) {
+        const tips = Array.isArray(tmpl.fix_suggestions) && tmpl.fix_suggestions.length
+          ? `\n修复建议：\n• ${tmpl.fix_suggestions.join("\n• ")}`
+          : "";
+        store.setError(`${tmpl.friendly_message}${tips}`);
+      } else {
+        store.setError("优化描述失败");
+      }
     }
   } catch (err) {
     store.setError("优化描述时发生错误");
@@ -416,7 +424,20 @@ const startMatching = async () => {
       // 匹配成功后刷新数据列表
       await refreshData();
     } else {
-      store.setError("分类匹配失败");
+      // 模板错误友好提示
+      const tmpl = (resp as any).template_error as {
+        friendly_message?: string;
+        fix_suggestions?: string[];
+        details?: Record<string, unknown>;
+      } | undefined;
+      if (tmpl?.friendly_message) {
+        const tips = Array.isArray(tmpl.fix_suggestions) && tmpl.fix_suggestions.length
+          ? `\n修复建议：\n• ${tmpl.fix_suggestions.join("\n• ")}`
+          : "";
+        store.setError(`${tmpl.friendly_message}${tips}`);
+      } else {
+        store.setError("分类匹配失败");
+      }
     }
   } catch (err) {
     store.setError("执行匹配时发生错误");

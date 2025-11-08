@@ -137,7 +137,7 @@ class CategoryMatcherService:
             self.matcher.total_output_tokens = 0
 
         # 执行匹配
-        results: List[Tuple[str, str, int]] = self.matcher.match_categories_enhanced(
+        results: List[Tuple[str, str, int]] = self.matcher.match_categories(
             user_input,
             top_n=top_n,
             save_detailed=True,

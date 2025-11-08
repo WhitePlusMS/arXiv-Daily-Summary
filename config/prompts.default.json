@@ -1,0 +1,46 @@
+{
+  "category_evaluation": {
+    "name": "分类评估",
+    "template": "# CO-STAR Prompt for Academic Category Matching (Enhanced)\n\n## (C) Context:\n系统为科研人员提供分类匹配建议。当前评估分类：{category_name}\n\n## (O) Objective:\n综合考虑用户研究兴趣与个人研究画像，输出严格的匹配度评分（0-100）。\n\n## (A) Audience:\n用于指导科研投稿与阅读优先级。\n\n## (S) Style & (T) Tone:\n专业、可解释、避免冗长。\n\n## (A) Action:\n1. 用户研究兴趣：\n```text\n{user_description}\n```\n\n2. 用户研究画像（背景/优势/偏好）：\n```text\n{category_profile}\n```\n\n3. 分类说明（如有）：\n```text\n{category_description}\n```\n\n仅输出一个0-100整数评分。\n",
+    "variables": ["user_description", "category_name", "category_description", "category_profile"]
+  },
+  
+  "research_description_optimization": {
+    "name": "研究兴趣描述优化",
+    "template": "你是一位擅长学术写作的AI助手。请将以下研究兴趣描述改写为更清晰、结构化且适合LLM提示词使用的版本：\n\n原始描述：\n```text\n{user_description}\n```\n\n要求：\n- 保留原始语义与重点，不要引入新的研究方向\n- 使用简洁的中文，分条列出关键主题、任务或方法\n- 提供3-5个明确的关键词标签\n",
+    "variables": ["user_description"]
+  },
+  "summary_report": {
+    "name": "论文推荐总结报告（Markdown）",
+    "template": "你是一位顶尖的AI研究科学家和资深学术导师。你的任务是基于我提供的研究兴趣和最新的ArXiv论文列表，为我生成一份高度结构化、富有洞察力且极具实用价值的中文研究分析报告。\n\n请深入分析每篇论文的核心贡献，识别论文之间的内在联系、技术演进趋势和潜在的研究机会。\n\n我的研究兴趣: {description}\n\n推荐论文列表：\n{papers_text}\n\n请严格按照以下Markdown模板格式生成报告，确保每一部分都提供深刻且具体的分析：\n\n# ArXiv 研究洞察报告\n\n> BY:{username}\n> ({current_time})\n\n##  摘要\n[在此处提供一个高度浓缩的执行摘要。用2-3句话总结今天所有论文中最核心的发现、最重要的技术趋势，以及与我的研究兴趣最直接的关联。]\n\n## 🔍 主题深度剖析\n[将论文精准地划分到2-3个核心研究主题。对于每个主题，进行深入分析：]\n\n### 主题一：[主题名称，例如：多模态大模型的鲁棒性与泛化]\n* **核心问题 (Problem Domain):** 该主题下的论文主要致力于解决什么关键科学或工程问题？\n* **代表性论文 (Key Papers):** [列出该主题下的1-3篇关键论文的标题]\n* **方法论创新 (Methodological Innovations):**\n    * **[论文A名称]:** [简述其核心方法、模型架构或算法的创新之处。]\n    * **[论文B名称]:** [简述其核心方法、模型架构或算法的创新之处。]\n* **研究启示 (Insights & Implications):** 这些成果的研究成果对该领域意味着什么？它们验证了什么假设，或者推翻了什么传统认知？\n\n### 主题二：[主题名称，例如：Agent的自主学习与进化]\n* **核心问题 (Problem Domain):** 该主题下的论文主要致力于解决什么关键科学或工程问题？\n* **代表性论文 (Key Papers):** [列出该主题下的1-3篇关键论文的标题]\n* **方法论创新 (Methodological Innovations):**\n    * **[论文A名称]:** [简述其核心方法、模型架构或算法的创新之处。]\n* **研究启示 (Insights & Implications):** 这些成果的研究成果对该领域意味着什么？它们验证了什么假设，或者推翻了什么传统认知？\n\n## 📈 宏观趋势与前瞻\n[综合所有论文，从更高维度进行分析：]\n* **技术趋势 (Tech Trends):** 当前研究最热门的技术方向是什么？（例如：从模型微调转向自主学习、对特定领域（如金融）的深入应用等）\n* **潜在机会 (Opportunities):** 基于现有研究，哪些问题尚未被解决？存在哪些新的研究空白或交叉领域机会？\n* **值得关注的工具/数据集 (Noteworthy Tools/Datasets):** 本次推荐中是否出现了新的、有潜力的基准测试、数据集或开源工具？\n\n## 💡 个性化建议与行动指南\n[本部分将分析与我的研究兴趣紧密结合，提供可操作的建议：]\n* **关联性解读 (Relevance Analysis):** 具体说明今天的哪些论文/技术与我的研究方向直接相关。\n* **可借鉴点 (Actionable Takeaways):** 我可以从这些论文中借鉴哪些具体的技术、实验设计或分析思路来改进我自己的研究项目？\n* **优先阅读建议 (Reading Priority):** 基于相关性和创新性，建议我优先精读哪1-2篇论文？为什么？\n",
+    "variables": ["description", "username", "current_time", "papers_text"]
+  },
+  "detailed_analysis": {
+    "name": "单篇论文详细分析（含结构化要点）",
+    "template": "你是一位AI研究助理。请根据以下论文信息生成结构化的中文详细分析：\n\n**论文题目:** {title}\n**作者:** {authors}\n**ArXiv ID:** {arXiv_id}\n**论文链接:** {pdf_url}\n\n**论文全文（截断后）:**\n```text\n{full_text}\n```\n\n## 1. {title}\n- **相关性评分**: ({relevance_score}/10)\n- **核心问题与动机**: [描述论文试图解决的问题及其学术意义]\n- **方法论与技术细节**: [说明关键方法与创新点]\n- **实验与结果**: [总结实验设置与结果]\n- **局限性与改进空间**: [指出不足与改进方向]\n- **与我的研究兴趣的关联性**: [具体说明关联]\n",
+    "variables": [
+      "description",
+      "title",
+      "authors",
+      "arXiv_id",
+      "pdf_url",
+      "full_text",
+      "relevance_score"
+    ]
+  },
+  "brief_analysis": {
+    "name": "单篇论文简要分析",
+    "template": "你是一位AI研究助手。请基于以下论文的摘要，生成一个简洁的中文TLDR总结。\n\n论文标题：{title}\n论文摘要：{abstract}\n\n请用1-2句话总结这篇论文的核心贡献和主要发现，使用流畅的中文。\n",
+    "variables": ["title", "abstract"]
+  },
+  "scoring_system_message": {
+    "name": "评分系统消息（严格）",
+    "template": "You are a scoring assistant. You MUST respond with only a single integer between 0-100. NEVER use <think> tags or any thinking process. NEVER provide explanations. Output format: just the number, nothing else.",
+    "variables": []
+  },
+  "time_service_system_message": {
+    "name": "时间服务系统消息",
+    "template": "你是一个只会返回标准时间格式的机器人。请根据工具返回的结果，直接输出格式为 YYYY-MM-DD HH:MM:SS 的时间字符串，不要包含任何其他文字、标点或解释。",
+    "variables": []
+  }
+}

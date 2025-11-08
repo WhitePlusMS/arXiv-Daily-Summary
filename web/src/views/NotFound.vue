@@ -3,7 +3,6 @@
     <div class="streamlit-header">
       <h1 class="streamlit-title">🔎 页面未找到</h1>
       <div class="streamlit-caption">您访问的页面不存在或已被移动</div>
-      <div class="streamlit-divider"></div>
     </div>
 
     <div class="streamlit-section">

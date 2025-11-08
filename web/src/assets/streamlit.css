@@ -34,12 +34,6 @@
   font-size: 13px;
 }
 
-.streamlit-divider {
-  height: 1px;
-  background: var(--color-border);
-  margin: 16px 0;
-}
-
 .streamlit-section {
   background: var(--color-background-soft);
   border: 1px solid var(--color-border);

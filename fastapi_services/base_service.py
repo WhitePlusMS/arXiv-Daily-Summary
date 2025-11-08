@@ -16,6 +16,8 @@ class ServiceResponse(BaseModel):
     data: Optional[Any] = None
     message: Optional[str] = None
     error: Optional[str] = None
+    # 可选的HTTP状态码，用于路由在需要时提升为HTTP异常
+    status_code: Optional[int] = None
     timestamp: datetime = datetime.now()
 
 
@@ -43,6 +45,6 @@ class BaseService:
         """创建成功响应"""
         return ServiceResponse(success=True, data=data, message=message)
     
-    def error_response(self, error: str, data: Any = None) -> ServiceResponse:
+    def error_response(self, error: str, data: Any = None, status_code: Optional[int] = None) -> ServiceResponse:
         """创建错误响应"""
-        return ServiceResponse(success=False, error=error, data=data)
+        return ServiceResponse(success=False, error=error, data=data, message=error, status_code=status_code)

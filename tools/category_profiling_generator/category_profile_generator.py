@@ -74,7 +74,7 @@ def save_enhanced_categories(categories: list, output_path: Path):
         output_path.parent.mkdir(parents=True, exist_ok=True)
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(categories, f, ensure_ascii=False, indent=2)
-        print(f"\n成功将增强版分类数据保存到: {output_path}")
+        print(f"\n成功将分类评估数据保存到: {output_path}")
     except Exception as e:
         print(f"\n保存文件时出错: {e}")
 
@@ -194,7 +194,7 @@ def main():
 
     print("\n--- 所有分类处理完成 ---")
     
-    # 保存增强版的分类数据
+    # 保存分类评估数据
     output_file_path = project_root / "data" / "users" / "arxiv_categories_enhanced.json"
     save_enhanced_categories(categories, output_file_path)
 

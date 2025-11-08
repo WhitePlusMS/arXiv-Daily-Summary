@@ -8,6 +8,7 @@ from functools import lru_cache
 from .main_dashboard_service import ArxivRecommenderService
 from .category_matcher_service import CategoryMatcherService
 from .environment_config_service import EnvConfigService
+from .prompt_service import PromptService
 
 
 class ServiceContainer:
@@ -42,6 +43,13 @@ class ServiceContainer:
             self._services['env_config_service'] = EnvConfigService()
         return self._services['env_config_service']
 
+    @lru_cache(maxsize=1)
+    def get_prompt_service(self) -> PromptService:
+        """获取提示词管理服务实例"""
+        if 'prompt_service' not in self._services:
+            self._services['prompt_service'] = PromptService()
+        return self._services['prompt_service']
+
 
 # 全局服务容器实例
 service_container = ServiceContainer()
@@ -59,3 +67,7 @@ def get_category_matcher_service() -> CategoryMatcherService:
 def get_env_config_service() -> EnvConfigService:
     """FastAPI依赖注入：获取环境配置服务"""
     return service_container.get_env_config_service()
+
+def get_prompt_service() -> PromptService:
+    """FastAPI依赖注入：获取提示词管理服务"""
+    return service_container.get_prompt_service()

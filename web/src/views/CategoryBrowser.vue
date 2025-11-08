@@ -1,11 +1,10 @@
 <template>
   <div class="streamlit-dashboard">
     <!-- 页面头部 -->
-    <div class="streamlit-header">
-      <h1 class="streamlit-title">📚 ArXiv 学术分类</h1>
-      <div class="streamlit-caption">探索完整的 ArXiv 学术分类体系，发现你的研究领域</div>
-      <div class="streamlit-divider"></div>
-    </div>
+  <div class="streamlit-header">
+    <h1 class="streamlit-title">📚 ArXiv 学术分类</h1>
+    <div class="streamlit-caption">探索完整的 ArXiv 学术分类体系，发现你的研究领域</div>
+  </div>
 
     <!-- 错误提示 -->
     <div v-if="error" class="streamlit-error">
@@ -26,7 +25,6 @@
           <div class="stat-label">具体研究方向</div>
         </div>
       </div>
-      <div class="streamlit-divider"></div>
     </div>
 
     <!-- 搜索框 -->
@@ -42,7 +40,6 @@
         />
         <div class="streamlit-help">支持在分类ID、英文/中文名称、英文/中文描述中搜索</div>
       </div>
-      <div class="streamlit-divider"></div>
     </div>
 
     <!-- 分类区域 -->

@@ -31,6 +31,14 @@ export interface ApiResponse<T = unknown> {
   error?: string
 }
 
+// 模板错误详情（后端 400 返回 detail）
+export interface TemplateErrorDetail {
+  error_type: string
+  friendly_message?: string
+  fix_suggestions?: string[]
+  details?: Record<string, unknown>
+}
+
 // 前端运行态配置（小写+语义化），与后端 .env 大写映射区分
 export interface FrontendConfig {
   // API / LLM
@@ -104,4 +112,12 @@ export interface ReportItem {
   name: string
   date: string
   size: number
+}
+
+// 提示词条目
+export interface PromptItem {
+  id: string
+  name: string
+  template: string
+  variables?: string[]
 }

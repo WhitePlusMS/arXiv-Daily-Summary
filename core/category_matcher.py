@@ -194,7 +194,7 @@ class CategoryMatcher:
         return all_subcategories
     
     def _load_enhanced_categories(self) -> List[Dict[str, str]]:
-        """加载增强版ArXiv分类数据（包含分类画像信息）
+        """加载分类评估数据（包含分类画像信息）
         
         Returns:
             包含所有分类及其画像信息的列表
@@ -212,14 +212,14 @@ class CategoryMatcher:
             with open(enhanced_categories_file, 'r', encoding='utf-8') as f:
                 enhanced_categories = json.load(f)
             
-            logger.info(f"加载了 {len(enhanced_categories)} 个增强版分类")
+            logger.info(f"加载了 {len(enhanced_categories)} 个分类（含画像）")
             return enhanced_categories
             
         except FileNotFoundError:
-            logger.warning("增强版分类文件不存在，将使用基础分类数据")
+            logger.warning("分类评估数据文件不存在，将使用原始分类数据")
             return self.categories
         except Exception as e:
-            logger.error(f"加载增强版分类数据失败: {e}，将使用基础分类数据")
+            logger.error(f"加载分类评估数据失败: {e}，将使用原始分类数据")
             return self.categories
     
     def _print_token_usage(self):
@@ -353,21 +353,22 @@ class CategoryMatcher:
         Returns:
             包含(category_id, category_name, score)的列表，按评分降序排列
         """
-        logger.info(f"开始匹配分类 - 用户描述长度: {len(user_description)} 字符")
+        logger.info(f"开始分类匹配 - 用户描述长度: {len(user_description)} 字符")
         
         results = []
         
-        for i, category in enumerate(self.categories):
-            logger.debug(f"评估分类 {i+1}/{len(self.categories)}: {category['id']}")
+        for i, category in enumerate[Dict[str, str]](self.enhanced_categories):
+            logger.debug(f"评估分类 {i+1}/{len(self.enhanced_categories)}: {category['id']}")
             
             prompt = self.llm.build_category_evaluation_prompt(user_description, category)
             score = self._call_llm(prompt)
             
-            results.append((category['id'], category['name'], score))
+            category_name = category.get('name_cn', category.get('name', ''))
+            results.append((category['id'], category_name, score))
             
             # 简单的进度显示
             if (i + 1) % 10 == 0:
-                logger.info(f"已评估 {i+1}/{len(self.categories)} 个分类")
+                logger.info(f"已评估 {i+1}/{len(self.enhanced_categories)} 个分类")
         
         # 按评分降序排序
         results.sort(key=lambda x: x[2], reverse=True)
@@ -380,48 +381,6 @@ class CategoryMatcher:
         self._print_token_usage()
         
         logger.success(f"分类匹配完成 - 返回前 {top_n} 个结果")
-        return results[:top_n]
-    
-    def match_categories_enhanced(self, user_description: str, top_n: int = 5, save_detailed: bool = True, username: str = None) -> List[Tuple[str, str, int]]:
-        """使用增强版提示词匹配用户研究方向到ArXiv分类
-        
-        Args:
-            user_description: 用户研究方向描述
-            top_n: 返回前N个最匹配的分类
-            save_detailed: 是否保存全部分类的详细评分
-            username: 用户名（用于保存详细评分）
-            
-        Returns:
-            包含(category_id, category_name, score)的列表，按评分降序排列
-        """
-        logger.info(f"开始增强版分类匹配 - 用户描述长度: {len(user_description)} 字符")
-        
-        results = []
-        
-        for i, category in enumerate(self.enhanced_categories):
-            logger.debug(f"评估增强版分类 {i+1}/{len(self.enhanced_categories)}: {category['id']}")
-            
-            prompt = self.llm.build_category_evaluation_prompt_enhanced(user_description, category)
-            score = self._call_llm(prompt)
-            
-            category_name = category.get('name_cn', category.get('name', ''))
-            results.append((category['id'], category_name, score))
-            
-            # 简单的进度显示
-            if (i + 1) % 10 == 0:
-                logger.info(f"已评估 {i+1}/{len(self.enhanced_categories)} 个增强版分类")
-        
-        # 按评分降序排序
-        results.sort(key=lambda x: x[2], reverse=True)
-        
-        # 保存详细评分（如果启用且提供了用户名）
-        if save_detailed and username:
-            self.save_detailed_scores(f"{username}_enhanced", user_description, results)
-        
-        # 输出token统计和费用计算
-        self._print_token_usage()
-        
-        logger.success(f"增强版分类匹配完成 - 返回前 {top_n} 个结果")
         return results[:top_n]
 
 

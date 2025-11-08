@@ -3,7 +3,6 @@
     <!-- 页头 -->
     <div class="streamlit-header">
       <h1 class="streamlit-title">⚙️ ArXiv推荐系统 - 环境配置</h1>
-      <div class="streamlit-divider"></div>
     </div>
 
     <!-- 顶部未保存更改横幅（置顶） -->
@@ -72,7 +71,7 @@
         </div>
       </div>
       <div v-else class="streamlit-success">✅ 所有配置已同步，无未保存更改</div>
-      <div class="streamlit-divider"></div>
+      
     </div>
 
     <!-- 分组标签导航（更直观） -->
@@ -90,7 +89,6 @@
           {{ s }}
         </button>
       </div>
-      <div class="streamlit-divider"></div>
     </div>
 
     <!-- 配置表单区域 -->
@@ -579,11 +577,50 @@
         </div>
       </div>
 
-      <div class="streamlit-divider"></div>
+      <!-- 🧠 高级配置（提示词） -->
+      <div v-if="selectedSection === '🧠 高级配置（提示词）'" class="prompt-section">
+        <div class="streamlit-info" style="margin-bottom: 12px;">
+          该分组用于管理 LLM 提示词模板。每条提示词可单独保存或重置为默认值
+        </div>
+        <div class="button-row" style="margin-bottom: 12px;">
+          <button @click="loadPrompts" :disabled="promptsLoading" class="streamlit-button">🔄 刷新列表</button>
+          <button @click="resetAllPrompts" :disabled="promptsLoading" class="streamlit-button">♻️ 重置所有提示词</button>
+        </div>
+        <div v-if="promptsLoading" class="streamlit-warning">正在加载提示词...</div>
+        <div v-else>
+          <div v-if="prompts.length === 0" class="streamlit-info">暂无提示词可管理。</div>
+          <div
+            v-for="p in prompts"
+            :key="p.id"
+            class="prompt-card"
+          >
+            <h3 class="streamlit-subheader">
+              {{ edits[p.id]?.name || p.name }}
+              <small style="font-weight: normal; color: #666;">ID: {{ p.id }}</small>
+            </h3>
+            <div class="form-item">
+              <label>可用变量</label>
+              <pre class="var-block">{{ (p.variables && p.variables.length > 0) ? p.variables.join('\n') : '无' }}</pre>
+            </div>
+            <div class="form-item">
+              <label>模板内容</label>
+              <textarea v-model="edits[p.id].template" @input="clearPromptError(p.id)" class="streamlit-textarea template-textarea" rows="18" />
+            </div>
+            <div v-if="promptErrors[p.id]" class="streamlit-error" style="margin-bottom: 8px;">
+              ❌ {{ promptErrors[p.id] }}
+            </div>
+            <div class="button-row prompt-actions">
+              <button @click="savePrompt(p.id)" :disabled="promptsLoading" class="streamlit-button streamlit-button-primary">💾 保存该提示词</button>
+              <button @click="resetPrompt(p.id)" :disabled="promptsLoading" class="streamlit-button">↩️ 重置为默认</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <!-- 底部操作按钮 -->
-    <div class="streamlit-section">
+    <!-- 底部操作按钮（除提示词分组外显示） -->
+    <div class="streamlit-section" v-if="selectedSection !== '🧠 高级配置（提示词）'">
       <div class="button-row">
         <button
           @click="saveConfig"
@@ -607,9 +644,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { useArxivStore } from "@/stores/arxiv";
 import * as api from "@/services/api";
+import type { PromptItem } from "@/types";
 
 const store = useArxivStore();
 
@@ -622,6 +660,7 @@ const sections = [
   "📁 文件路径配置",
   "📝 日志配置",
   "🕐 时区格式配置",
+  "🧠 高级配置（提示词）",
 ];
 
 const selectedSection = ref(sections[0]);
@@ -776,6 +815,164 @@ const restoreDefault = async () => {
   }
 };
 
+// 提示词管理状态与方法
+const prompts = ref<PromptItem[]>([]);
+const promptsLoading = ref(false);
+const promptErrors = ref<Record<string, string>>({});
+const edits = ref<Record<string, { name: string; template: string }>>({});
+
+const loadPrompts = async () => {
+  promptsLoading.value = true;
+  store.clearError();
+  try {
+    const res = await api.listPrompts();
+    const list = (res?.data || []) as PromptItem[];
+    prompts.value = list;
+    const map: Record<string, { name: string; template: string }> = {};
+    list.forEach((p) => {
+      map[p.id] = {
+        name: p.name,
+        template: p.template,
+      };
+    });
+    edits.value = map;
+  } catch (err) {
+    store.setError("加载提示词失败");
+    console.error("加载提示词失败:", err);
+  } finally {
+    promptsLoading.value = false;
+  }
+};
+
+const clearPromptError = (id: string) => {
+  if (promptErrors.value[id]) {
+    delete promptErrors.value[id];
+  }
+  // 同步清理全局错误，避免重复提示
+  store.clearError();
+};
+
+// 提取模板中的占位符名称（更通用）：如 {user_description}、{0}、{名称}
+const extractPlaceholders = (tpl: string): string[] => {
+  if (!tpl) return [];
+  const tokens: string[] = [];
+  let match: RegExpExecArray | null;
+  const re = /\{([^{}]+)\}/g;
+  while ((match = re.exec(tpl)) !== null) {
+    tokens.push(match[1]);
+  }
+  const names = tokens
+    .map((t) => t.split(/[!:\.\[]/)[0].trim())
+    .filter((x) => !!x);
+  return Array.from(new Set(names));
+};
+
+// 校验：占位符是否都在允许的变量列表中
+const validateTemplateBeforeSave = (id: string): { valid: boolean; unknown: string[]; allowed: string[] } => {
+  const idx = prompts.value.findIndex((x) => x.id === id);
+  const allowed = (idx >= 0 && Array.isArray(prompts.value[idx].variables)) ? (prompts.value[idx].variables as string[]) : [];
+  const tpl = edits.value[id]?.template || "";
+  const used = extractPlaceholders(tpl);
+  const unknown = used.filter((x) => !allowed.includes(x));
+  return { valid: unknown.length === 0, unknown, allowed };
+};
+
+const savePrompt = async (id: string) => {
+  promptsLoading.value = true;
+  store.clearError();
+  try {
+    // 保存前校验模板占位符
+    const check = validateTemplateBeforeSave(id);
+    if (!check.valid) {
+      const unknownText = check.unknown.map((n) => `{${n}}`).join(", ");
+      const allowedText = (check.allowed || []).join(", ") || "（无）";
+      const msg = `模板占位符不匹配：${unknownText}；允许的变量：{${allowedText}}。修复建议：检查占位符是否与变量列表一致`;
+      promptErrors.value[id] = msg;
+      store.setError(msg);
+      return;
+    }
+    const payload = edits.value[id];
+    const res = await api.updatePrompt(id, payload);
+    if (res.success && res.data) {
+      // 更新当前列表项
+      const idx = prompts.value.findIndex((x) => x.id === id);
+      if (idx >= 0) {
+        prompts.value[idx] = { ...(prompts.value[idx] || {}), ...(res.data as PromptItem) } as PromptItem;
+      }
+      // 保存成功后清理就地错误
+      if (promptErrors.value[id]) {
+        delete promptErrors.value[id];
+      }
+    } else {
+      const msg = res?.message || res?.error || "保存提示词失败";
+      promptErrors.value[id] = msg;
+      store.setError(msg);
+    }
+  } catch (err) {
+    const anyErr = err as any;
+    const detailObj = anyErr?.response?.data?.detail;
+    const detailStr = typeof detailObj === 'string' ? detailObj : undefined;
+    const msg = (detailObj?.friendly_message)
+      || anyErr?.response?.data?.message
+      || detailStr
+      || anyErr?.message
+      || "保存提示词时发生错误";
+    promptErrors.value[id] = msg;
+    store.setError(msg);
+    console.error("保存提示词错误:", err);
+  } finally {
+    promptsLoading.value = false;
+  }
+};
+
+const resetPrompt = async (id: string) => {
+  promptsLoading.value = true;
+  store.clearError();
+  try {
+    const res = await api.resetPrompt(id);
+    if (res.success && res.data) {
+      const updated = res.data as PromptItem;
+      const idx = prompts.value.findIndex((x) => x.id === id);
+      if (idx >= 0) {
+        prompts.value[idx] = updated;
+      }
+      edits.value[id] = {
+        name: updated.name,
+        template: updated.template,
+      };
+      // 重置为默认后清理就地错误
+      if (promptErrors.value[id]) {
+        delete promptErrors.value[id];
+      }
+    } else {
+      store.setError(res.message || "重置提示词失败");
+    }
+  } catch (err) {
+    store.setError("重置提示词时发生错误");
+    console.error("重置提示词错误:", err);
+  } finally {
+    promptsLoading.value = false;
+  }
+};
+
+const resetAllPrompts = async () => {
+  promptsLoading.value = true;
+  store.clearError();
+  try {
+    const res = await api.resetAllPrompts();
+    if (res.success) {
+      await loadPrompts();
+    } else {
+      store.setError(res.message || "重置所有提示词失败");
+    }
+  } catch (err) {
+    store.setError("重置所有提示词时发生错误");
+    console.error("重置所有提示词错误:", err);
+  } finally {
+    promptsLoading.value = false;
+  }
+};
+
 // 当前分组字段映射，用于分组重置
 const sectionFields: Record<string, string[]> = {
   "🤖 模型与API配置": [
@@ -843,6 +1040,7 @@ const resetSectionChanges = () => {
 
 onMounted(async () => {
   await loadConfig();
+  await loadPrompts();
   window.addEventListener("beforeunload", handleBeforeUnload);
 });
 
@@ -850,3 +1048,44 @@ onBeforeUnmount(() => {
   window.removeEventListener("beforeunload", handleBeforeUnload);
 });
 </script>
+
+<style scoped>
+.prompt-section {
+  width: 100%;
+}
+
+.prompt-card {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #eaecef;
+  border-radius: 8px;
+  background: #fbfbfb;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+}
+
+.var-block {
+  white-space: pre-wrap;
+  background: #f6f8fa;
+  border: 1px solid #eaecef;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  line-height: 1.6;
+}
+
+.prompt-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.template-textarea {
+  width: 100%;
+  min-height: 360px;
+  resize: vertical;
+  box-sizing: border-box;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+</style>

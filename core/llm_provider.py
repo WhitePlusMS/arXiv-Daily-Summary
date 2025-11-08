@@ -13,6 +13,7 @@ import threading
 from typing import Optional, Dict, Any, List, Union
 from loguru import logger
 from core.env_config import get_int, get_float, get_str
+from core.prompt_manager import get_prompt_manager
 
 
 class LLMProvider:
@@ -72,6 +73,11 @@ class LLMProvider:
         self.default_enable_search = enable_search
         self.default_thinking_budget = thinking_budget
         self.default_incremental_output = incremental_output
+        # 统一提示词管理器
+        try:
+            self.prompt_manager = get_prompt_manager()
+        except Exception:
+            self.prompt_manager = None
         # Token用量统计（作为单一真源）
         self.total_input_tokens = 0
         self.total_output_tokens = 0
@@ -413,6 +419,13 @@ class LLMProvider:
     @staticmethod
     def build_time_service_system_message() -> str:
         """用于时间工具调用后的最终系统消息，要求仅输出标准时间字符串。"""
+        try:
+            pm = get_prompt_manager()
+            tpl = pm.get_template("time_service_system_message")
+            if tpl:
+                return tpl
+        except Exception:
+            pass
         return (
             "你是一个只会返回标准时间格式的机器人。请根据工具返回的结果，直接输出格式为 YYYY-MM-DD HH:MM:SS 的时间字符串，不要包含任何其他文字、标点或解释。"
         )
@@ -420,10 +433,11 @@ class LLMProvider:
     @staticmethod
     def build_scoring_warmup_messages() -> List[Dict[str, str]]:
         """用于 OLLAMA 预热的一组消息，确保仅返回整数评分。"""
+        system_msg = LLMProvider.build_scoring_system_message(strict=True)
         return [
             {
                 "role": "system",
-                "content": "You are a scoring assistant. You MUST respond with only a single integer between 0-100. No explanations, no text, just the number.",
+                "content": system_msg,
             },
             {
                 "role": "user",
@@ -433,127 +447,46 @@ class LLMProvider:
 
     @staticmethod
     def build_scoring_system_message(strict: bool = True) -> str:
-        """分类评分的系统消息。
-        strict=True 时，额外强调不允许思维链、不允许解释，仅输出数字。
-        """
-        if strict:
-            return (
-                "You are a scoring assistant. You MUST respond with only a single integer between 0-100. NEVER use <think> tags or any thinking process. NEVER provide explanations. Output format: just the number, nothing else."
-            )
+        """分类评分的系统消息（集中模板）。"""
+        try:
+            pm = get_prompt_manager()
+            tpl = pm.get_template("scoring_system_message")
+            if tpl:
+                return tpl
+        except Exception:
+            pass
         return (
-            "You are a scoring assistant. You MUST respond with only a single integer between 0-100. No explanations, no text, just the number."
+            "You are a scoring assistant. You MUST respond with only a single integer between 0-100. NEVER use <think> tags or any thinking process. NEVER provide explanations. Output format: just the number, nothing else."
         )
 
     def build_category_evaluation_prompt(self, user_description: str, category: Dict[str, Any]) -> str:
-        """构建基础版分类评估提示词（CO-STAR 风格）。"""
-        return f"""
-# CO-STAR Prompt for Academic Category Matching
-
-## (C) Context:
-你正在为一个内部的"智能投稿助手"系统提供核心判断能力。该系统的用户是严谨的科研人员，他们需要根据你的评分来决定自己耗费心血的研究论文应该投往哪个ArXiv分类。ArXiv的分类体系复杂，存在广泛的交叉和重叠，一个研究方向往往与多个分类都有关联，但关联的性质和程度有细微差别。你的判断是这个决策过程中的关键一环。
-
-## (S) Style & (T) Tone:
-请扮演一位极其严谨、经验丰富的ArXiv高级审核员。你的判断风格必须是分析性的、批判性的，并且对细节极其敏感。你的工作语气是要求苛刻的，追求绝对的精确，不接受任何模棱两可或过于概括的评估。
-
-## (A) Audience:
-你的评估结果的最终受众是一位正在为自己的重要论文（可能是博士毕业论文或一项重大研究的成果）寻找最恰当分类的研究者。他们依赖你的精确评分来避免论文被错投或淹没在不相关的领域中。
-
-## (O) Objective:
-你的核心目标是，严格评估以下提供的"用户研究方向"与"ArXiv分类"之间的匹配程度，并输出一个**精确到个位数的整数评分（0-100）**。这个评分必须能反映两者之间哪怕最细微的关联度差异。
-- **100分** 代表该研究是此分类的教科书式范例。
-- **85-99分** 代表非常核心的匹配，是理想的投稿目标。
-- **60-84分** 代表强相关，研究属于该分类的常见子领域或应用领域。
-- **30-59分** 代表存在方法论或主题上的交叉，但并非核心。
-- **1-29分** 代表仅有微弱或间接的联系。
-- **0分** 代表完全不相关。
-
-## (R) Response Format:
-你的输出**必须且只能是**一个0到100之间的整数。
-- **禁止**返回任何解释、理由、文字或单位。
-- **必须**提供细粒度的分数，例如 78, 93, 62，而不是笼统的 70, 80, 90。
-Output only a number 0-100. No text.
----
-### [输入数据]
-
-#### 用户研究方向:
-{user_description}
-
-#### ArXiv分类信息:
-- ID: {category['id']}
-- 名称: {category['name']}
-- 描述: {category['description']}
----
-### [输出]
-""".strip()
-
-    def build_category_evaluation_prompt_enhanced(self, user_description: str, category: Dict[str, Any]) -> str:
-        """构建增强版分类评估提示词（含分类画像）。"""
+        """构建分类评估提示词"""
+        category_name = category.get("name_cn") or category.get("name") or ""
+        category_desc = category.get("description_cn") or category.get("description") or ""
         profile_info = ""
-        if "profile" in category:
+        if "profile" in category and isinstance(category.get("profile"), dict):
             profile = category["profile"]
-            profile_info = f"""
-#### 分类深度画像:
-**领域概述**: {profile.get('profile_summary', '暂无')}
-
-**核心研究主题**:
-{chr(10).join([f'    • {topic}' for topic in profile.get('core_topics', [])])}
-
-**常用研究方法**:
-{chr(10).join([f'    • {method}' for method in profile.get('common_methodologies', [])])}
-
-**跨学科连接**:
-{chr(10).join([f'    • {connection}' for connection in profile.get('interdisciplinary_connections', [])])}
-
-**关键术语**:
-{', '.join(profile.get('key_terminologies', []))}
-"""
-
-        return f"""
-## (C) Context:
-你正在为一个高精度的"智能投稿助手"系统提供核心判断能力。该系统的用户是严谨的科研人员，他们需要根据你的评分来决定自己耗费心血的研究论文应该投往哪个ArXiv分类。现在你拥有了该分类的深度画像信息，包括核心研究主题、常用方法论、跨学科连接和关键术语，这使你能够进行更加精准和细致的匹配评估。
-## (O) Objective:
-基于提供的分类深度画像信息，严格评估"用户研究方向"与"ArXiv分类"之间的匹配程度，输出一个**精确到个位数的整数评分（0-100）**。
-## (S) Style & (T) Tone:
-请扮演一位拥有深度领域知识的ArXiv资深审核专家。你的判断风格必须是:
-- **深度分析性**: 不仅看表面关键词匹配，更要理解研究的本质和方法论
-- **多维度评估**: 从研究主题、方法论、跨学科性、术语使用等多个维度综合判断
-- **精确量化**: 对细微差别敏感，能够区分85分和87分的差异
-- **前瞻性思考**: 考虑研究的发展趋势和在该分类中的接受度
-## (A) Audience:
-你的评估结果将直接影响一位研究者的论文投稿决策。他们可能是:
-- 正在撰写博士论文的研究生
-- 准备投稿重要研究成果的学者
-- 寻求最佳发表平台的跨学科研究者
-他们依赖你的精确评分来最大化论文的影响力和可见度。
-**评分标准**:
-- **95-100分**: 研究完美契合分类的核心主题和方法论，是该分类的典型代表
-- **85-94分**: 研究高度匹配分类的主要研究方向，使用相关方法论和术语
-- **70-84分**: 研究与分类有强相关性，涉及相关主题或方法，但可能不是核心
-- **50-69分**: 研究与分类存在明显交集，在跨学科连接或方法论上有重叠
-- **25-49分**: 研究与分类有一定关联，可能使用相关术语或涉及边缘主题
-- **10-24分**: 研究与分类仅有微弱联系，关联性较为间接
-- **1-9分**: 研究与分类几乎无关，仅在极个别方面可能有联系
-- **0分**: 研究与分类完全不相关
-## (R) Response Format:
-你的输出**必须且只能是**一个0到100之间的整数。
-- **严格禁止**返回任何解释、理由、文字、符号或单位
-- **必须**提供精确的个位数评分，体现细微差别
-- **示例**: 73, 89, 56（而非70, 90, 60）
-Output only a number 0-100. No text.
----
-### [输入数据]
-
-#### 用户研究方向:
-{user_description}
-
-#### ArXiv分类基础信息:
-- **分类ID**: {category['id']}
-- **分类名称**: {category.get('name_cn', category.get('name', ''))}
-- **官方描述**: {category.get('description_cn', category.get('description', ''))}
-{profile_info}
----
-### [输出]
-""".strip()
+            summary = profile.get("profile_summary", "暂无")
+            topics = "\n".join([f"    • {t}" for t in profile.get("core_topics", [])])
+            methods = "\n".join([f"    • {m}" for m in profile.get("common_methodologies", [])])
+            connections = "\n".join([f"    • {c}" for c in profile.get("interdisciplinary_connections", [])])
+            terms = ", ".join(profile.get("key_terminologies", []))
+            profile_info = (
+                f"**领域概述**: {summary}\n\n"
+                f"**核心研究主题**:\n{topics}\n\n"
+                f"**常用研究方法**:\n{methods}\n\n"
+                f"**跨学科连接**:\n{connections}\n\n"
+                f"**关键术语**:\n{terms}"
+            )
+        return self.prompt_manager.render(
+            "category_evaluation",
+            {
+                "user_description": user_description,
+                "category_name": category_name,
+                "category_description": category_desc,
+                "category_profile": profile_info,
+            },
+        )
 
     @staticmethod
     def build_category_translation_prompt(text: str) -> str:
@@ -672,62 +605,11 @@ Output only a number 0-100. No text.
         logger.info(f"总费用: ¥{cost['total_cost']:.4f}")
     
     def build_research_description_optimization_prompt(self, user_description: str) -> str:
-        """构建研究内容描述优化提示词（基于COSTAR原则）。
-        
-        Args:
-            user_description: 用户输入的简短研究描述
-            
-        Returns:
-            优化提示词
-        """
-        return f"""
-# Context (背景)
-你是一位资深的学术研究顾问和科研写作专家，专门帮助研究人员完善和优化他们的研究兴趣描述。你具有丰富的跨学科研究经验，能够准确理解各个领域的研究方向和术语。
-
-# Objective (目标)
-请将用户提供的简短研究描述扩展为一个详细、专业、结构化的研究兴趣说明。这个优化后的描述将用于ArXiv论文分类匹配系统，帮助用户找到最相关的研究论文。
-
-# Style (风格)
-- 使用学术性但易懂的语言
-- 保持专业和客观的语调
-- 结构清晰，层次分明
-- 包含具体的技术术语和关键词
-
-# Tone (语调)
-专业、准确、详细但不冗长，体现研究者的专业水平
-
-# Audience (受众)
-学术论文推荐系统和其他研究人员
-
-# Response (响应格式)
-请直接输出优化后的研究兴趣描述，按照以下结构：
-
-### 核心研究领域
-[明确指出主要的研究领域和方向]
-
-### 具体研究兴趣
-[详细列出具体的研究子领域、技术方向或问题]
-
-### 应用场景和目标
-[描述研究的应用领域和预期目标]
-
-### 相关关键词
-[提供一系列相关的学术关键词，用逗号分隔]
-
-### 不感兴趣的领域
-[列出用户不感兴趣的研究领域，用逗号分隔]
-
-用户输入：{user_description}
-
-**要求：**
-1. 保持用户原始意图不变，只进行扩展和完善
-2. 添加相关的学术术语和技术细节
-3. 确保描述足够具体，能够准确匹配相关论文
-4. 如果用户描述过于简单，请合理推断可能的研究方向
-5. 总长度控制在500字之内
-6. 使用中文回复
-7. 直接输出优化后的内容，不要包含任何标题或说明文字
-        """.strip()
+        """构建研究内容描述优化提示词（集中模板渲染）。"""
+        return self.prompt_manager.render(
+            "research_description_optimization",
+            {"user_description": user_description},
+        )
 
     def build_paper_evaluation_prompt(self, paper: Dict[str, Any], description: str) -> str:
         """构建论文评估提示词。
@@ -843,82 +725,28 @@ Output only a number 0-100. No text.
         if not papers:
             return ""
         
-        # 构建论文信息
+        # 构建论文信息文本
         papers_info = []
         for i, paper in enumerate(papers, 1):
-            paper_info = f"""
-{i}. **{paper['title']}**
-   - 相关性评分: {paper['relevance_score']}/10
-   - 原始摘要: {paper['abstract']}
-   - ArXiv ID: {paper['arXiv_id']}
-   - 发布日期: {paper['published']}
-
-            """.strip()
-            papers_info.append(paper_info)
-        
+            info = (
+                f"{i}. **{paper['title']}**\n"
+                f"   - 相关性评分: {paper['relevance_score']}/10\n"
+                f"   - 原始摘要: {paper['abstract']}\n"
+                f"   - ArXiv ID: {paper['arXiv_id']}\n"
+                f"   - 发布日期: {paper['published']}\n"
+            ).strip()
+            papers_info.append(info)
         papers_text = "\n\n".join(papers_info)
-        
-        return f"""
-你是一位顶尖的AI研究科学家和资深学术导师。你的任务是基于我提供的研究兴趣和最新的ArXiv论文列表，为我生成一份高度结构化、富有洞察力且极具实用价值的中文研究分析报告。
 
-请深入分析每篇论文的核心贡献，识别论文之间的内在联系、技术演进趋势和潜在的研究机会。
-
-我的研究兴趣: {self.description}
-
-推荐论文列表：
-{papers_text}
-
-请严格按照以下Markdown模板格式生成报告，确保每一部分都提供深刻且具体的分析：
-
-# ArXiv 研究洞察报告
-
-> BY:{self.username}
-> ({current_time})
-
-##  摘要
-[在此处提供一个高度浓缩的执行摘要。用2-3句话总结今天所有论文中最核心的发现、最重要的技术趋势，以及与我的研究兴趣最直接的关联。]
-
-## 🔍 主题深度剖析
-[将论文精准地划分到2-3个核心研究主题。对于每个主题，进行深入分析：]
-
-### 主题一：[主题名称，例如：多模态大模型的鲁棒性与泛化]
-* **核心问题 (Problem Domain):** 该主题下的论文主要致力于解决什么关键科学或工程问题？
-* **代表性论文 (Key Papers):** [列出该主题下的1-3篇关键论文的标题]
-* **方法论创新 (Methodological Innovations):**
-    * **[论文A名称]:** [简述其核心方法、模型架构或算法的创新之处。]
-    * **[论文B名称]:** [简述其核心方法、模型架构或算法的创新之处。]
-* **研究启示 (Insights & Implications):** 这些成果的研究成果对该领域意味着什么？它们验证了什么假设，或者推翻了什么传统认知？
-
-### 主题二：[主题名称，例如：Agent的自主学习与进化]
-* **核心问题 (Problem Domain):** 该主题下的论文主要致力于解决什么关键科学或工程问题？
-* **代表性论文 (Key Papers):** [列出该主题下的1-3篇关键论文的标题]
-* **方法论创新 (Methodological Innovations):**
-    * **[论文A名称]:** [简述其核心方法、模型架构或算法的创新之处。]
-* **研究启示 (Insights & Implications):** 这些成果的研究成果对该领域意味着什么？它们验证了什么假设，或者推翻了什么传统认知？
-
-
-## 📈 宏观趋势与前瞻
-[综合所有论文，从更高维度进行分析：]
-* **技术趋势 (Tech Trends):** 当前研究最热门的技术方向是什么？（例如：从模型微调转向自主学习、对特定领域（如金融）的深入应用等）
-* **潜在机会 (Opportunities):** 基于现有研究，哪些问题尚未被解决？存在哪些新的研究空白或交叉领域机会？
-* **值得关注的工具/数据集 (Noteworthy Tools/Datasets):** 本次推荐中是否出现了新的、有潜力的基准测试、数据集或开源工具？
-
-
-## 💡 个性化建议与行动指南
-[本部分将分析与我的研究兴趣紧密结合，提供可操作的建议：]
-* **关联性解读 (Relevance Analysis):** 具体说明今天的哪些论文/技术（例如 `SEAgent` 的自主学习框架，或 `FinMMR` 的评测方法）与我的研究方向直接相关。
-* **可借鉴点 (Actionable Takeaways):** 我可以从这些论文中借鉴哪些具体的技术、实验设计或分析思路来改进我自己的研究项目？
-* **优先阅读建议 (Reading Priority):** 基于相关性和创新性，建议我优先精读哪1-2篇论文？为什么？
-
----
-
-**请确保最终报告：**
-1.  完全使用流畅、专业的中文撰写。
-2.  分析深入，避免简单复述摘要。
-3.  逻辑清晰，结构严谨，观点独到。
-4.  对我个人的研究具有明确的指导价值。
-5.  请注意，我的研究兴趣可能是用英文描述的，请在分析时充分理解并将其与论文内容关联。
-        """.strip()
+        return self.prompt_manager.render(
+            "summary_report",
+            {
+                "description": self.description,
+                "username": self.username,
+                "current_time": current_time,
+                "papers_text": papers_text,
+            },
+        )
 
 
 
@@ -1008,54 +836,21 @@ Output only a number 0-100. No text.
         # Token感知截断：优先按token估算，再用字符长度兜底
         full_text = paper.get('full_text', '')
         max_tokens_text = get_int('FULLTEXT_MAX_TOKENS', 4000)
-        max_chars_fallback = get_int('FULLTEXT_MAX_CHARS', 15000)
+        max_chars_fallback = get_int('FULLTEXT_MAX_CHARS', 20000)
         full_text = self._truncate_by_tokens(full_text, max_tokens_text, max_chars_fallback)
 
-        return f"""
-你是一位顶尖的AI研究科学家和资深学术导师。你的任务是基于我提供的研究兴趣和一篇完整的ArXiv论文，为我生成一份高度结构化、富有洞察力的中文研究分析报告。
-
-请深入分析这篇论文的核心贡献，并严格按照以下Markdown模板格式生成报告，确保每一部分都提供深刻且具体的分析：
-
-**我的研究兴趣:** {self.description}
-
----
-
-**论文标题:** {paper['title']}
-**作者:** {', '.join(paper['authors'])}
-**ArXiv ID:** {paper['arXiv_id']}
-**论文链接:** {paper['pdf_url']}
-
----
-
-**论文全文:**
-```text
-{full_text}
-```
-
----
-
-**请严格按照以下Markdown格式生成详细分析报告:**
-
-## 1. {paper['title']}
-- **相关性评分**:  ({paper['relevance_score']}/10)
-- **ArXiv ID**: {paper['arXiv_id']}
-- **作者**: {', '.join(paper['authors'])}
-- **论文链接**: <a href="{paper['pdf_url']}" class="link-btn pdf-link" target="_blank">PDF</a> <a href="{paper['abstract_url']}" class="link-btn arxiv-link" target="_blank">ArXiv</a>
-- **研究背景**: [在这里详细阐述论文的研究背景、旨在解决的关键问题及其重要性。]
-- **方法创新**: [在这里深入分析论文提出的核心方法、模型架构或算法的创新之处。请具体说明其与现有方法的不同和优势。]
-- **实验结果**: [在这里总结论文的关键实验设置和主要结果。请描述实验如何验证了方法的有效性，并提及关键的性能指标或发现。]
-- **结论意义**: [在这里评价论文结论的科学意义、潜在应用价值和对领域的长远影响。]
-- **核心贡献**: [在这里用一段话高度概括论文最核心、最精炼的贡献。]
-
-
-
-**请确保最终报告：**
-1.  完全使用流畅、专业的中文撰写。
-2.  分析深入，避免简单复述原文。
-3.  逻辑清晰，结构严谨，观点独到。
-4.  对我个人的研究具有明确的指导价值。
-5.  请注意，我的研究兴趣可能是用英文描述的，请在分析时充分理解并将其与论文内容关联。
-        """.strip()
+        return self.prompt_manager.render(
+            "detailed_analysis",
+            {
+                "description": self.description,
+                "title": paper.get('title', ''),
+                "authors": ", ".join(paper.get('authors', [])),
+                "arXiv_id": paper.get('arXiv_id', ''),
+                "pdf_url": paper.get('pdf_url', ''),
+                "full_text": full_text,
+                "relevance_score": paper.get('relevance_score', ''),
+            },
+        )
 
     def generate_detailed_paper_analysis(self, paper: Dict[str, Any], temperature: float = None) -> str:
         """为单篇论文生成详细的分析报告.
@@ -1095,14 +890,13 @@ Output only a number 0-100. No text.
         Returns:
             简要分析提示词
         """
-        return f"""
-你是一位AI研究助手。请基于以下论文的摘要，生成一个简洁的中文TLDR总结。
-
-论文标题：{paper['title']}
-论文摘要：{paper['abstract']}
-
-请用1-2句话总结这篇论文的核心贡献和主要发现，使用流畅的中文。
-""".strip()
+        return self.prompt_manager.render(
+            "brief_analysis",
+            {
+                "title": paper.get('title', ''),
+                "abstract": paper.get('abstract', ''),
+            },
+        )
 
     def generate_brief_analysis(self, paper: Dict[str, Any], temperature: float = None) -> str:
         """为单篇论文生成简要分析（TLDR）。

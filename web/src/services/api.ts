@@ -1,5 +1,13 @@
 import axios from "axios";
-import type { ApiResponse, UserProfile, RecommendationResult, ReportItem, Category } from "@/types";
+import type {
+  ApiResponse,
+  UserProfile,
+  RecommendationResult,
+  ReportItem,
+  Category,
+  PromptItem,
+  TemplateErrorDetail,
+} from "@/types";
 
 // 从环境变量读取后端 API 地址，避免硬编码
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
@@ -49,19 +57,40 @@ api.interceptors.response.use(
     ) {
       const msg = "API请求错误: 请求超时，服务正在处理或网络较慢。";
       console.error(msg);
-      window.dispatchEvent(new CustomEvent("api-error", { detail: msg }));
     } else if (String(error?.message).includes("ERR_ABORTED") || error?.name === "CanceledError") {
       const msg = "API请求错误: 请求被取消（可能是页面刷新或路由切换）。";
       console.warn(msg);
     } else {
-      // 兼容统一的 ApiResponse 结构
-      const serverMsg = error?.response?.data?.message || error?.message || "API请求错误";
-      console.error("API请求错误:", serverMsg);
-      window.dispatchEvent(new CustomEvent("api-error", { detail: serverMsg }));
+      // 模板错误（后端400）优先显示友好文案
+      const detail = error?.response?.data?.detail as TemplateErrorDetail | undefined;
+      if (error?.response?.status === 400 && detail) {
+        console.error("API请求错误(模板)", detail);
+      } else {
+        const serverMsg = error?.response?.data?.message || error?.message || "API请求错误";
+        console.error("API请求错误:", serverMsg);
+      }
     }
     return Promise.reject(error);
   }
 );
+
+// 规范化后端 400 模板错误为统一结构
+function normalizeTemplateError(e: unknown): TemplateErrorDetail | undefined {
+  const err = e as {
+    response?: { status?: number; data?: { detail?: unknown } };
+    message?: string;
+  };
+  if (err?.response?.status === 400 && err?.response?.data?.detail) {
+    const d = err.response.data.detail as TemplateErrorDetail;
+    return {
+      error_type: String(d?.error_type || "template_exception"),
+      friendly_message: d?.friendly_message,
+      fix_suggestions: Array.isArray(d?.fix_suggestions) ? d.fix_suggestions : undefined,
+      details: d?.details,
+    };
+  }
+  return undefined;
+}
 
 // API服务函数
 export const initializeService = async (): Promise<ApiResponse<{ initialized: boolean }>> => {
@@ -120,11 +149,24 @@ export const runRecommendation = async (request: {
   if (request.target_date) {
     payload.target_date = request.target_date;
   }
-  const response = await api.post("/api/run-recommendation", payload, {
-    timeout: 300000,
-    signal: getAbortSignal("POST /api/run-recommendation"),
-  });
-  return response.data;
+  try {
+    const response = await api.post("/api/run-recommendation", payload, {
+      timeout: 300000,
+      signal: getAbortSignal("POST /api/run-recommendation"),
+    });
+    return response.data;
+  } catch (e) {
+    const tmpl = normalizeTemplateError(e);
+    if (tmpl) {
+      return {
+        success: false,
+        error: tmpl.friendly_message || "模板错误导致请求失败",
+        message: tmpl.friendly_message,
+        template_error: tmpl,
+      } as ApiResponse<RecommendationResult>;
+    }
+    throw e;
+  }
 };
 
 export const getRecentReports = async (): Promise<ApiResponse<ReportItem[]>> => {
@@ -210,6 +252,70 @@ export const restoreDefaultEnvConfig = async (): Promise<ApiResponse<Record<stri
 };
 
 // =====================
+// 提示词管理相关 API
+// =====================
+
+// 列出所有提示词
+export const listPrompts = async (): Promise<ApiResponse<PromptItem[]>> => {
+  const response = await api.get("/api/prompts", {
+    signal: getAbortSignal("GET /api/prompts"),
+  });
+  return response.data;
+};
+
+// 获取单个提示词
+export const getPrompt = async (prompt_id: string): Promise<ApiResponse<PromptItem>> => {
+  const response = await api.get(`/api/prompts/${encodeURIComponent(prompt_id)}`, {
+    signal: getAbortSignal(`GET /api/prompts/${prompt_id}`),
+  });
+  return response.data;
+};
+
+// 更新提示词（允许更新 name/template）
+export const updatePrompt = async (
+  prompt_id: string,
+  updates: Partial<Pick<PromptItem, "name" | "template">>
+): Promise<ApiResponse<PromptItem>> => {
+  try {
+    const response = await api.put(`/api/prompts/${encodeURIComponent(prompt_id)}`, updates, {
+      signal: getAbortSignal(`PUT /api/prompts/${prompt_id}`),
+    });
+    return response.data;
+  } catch (e) {
+    const tmpl = normalizeTemplateError(e);
+    if (tmpl) {
+      return {
+        success: false,
+        error: tmpl.friendly_message || "模板错误导致保存失败",
+        message: tmpl.friendly_message,
+        template_error: tmpl,
+      } as ApiResponse<PromptItem>;
+    }
+    throw e;
+  }
+};
+
+// 重置单个提示词
+export const resetPrompt = async (prompt_id: string): Promise<ApiResponse<PromptItem>> => {
+  const response = await api.post(
+    `/api/prompts/${encodeURIComponent(prompt_id)}/reset`,
+    undefined,
+    {
+      signal: getAbortSignal(`POST /api/prompts/${prompt_id}/reset`),
+    }
+  );
+  return response.data;
+};
+
+// 重置所有提示词
+export const resetAllPrompts = async (): Promise<ApiResponse<null>> => {
+  const response = await api.post("/api/prompts/reset", undefined, {
+    signal: getAbortSignal("POST /api/prompts/reset"),
+  });
+  return response.data;
+};
+
+// =====================
 // 分类匹配器相关 API
 // =====================
 
@@ -235,10 +341,23 @@ export const getMatcherData = async (): Promise<
 export const optimizeMatcherDescription = async (request: {
   user_input: string;
 }): Promise<ApiResponse<{ optimized: string }>> => {
-  const response = await api.post("/api/matcher/optimize", request, {
-    signal: getAbortSignal("POST /api/matcher/optimize"),
-  });
-  return response.data;
+  try {
+    const response = await api.post("/api/matcher/optimize", request, {
+      signal: getAbortSignal("POST /api/matcher/optimize"),
+    });
+    return response.data;
+  } catch (e) {
+    const tmpl = normalizeTemplateError(e);
+    if (tmpl) {
+      return {
+        success: false,
+        error: tmpl.friendly_message || "模板错误导致优化失败",
+        message: tmpl.friendly_message,
+        template_error: tmpl,
+      } as ApiResponse<{ optimized: string }>;
+    }
+    throw e;
+  }
 };
 
 // 执行分类匹配
@@ -252,11 +371,27 @@ export const runCategoryMatching = async (request: {
     token_usage: { input_tokens: number; output_tokens: number; total_tokens: number };
   }>
 > => {
-  const response = await api.post("/api/matcher/run", request, {
-    timeout: 300000,
-    signal: getAbortSignal("POST /api/matcher/run"),
-  });
-  return response.data;
+  try {
+    const response = await api.post("/api/matcher/run", request, {
+      timeout: 300000,
+      signal: getAbortSignal("POST /api/matcher/run"),
+    });
+    return response.data;
+  } catch (e) {
+    const tmpl = normalizeTemplateError(e);
+    if (tmpl) {
+      return {
+        success: false,
+        error: tmpl.friendly_message || "模板错误导致分类匹配失败",
+        message: tmpl.friendly_message,
+        template_error: tmpl,
+      } as ApiResponse<{
+        results: { id: string; name: string; score: number }[];
+        token_usage: { input_tokens: number; output_tokens: number; total_tokens: number };
+      }>;
+    }
+    throw e;
+  }
 };
 
 // 更新单条匹配记录
@@ -331,9 +466,7 @@ export const getMatcherDataOrProfiles = async (): Promise<
   try {
     const res = await getMatcherData();
     if (res?.success) return res;
-  } catch (e) {
-    // 忽略，进入回退
-  }
+  } catch {}
   const fallback = await getUserProfiles();
   return { ...fallback, stats: undefined } as ApiResponse<UserProfile[]> & {
     stats?: Record<string, unknown>;
