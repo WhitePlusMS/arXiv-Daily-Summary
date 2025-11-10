@@ -180,3 +180,9 @@ def get_prompt_manager() -> PromptManager:
     if _global_manager is None:
         _global_manager = PromptManager()
     return _global_manager
+
+
+def clear_prompt_manager_cache():
+    """清除全局 PromptManager 缓存，强制下次获取时重新初始化"""
+    global _global_manager
+    _global_manager = None

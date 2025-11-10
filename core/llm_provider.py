@@ -625,116 +625,44 @@ class LLMProvider:
         """
         
         # 1. 提取输入
-        # 为 .get() 提供一个默认的空字符串，以防万一
         positive_query = description.get("positive_query", "")
         negative_query = description.get("negative_query")  # 如果不存在，这将是 None
         
         paper_title = paper.get('title', 'N/A')
         paper_abstract = paper.get('abstract', 'N/A')
         
-        # 2. 准备提示词的基础模块
-        prompt_role = "你是一个严谨的学术论文评估专家。\n你的任务是根据用户的研究兴趣，严格评估一篇论文的相关性。"
-        
-        prompt_paper_info = f"""
-
----
-
-论文信息：
-
-标题：{paper_title}
-
-摘要：{paper_abstract}
-
----
-
-请严格按照以下JSON格式返回结果，不要包含任何其他文字：
-
-{{
-    "relevance_score": <一个 0-10 之间的数字>
-
-}}
-
-"""
-        
-        # 3. 动态构建核心的 "兴趣" 和 "标准" 模块
-        
+        # 2. 根据是否有负面偏好选择不同的提示词模板
         if not negative_query:
-            # 场景一：用户只有 A (简洁高效版)
-            # =================================
-            
-            prompt_interest = f"研究兴趣 (A)：我想要关于 [{positive_query}] 的论文。"
-            
-            prompt_criteria = f"""
-
----
-
-评分标准（请严格遵守）：
-
-* 9-10 分（高度相关）：论文的核心问题和方法 **完全** 符合 [A: {positive_query}]。
-
-* 7-8 分（中度相关）：论文的主题与 [A] 相关，但可能不是核心，或方法不同。
-
-* 5-6 分（一般相关）：论文只在背景或某个方面与 [A] 相关。
-
-* 1-4 分（低度相关）：论文只是关键词蹭到 [A]。
-
-* 0 分（完全无关）：论文与 [A] 完全无关。
-
----
-
-"""
-        
+            # 场景一：用户只有正面兴趣（单兴趣场景）
+            prompt_id = "paper_evaluation_single_interest"
+            variables = {
+                "positive_query": positive_query,
+                "paper_title": paper_title,
+                "paper_abstract": paper_abstract,
+            }
         else:
-            # 场景二：用户有 A 和 B (权衡利弊版)
-            # =================================
-            # 我们默认用户的B偏好是"不太想要"（软约束），这是最安全的选择。
-            
-            prompt_interest = f"""
-
-主要兴趣 (A)：我想要关于 [{positive_query}] 的论文。
-
-次要偏好 (B)：我**不太希望**看到关于 [{negative_query}] 的论文。
-
-"""
-            
-            prompt_criteria = f"""
-
----
-
-评分标准（请严格遵守）：
-
-A-相关性 是主要评分依据，B-偏好 是次要扣分项。
-
-* 9-10 分（非常推荐）：论文 **高度** 相关 [A: {positive_query}]，并且 **不** 涉及 [B: {negative_query}]。
-
-* 7-8 分（值得一看）：论文 **中度** 相关 [A]，并且 **不** 涉及 [B]。
-
-* 6-7 分（相关，但有B）：论文 **高度** 相关 [A]，但 **也** 涉及了 [B]。
-
-* 4-5 分（勉强相关）：论文 **中度** 相关 [A]，但 **也** 涉及了 [B]。
-
-* 1-3 分（不太相关）：论文 **低度** 相关 [A]（无论是否涉及B）。
-
-* 0 分（完全无关）：论文与 [A] 完全无关。
-
----
-
-"""
+            # 场景二：用户有正面和负面兴趣（双兴趣场景）
+            prompt_id = "paper_evaluation_dual_interest"
+            variables = {
+                "positive_query": positive_query,
+                "negative_query": negative_query,
+                "paper_title": paper_title,
+                "paper_abstract": paper_abstract,
+            }
         
-        # 4. 组合并返回最终的提示词
-        final_prompt = f"""
-
-{prompt_role}
-
-{prompt_interest}
-
-{prompt_criteria}
-
-{prompt_paper_info}
-
-""".strip()
+        # 3. 使用 PromptManager 渲染模板
+        if not self.prompt_manager:
+            logger.error("PromptManager 未初始化，无法构建提示词")
+            raise RuntimeError("PromptManager 未初始化")
         
-        return final_prompt
+        try:
+            return self.prompt_manager.render(prompt_id, variables)
+        except KeyError as e:
+            logger.error(f"提示词模板不存在或变量缺失: {prompt_id}, 错误: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"渲染提示词模板失败: {prompt_id}, 错误: {e}")
+            raise
 #     请按照以下JSON格式返回评估结果：
 # {{
 #     "relevance_score": <0-10的数字，表示相关性评分>,

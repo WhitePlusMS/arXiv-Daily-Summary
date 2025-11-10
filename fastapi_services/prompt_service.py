@@ -29,6 +29,8 @@ class PromptService(BaseService):
 
     async def get_all_prompts(self) -> ServiceResponse:
         """获取所有提示词的列表"""
+        # 重新加载以确保获取最新的提示词（包括新添加的）
+        self.manager.reload()
         prompts = self.manager.get_all()
         return self.success_response(
             [{"id": k, **v} for k, v in prompts.items()],
