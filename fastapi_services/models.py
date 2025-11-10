@@ -14,6 +14,7 @@ class UserProfile(BaseModel):
     username: str
     user_input: str
     category_id: str
+    negative_query: Optional[str] = ""
 
 
 class RecommendationRequest(BaseModel):
@@ -45,6 +46,7 @@ class RecommendationResult(BaseModel):
 class ResearchInterestsRequest(BaseModel):
     """研究兴趣更新请求模型"""
     interests: List[str]
+    negative_interests: Optional[List[str]] = []
 
 
 class InitializeRequest(BaseModel):

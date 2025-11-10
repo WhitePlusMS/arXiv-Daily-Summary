@@ -3,6 +3,7 @@ export interface UserProfile {
   username: string
   user_input: string
   category_id: string
+  negative_query?: string
 }
 
 // 推荐结果接口

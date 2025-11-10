@@ -274,15 +274,20 @@ class ArxivRecommenderService(BaseService):
             self.log_error("获取报告文件失败", e)
             return self.error_response(f"获取报告文件失败: {str(e)}", [])
     
-    async def update_research_interests(self, interests: List[str]) -> ServiceResponse:
+    async def update_research_interests(self, interests: List[str], negative_interests: Optional[List[str]] = None) -> ServiceResponse:
         """更新研究兴趣"""
-        self.log_info("开始更新研究兴趣", count=len(interests))
+        self.log_info("开始更新研究兴趣", count=len(interests), negative_count=len(negative_interests) if negative_interests else 0)
         try:
             self.research_interests = interests
+            # 注意：CLI 应用的 update_research_interests 方法目前只接受 interests 列表
+            # 负面偏好会在推荐引擎初始化时通过 description 字典传递
             if self.cli_app:
                 self.cli_app.update_research_interests(interests)
             self.log_info("研究兴趣更新成功")
-            return self.success_response(interests, "研究兴趣更新成功")
+            result = {"interests": interests}
+            if negative_interests is not None:
+                result["negative_interests"] = negative_interests
+            return self.success_response(result, "研究兴趣更新成功")
         except Exception as e:
             self.log_error("研究兴趣更新失败", e)
             return self.error_response(f"研究兴趣更新失败: {str(e)}")

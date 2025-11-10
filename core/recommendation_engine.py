@@ -6,7 +6,7 @@
 import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Union
 from datetime import datetime
 from loguru import logger
 
@@ -28,7 +28,7 @@ class RecommendationEngine:
         model: str,
         base_url: str,
         api_key: str,
-        description: str,
+        description: Union[str, Dict[str, str]],
         username: str = "TEST",
         num_workers: int = 2,
         temperature: float = 0.7,
@@ -49,7 +49,9 @@ class RecommendationEngine:
             model: LLM模型名称
             base_url: LLM API基础URL
             api_key: LLM API密钥
-            description: 研究兴趣描述
+            description: 研究兴趣描述，可以是字符串（向后兼容）或字典格式
+                         - 字符串格式：直接作为 positive_query
+                         - 字典格式：{"positive_query": ..., "negative_query": ...}
             username: 用户名，用于生成报告时的署名
             num_workers: 并行处理线程数
             temperature: LLM生成温度
@@ -57,11 +59,18 @@ class RecommendationEngine:
             max_tokens: LLM最大token数
         """
         logger.info("推荐引擎初始化开始")
+        
+        # 向后兼容：如果 description 是字符串，转换为字典格式
+        if isinstance(description, str):
+            description_dict = {"positive_query": description, "negative_query": ""}
+        else:
+            description_dict = description
+        
         self.categories = categories
         self.max_entries = max_entries
         self.num_detailed_papers = num_detailed_papers
         self.num_brief_papers = num_brief_papers
-        self.description = description
+        self.description = description_dict  # 存储为字典格式
         self.num_workers = num_workers
         self.relevance_filter_threshold = relevance_filter_threshold
         
@@ -70,11 +79,13 @@ class RecommendationEngine:
         self.arxiv_fetcher = arxiv_fetcher or ArxivFetcher()
 
         # 主LLM提供者（用于详细分析和报告生成）
+        # LLMProvider 的 description 参数仍然是字符串，使用 positive_query
+        description_str = description_dict.get("positive_query", "")
         self.llm_provider = llm_provider or LLMProvider(
             model=model,
             base_url=base_url,
             api_key=api_key,
-            description=description,
+            description=description_str,
             username=username,
             temperature=temperature,
             top_p=top_p,
@@ -82,8 +93,9 @@ class RecommendationEngine:
         )
 
         # 轻量模型提供者（用于论文相关性评估）
+        # create_light_llm_provider 也需要字符串格式
         self.light_llm_provider = light_llm_provider or create_light_llm_provider(
-            description=description,
+            description=description_str,
             username=username,
         )
         # PDF 文本解析器（独立模块，减少 ArxivFetcher 职责）
@@ -94,6 +106,7 @@ class RecommendationEngine:
         self.max_tokens = max_tokens
         
         logger.success(f"推荐引擎初始化完成 - 分类: {categories}, 详细分析: {num_detailed_papers}, 简要分析: {num_brief_papers}")
+        logger.debug(f"推荐引擎配置 - num_detailed_papers={self.num_detailed_papers}, num_brief_papers={self.num_brief_papers}, max_total={self.num_detailed_papers + self.num_brief_papers}")
 
     def _fetch_papers_from_categories(self, date: str = None) -> List[Dict[str, Any]]:
         """从所有指定分类中获取论文。
@@ -230,12 +243,14 @@ class RecommendationEngine:
         
         # 限制推荐数量（详细分析数 + 简要分析数）
         max_total_papers = self.num_detailed_papers + self.num_brief_papers
+        papers_before_limit = len(recommended_papers)
+        logger.debug(f"论文数量限制 - 详细分析: {self.num_detailed_papers}, 简要分析: {self.num_brief_papers}, 最大总数: {max_total_papers}, 限制前论文数: {papers_before_limit}")
         recommended_papers = recommended_papers[:max_total_papers]
         
         if api_failure_count > 0:
             logger.warning(f"相关性评估完成 - 成功: {len(recommended_papers)} 篇, API失败: {api_failure_count} 篇")
         else:
-            logger.success(f"相关性评估完成 - 推荐论文: {len(recommended_papers)} 篇")
+            logger.success(f"相关性评估完成 - 推荐论文: {len(recommended_papers)} 篇 (限制前: {papers_before_limit} 篇)")
         return recommended_papers
 
 
@@ -392,7 +407,9 @@ class RecommendationEngine:
         
         with ThreadPoolExecutor(max_workers=3) as executor:
             # 提交三个任务到线程池（直接使用llm_provider生成总结报告，移除无用包装）
-            summary_future = executor.submit(self.llm_provider.generate_summary_report, recommended_papers, current_time)
+            # 传递最大论文数量限制，确保总结报告也遵守用户配置
+            max_total_papers = self.num_detailed_papers + self.num_brief_papers
+            summary_future = executor.submit(self.llm_provider.generate_summary_report, recommended_papers, current_time, None, max_total_papers)
             analysis_future = executor.submit(self._generate_detailed_analysis, recommended_papers)
             brief_future = executor.submit(self._generate_brief_analysis, recommended_papers)
             
@@ -439,11 +456,27 @@ def main():
         with open(description_path, "r", encoding="utf-8") as f:
             data = json.load(f)
         
-        # 获取第一个用户的user_input
+        # 获取第一个用户的user_input、negative_query和category_id
         if isinstance(data, list) and len(data) > 0:
             first_user = data[0]
             if isinstance(first_user, dict) and 'user_input' in first_user:
-                description = first_user['user_input']
+                positive_query = first_user['user_input']
+                negative_query = first_user.get('negative_query', '')
+                description = {
+                    "positive_query": positive_query,
+                    "negative_query": negative_query
+                }
+                
+                # 从用户配置文件读取分类标签
+                category_id = first_user.get('category_id', '')
+                if category_id:
+                    categories = [cat.strip() for cat in category_id.split(',') if cat.strip()]
+                    if not categories:
+                        logger.warning("category_id字段为空或格式不正确，使用默认分类")
+                        categories = ["cs.CL", "cs.IR", "cs.LG"]
+                else:
+                    logger.warning("用户配置文件中没有category_id字段，使用默认分类")
+                    categories = ["cs.CL", "cs.IR", "cs.LG"]
             else:
                 logger.error(f"JSON文件格式不正确，缺少user_input字段: {description_path}")
                 return
@@ -457,8 +490,7 @@ def main():
         logger.error(f"JSON文件解析失败: {e}")
         return
     
-    # 初始化推荐引擎
-    categories = get_list("ARXIV_CATEGORIES", default=["cs.CL","cs.IR","cs.LG"]) 
+    # 初始化推荐引擎 
     max_entries = get_int("MAX_ENTRIES", 50)
     num_detailed_papers = get_int("NUM_DETAILED_PAPERS", 3)
     num_brief_papers = get_int("NUM_BRIEF_PAPERS", 7)

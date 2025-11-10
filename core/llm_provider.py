@@ -611,35 +611,130 @@ class LLMProvider:
             {"user_description": user_description},
         )
 
-    def build_paper_evaluation_prompt(self, paper: Dict[str, Any], description: str) -> str:
-        """构建论文评估提示词。
-        
-        Args:
-            paper: 论文信息字典
-            description: 研究兴趣描述
-            
-        Returns:
-            论文评估提示词
-        """
-        return f"""
-你是一个学术论文评估专家。请根据以下研究兴趣描述，评估这篇论文的相关性。
+    def build_paper_evaluation_prompt(self, paper: Dict[str, Any], description: Dict[str, str]) -> str:
+        """根据用户的研究兴趣（包含正面和负面偏好）动态构建一个优化的LLM提示词。
 
-研究兴趣描述：
-{description}
+        Args:
+            paper: 包含 'title' 和 'abstract' 的论文信息字典。
+            description: 包含用户偏好的字典。
+                         - "positive_query": 必需，用户的主要研究兴趣 (A)。
+                         - "negative_query": 可选，用户"不太想要"的研究方向 (B)。
+
+        Returns:
+            一个为LLM准备好的、用于生成0-10分相关性评分的字符串提示词。
+        """
+        
+        # 1. 提取输入
+        # 为 .get() 提供一个默认的空字符串，以防万一
+        positive_query = description.get("positive_query", "")
+        negative_query = description.get("negative_query")  # 如果不存在，这将是 None
+        
+        paper_title = paper.get('title', 'N/A')
+        paper_abstract = paper.get('abstract', 'N/A')
+        
+        # 2. 准备提示词的基础模块
+        prompt_role = "你是一个严谨的学术论文评估专家。\n你的任务是根据用户的研究兴趣，严格评估一篇论文的相关性。"
+        
+        prompt_paper_info = f"""
+
+---
 
 论文信息：
-标题：{paper['title']}
-摘要：{paper['abstract']}
-作者：{', '.join(paper['authors'])}
-发布日期：{paper['published']}
 
-请按照以下JSON格式返回评估结果：
+标题：{paper_title}
+
+摘要：{paper_abstract}
+
+---
+
+请严格按照以下JSON格式返回结果，不要包含任何其他文字：
+
 {{
-    "relevance_score": <0-10的数字，表示相关性评分>,
+    "relevance_score": <一个 0-10 之间的数字>
+
 }}
 
-请确保返回的是有效的JSON格式，不要包含任何其他文字。
-        """.strip()
+"""
+        
+        # 3. 动态构建核心的 "兴趣" 和 "标准" 模块
+        
+        if not negative_query:
+            # 场景一：用户只有 A (简洁高效版)
+            # =================================
+            
+            prompt_interest = f"研究兴趣 (A)：我想要关于 [{positive_query}] 的论文。"
+            
+            prompt_criteria = f"""
+
+---
+
+评分标准（请严格遵守）：
+
+* 9-10 分（高度相关）：论文的核心问题和方法 **完全** 符合 [A: {positive_query}]。
+
+* 7-8 分（中度相关）：论文的主题与 [A] 相关，但可能不是核心，或方法不同。
+
+* 5-6 分（一般相关）：论文只在背景或某个方面与 [A] 相关。
+
+* 1-4 分（低度相关）：论文只是关键词蹭到 [A]。
+
+* 0 分（完全无关）：论文与 [A] 完全无关。
+
+---
+
+"""
+        
+        else:
+            # 场景二：用户有 A 和 B (权衡利弊版)
+            # =================================
+            # 我们默认用户的B偏好是"不太想要"（软约束），这是最安全的选择。
+            
+            prompt_interest = f"""
+
+主要兴趣 (A)：我想要关于 [{positive_query}] 的论文。
+
+次要偏好 (B)：我**不太希望**看到关于 [{negative_query}] 的论文。
+
+"""
+            
+            prompt_criteria = f"""
+
+---
+
+评分标准（请严格遵守）：
+
+A-相关性 是主要评分依据，B-偏好 是次要扣分项。
+
+* 9-10 分（非常推荐）：论文 **高度** 相关 [A: {positive_query}]，并且 **不** 涉及 [B: {negative_query}]。
+
+* 7-8 分（值得一看）：论文 **中度** 相关 [A]，并且 **不** 涉及 [B]。
+
+* 6-7 分（相关，但有B）：论文 **高度** 相关 [A]，但 **也** 涉及了 [B]。
+
+* 4-5 分（勉强相关）：论文 **中度** 相关 [A]，但 **也** 涉及了 [B]。
+
+* 1-3 分（不太相关）：论文 **低度** 相关 [A]（无论是否涉及B）。
+
+* 0 分（完全无关）：论文与 [A] 完全无关。
+
+---
+
+"""
+        
+        # 4. 组合并返回最终的提示词
+        final_prompt = f"""
+
+{prompt_role}
+
+{prompt_interest}
+
+{prompt_criteria}
+
+{prompt_paper_info}
+
+""".strip()
+        
+        return final_prompt
 #     请按照以下JSON格式返回评估结果：
 # {{
 #     "relevance_score": <0-10的数字，表示相关性评分>,
@@ -650,12 +745,14 @@ class LLMProvider:
 #     "tldr": "<用一段话总结论文的核心贡献>"
 # }}
 
-    def evaluate_paper_relevance(self, paper: Dict[str, Any], description: str, temperature: float = None) -> Dict[str, Any]:
+    def evaluate_paper_relevance(self, paper: Dict[str, Any], description: Union[str, Dict[str, str]], temperature: float = None) -> Dict[str, Any]:
         """评估单篇论文的相关性。
         
         Args:
             paper: 论文信息字典
-            description: 研究兴趣描述
+            description: 研究兴趣描述，可以是字符串（向后兼容）或字典格式
+                         - 字符串格式：直接作为 positive_query
+                         - 字典格式：{"positive_query": ..., "negative_query": ...}
             temperature: 生成温度（为None时使用provider默认值）
             
         Returns:
@@ -663,6 +760,10 @@ class LLMProvider:
         """
         title_short = paper['title'][:50] + '...' if len(paper['title']) > 50 else paper['title']
         logger.debug(f"论文相关性评估开始 - {title_short}")
+        
+        # 向后兼容：如果 description 是字符串，转换为字典格式
+        if isinstance(description, str):
+            description = {"positive_query": description, "negative_query": ""}
         
         prompt = self.build_paper_evaluation_prompt(paper, description)
         
@@ -750,13 +851,14 @@ class LLMProvider:
 
 
 
-    def generate_summary_report(self, papers: List[Dict[str, Any]], current_time: str, temperature: float = None) -> str:
+    def generate_summary_report(self, papers: List[Dict[str, Any]], current_time: str, temperature: float = None, max_papers: Optional[int] = None) -> str:
         """生成论文推荐的Markdown总结报告。
         
         Args:
             papers: 论文列表（已排序）
             current_time: 当前时间
             temperature: 生成温度（为None时使用provider默认值）
+            max_papers: 最大论文数量限制（用户配置的 num_detailed_papers + num_brief_papers），如果为None则不限制
             
         Returns:
             Markdown格式的总结报告
@@ -765,10 +867,10 @@ class LLMProvider:
             logger.warning("总结报告跳过 - 无推荐论文")
             return "今日无推荐论文。"
         
-        logger.info(f"总结报告生成开始 - 原始论文: {len(papers)} 篇")
+        logger.info(f"总结报告生成开始 - 原始论文: {len(papers)} 篇, 用户配置最大数量: {max_papers}")
         
-        # 动态选择最佳论文数量，确保提示词长度不超过15000字符
-        optimal_papers = self._select_optimal_papers_for_prompt(papers, current_time, max_length=30000)
+        # 动态选择最佳论文数量，确保提示词长度不超过30000字符，同时遵守用户配置的最大论文数量
+        optimal_papers = self._select_optimal_papers_for_prompt(papers, current_time, max_length=30000, max_papers=max_papers)
         
         logger.debug(f"论文数量优化完成 - 最终选择: {len(optimal_papers)} 篇")
         
@@ -786,13 +888,14 @@ class LLMProvider:
             logger.error(f"总结报告生成失败: {e}")
             return "生成总结失败。"
 
-    def _select_optimal_papers_for_prompt(self, papers: List[Dict[str, Any]], current_time: str, max_length: int = 15000) -> List[Dict[str, Any]]:
+    def _select_optimal_papers_for_prompt(self, papers: List[Dict[str, Any]], current_time: str, max_length: int = 15000, max_papers: Optional[int] = None) -> List[Dict[str, Any]]:
         """根据提示词长度限制动态选择最佳论文数量。
         
         Args:
             papers: 已排序的论文列表（按相关性从高到低）
             current_time: 当前时间
             max_length: 提示词最大长度限制
+            max_papers: 最大论文数量限制（用户配置），如果为None则不限制
             
         Returns:
             优化后的论文列表
@@ -800,7 +903,12 @@ class LLMProvider:
         if not papers:
             return papers
         
-        logger.debug(f"论文数量优化开始 - 最大长度限制: {max_length} 字符")
+        # 首先应用用户配置的最大论文数量限制
+        if max_papers is not None and max_papers > 0:
+            papers = papers[:max_papers]
+            logger.debug(f"应用用户配置限制 - 最大论文数: {max_papers}, 限制后: {len(papers)} 篇")
+        
+        logger.debug(f"论文数量优化开始 - 最大长度限制: {max_length} 字符, 当前论文数: {len(papers)} 篇")
         
         # 从1篇论文开始逐步增加，找到最佳数量
         optimal_papers = []

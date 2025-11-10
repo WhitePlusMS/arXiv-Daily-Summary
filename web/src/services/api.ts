@@ -121,7 +121,8 @@ export const getResearchInterests = async (): Promise<ApiResponse<string[]>> => 
 
 export const updateResearchInterests = async (request: {
   interests: string[];
-}): Promise<ApiResponse<{ interests: string[] }>> => {
+  negative_interests?: string[];
+}): Promise<ApiResponse<{ interests: string[]; negative_interests?: string[] }>> => {
   const response = await api.post("/api/research-interests", request, {
     signal: getAbortSignal("POST /api/research-interests"),
   });

@@ -60,10 +60,19 @@
       <div class="streamlit-section">
         <h2 class="streamlit-subheader">🎯 研究兴趣</h2>
         <div class="streamlit-text-area">
-          <label>请输入您的研究方向，描述即可：</label>
+          <label>（A）感兴趣的研究方向：</label>
           <textarea
             v-model="interestsText"
-            placeholder="输入您的研究方向，系统将基于这些方向推荐相关论文"
+            placeholder="输入您感兴趣的研究方向，系统将基于这些方向推荐相关论文"
+            :disabled="isLoading"
+            class="streamlit-textarea"
+          ></textarea>
+        </div>
+        <div class="streamlit-text-area" style="margin-top: 1rem;">
+          <label>（B）不感兴趣的研究方向（可选）：</label>
+          <textarea
+            v-model="negativeInterestsText"
+            placeholder="输入您不太感兴趣的研究方向，系统会降低相关论文的推荐优先级"
             :disabled="isLoading"
             class="streamlit-textarea"
           ></textarea>
@@ -241,6 +250,7 @@ const arxivTime = ref("");
 const localTimezone = ref("");
 const arxivTimezone = ref("");
 const interestsText = ref("");
+const negativeInterestsText = ref("");
 const selectedDate = ref("");
 const todayStr = ref("");
 const yesterdayStr = ref("");
@@ -257,6 +267,7 @@ const {
   config,
   userProfiles,
   researchInterests,
+  negativeInterests,
   selectedProfile,
   selectedProfileName,
   isLoading,
@@ -583,12 +594,27 @@ watch(
   { immediate: true }
 );
 
+// 监听负面偏好变化，更新文本框
+watch(
+  negativeInterests,
+  (newInterests) => {
+    negativeInterestsText.value = newInterests.join("\n");
+  },
+  { immediate: true }
+);
+
 // 监听文本框变化，自动更新研究兴趣
 watch(interestsText, (newText) => {
   if (newText.trim()) {
     const interests = newText.split("\n").filter((line) => line.trim());
     store.setResearchInterests(interests);
   }
+});
+
+// 监听负面偏好文本框变化，自动更新负面偏好
+watch(negativeInterestsText, (newText) => {
+  const interests = newText.trim() ? newText.split("\n").filter((line) => line.trim()) : [];
+  store.setNegativeInterests(interests);
 });
 
 // 初始化

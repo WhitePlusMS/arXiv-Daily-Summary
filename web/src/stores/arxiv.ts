@@ -7,6 +7,7 @@ export const useArxivStore = defineStore('arxiv', () => {
   const config = ref<FrontendConfig | null>(null)
   const userProfiles = ref<UserProfile[]>([])
   const researchInterests = ref<string[]>([])
+  const negativeInterests = ref<string[]>([])
   const selectedProfile = ref<UserProfile | null>(null)
   const selectedProfileName = ref<string>('自定义')
   const isLoading = ref(false)
@@ -49,6 +50,10 @@ export const useArxivStore = defineStore('arxiv', () => {
     researchInterests.value = interests
   }
 
+  function setNegativeInterests(interests: string[]) {
+    negativeInterests.value = interests
+  }
+
   function setSelectedProfile(profileName: string) {
     selectedProfileName.value = profileName
     if (profileName === '自定义') {
@@ -59,6 +64,11 @@ export const useArxivStore = defineStore('arxiv', () => {
         // 更新研究兴趣
         const interests = selectedProfile.value.user_input.split('\n').filter(line => line.trim())
         setResearchInterests(interests)
+        
+        // 更新负面偏好
+        const negativeQuery = selectedProfile.value.negative_query || ''
+        const negativeInterestsList = negativeQuery.split('\n').filter(line => line.trim())
+        setNegativeInterests(negativeInterestsList)
         
         // 更新配置中的分类
         if (config.value) {
@@ -93,6 +103,7 @@ export const useArxivStore = defineStore('arxiv', () => {
     config,
     userProfiles,
     researchInterests,
+    negativeInterests,
     selectedProfile,
     selectedProfileName,
     isLoading,
@@ -111,6 +122,7 @@ export const useArxivStore = defineStore('arxiv', () => {
     setConfig,
     setUserProfiles,
     setResearchInterests,
+    setNegativeInterests,
     setSelectedProfile,
     setLoading,
     setError,

@@ -225,9 +225,12 @@ async def update_research_interests(
     service: ArxivRecommenderService = Depends(get_arxiv_service)
 ):
     """更新研究兴趣"""
-    logger.info(f"API调用: 更新研究兴趣 - {len(request.interests)}个兴趣")
+    logger.info(f"API调用: 更新研究兴趣 - {len(request.interests)}个兴趣, {len(request.negative_interests) if request.negative_interests else 0}个负面偏好")
     try:
-        result = await service.update_research_interests(request.interests)
+        result = await service.update_research_interests(
+            request.interests,
+            request.negative_interests if request.negative_interests else None
+        )
         return result
     except Exception as e:
         logger.error(f"更新研究兴趣失败: {str(e)}")

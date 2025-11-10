@@ -70,6 +70,10 @@ class ArxivRecommenderCLI:
         Returns:
             配置字典
         """
+        # 重新加载 .env 文件，确保获取最新配置
+        from core.env_config import reload
+        reload()
+        
         config = {
             # API配置
             'dashscope_api_key': get_str('DASHSCOPE_API_KEY', ''),
@@ -95,7 +99,9 @@ class ArxivRecommenderCLI:
             'arxiv_base_url': get_str('ARXIV_BASE_URL', 'http://export.arxiv.org/api/query'),
             'arxiv_retries': get_int('ARXIV_RETRIES', 3),
             'arxiv_delay': get_int('ARXIV_DELAY', 5),
-            'arxiv_categories': get_list('ARXIV_CATEGORIES', default=['cs.CV', 'cs.LG']),
+            # arxiv_categories 现在从用户配置文件中的 category_id 字段读取，不再从环境变量读取
+            # 如果用户配置文件中没有 category_id，则使用默认值
+            'arxiv_categories': ['cs.CV', 'cs.LG'],  # 默认值，会被 _load_user_categories() 覆盖
             'max_entries': get_int('MAX_ENTRIES', 50),
             'num_brief_papers': get_int('NUM_BRIEF_PAPERS', 7),
             'num_detailed_papers': get_int('NUM_DETAILED_PAPERS', 3),
@@ -633,11 +639,14 @@ class ArxivRecommenderCLI:
 
             logger.debug(f"初始化LLM提供商 - 提供方: {heavy_provider}, 模型: {heavy_model}")
             # 构造主LLM提供者，并作为依赖注入传递给推荐引擎
+            # LLMProvider 的 description 参数仍然是字符串，提取 positive_query
+            research_interests_dict = self._load_research_interests()
+            description_str = research_interests_dict.get("positive_query", "") if isinstance(research_interests_dict, dict) else str(research_interests_dict)
             self.llm_provider = LLMProvider(
                 model=heavy_model,
                 base_url=heavy_base_url,
                 api_key=heavy_api_key,
-                description=self._load_research_interests(),
+                description=description_str,
                 username=self._get_current_username(),
                 temperature=heavy_temperature,
                 top_p=heavy_top_p,
@@ -684,11 +693,11 @@ class ArxivRecommenderCLI:
             logger.error(f"组件初始化失败: {e}")
             raise
     
-    def _load_research_interests(self) -> str:
+    def _load_research_interests(self) -> Dict[str, str]:
         """从用户分类JSON文件加载研究兴趣。
         
         Returns:
-            研究兴趣文本
+            研究兴趣字典，包含 positive_query 和 negative_query
         """
         categories_file = self.config['user_categories_file']
         logger.debug(f"尝试加载研究兴趣文件: {categories_file}")
@@ -720,12 +729,18 @@ class ArxivRecommenderCLI:
                         logger.debug("未指定用户名，使用第一个用户的研究兴趣")
                     
                     if target_user and isinstance(target_user, dict):
-                        # 处理user_input字段
-                        if 'user_input' in target_user and target_user['user_input']:
-                            interests = target_user['user_input']
+                        # 处理user_input和negative_query字段
+                        positive_query = target_user.get('user_input', '')
+                        negative_query = target_user.get('negative_query', '')  # 可选字段，默认为空
+                        
+                        if positive_query:
+                            description_dict = {
+                                "positive_query": positive_query,
+                                "negative_query": negative_query
+                            }
                             username_info = f"用户 {target_user.get('username', '未知')}" if target_user.get('username') else "第一个用户"
                             logger.success(f"从JSON文件加载{username_info}的研究兴趣: {categories_file}")
-                            return interests
+                            return description_dict
                         else:
                             logger.warning(f"目标用户缺少user_input字段: {categories_file}")
                     else:
@@ -742,7 +757,10 @@ class ArxivRecommenderCLI:
         
         # 回退到默认配置
         logger.info("使用默认研究兴趣配置")
-        return "机器学习、深度学习、计算机视觉、自然语言处理"
+        return {
+            "positive_query": "机器学习、深度学习、计算机视觉、自然语言处理",
+            "negative_query": ""
+        }
     
     def _get_current_time(self) -> str:
         """获取当前时间。

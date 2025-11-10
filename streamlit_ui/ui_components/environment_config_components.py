@@ -202,14 +202,6 @@ def render_arxiv_config(config_manager):
         )
         # 使用辅助函数跟踪配置更改
         track_config_change('ARXIV_DELAY', str(delay))
-        
-        categories = st.text_area(
-            "ArXiv分类",
-            value=st.session_state.config_changes.get('ARXIV_CATEGORIES', ''),
-            help="ArXiv分类代码，用逗号分隔",
-            height=100
-        )
-        st.session_state.config_changes['ARXIV_CATEGORIES'] = categories
     
     with col2:
         max_entries = st.number_input(

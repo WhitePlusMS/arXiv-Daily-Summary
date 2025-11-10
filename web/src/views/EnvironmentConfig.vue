@@ -359,16 +359,6 @@
           <div class="streamlit-help">相邻请求之间的等待秒数，降低 API 压力。</div>
         </div>
         <div class="form-item">
-          <label>ARXIV_CATEGORIES</label>
-          <input
-            type="text"
-            v-model="configChanges.ARXIV_CATEGORIES"
-            placeholder="cs.CL, cs.IR, cs.LG"
-            class="streamlit-input"
-          />
-          <div class="streamlit-help">用逗号分隔的分类列表；支持多个学科标签。</div>
-        </div>
-        <div class="form-item">
           <label>MAX_ENTRIES</label>
           <input type="number" v-model="configChanges.MAX_ENTRIES" class="streamlit-input" />
           <div class="streamlit-help">每次拉取的最大论文数量（越大越慢）。</div>
@@ -1027,7 +1017,6 @@ const sectionFields: Record<string, string[]> = {
     "ARXIV_BASE_URL",
     "ARXIV_RETRIES",
     "ARXIV_DELAY",
-    "ARXIV_CATEGORIES",
     "MAX_ENTRIES",
     "NUM_DETAILED_PAPERS",
     "NUM_BRIEF_PAPERS",
