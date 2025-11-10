@@ -1,44 +1,46 @@
 <template>
   <div class="streamlit-dashboard">
     <!-- 页面头部 -->
-  <div class="streamlit-header">
-    <h1 class="streamlit-title">📚 ArXiv 学术分类</h1>
-    <div class="streamlit-caption">探索完整的 ArXiv 学术分类体系，发现你的研究领域</div>
-  </div>
+    <div class="streamlit-header">
+      <h1 class="streamlit-title">📚 ArXiv推荐系统 - 学术分类</h1>
+    </div>
 
     <!-- 错误提示 -->
     <div v-if="error" class="streamlit-error">
       {{ error }}
     </div>
 
-    <!-- 统计卡片 -->
-    <div class="streamlit-section" v-if="categories.length">
-      <h2 class="streamlit-subheader">📈 分类概览</h2>
-      <div class="stats-card">
-        <div class="stat-item">
-          <div class="stat-value">{{ totalMain }}</div>
-          <div class="stat-label">主要学术领域</div>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat-item">
-          <div class="stat-value green">{{ totalSub }}</div>
-          <div class="stat-label">具体研究方向</div>
+    <!-- 主要内容区域 -->
+    <div class="dashboard-content">
+      <!-- 统计卡片 -->
+      <div class="streamlit-section" v-if="categories.length">
+        <h2 class="streamlit-subheader">📈 分类概览</h2>
+        <div class="stats-card">
+          <div class="stat-item">
+            <div class="stat-value">{{ totalMain }}</div>
+            <div class="stat-label">主要学术领域</div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <div class="stat-value green">{{ totalSub }}</div>
+            <div class="stat-label">具体研究方向</div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- 搜索框 -->
-    <div class="streamlit-section">
-      <h2 class="streamlit-subheader">🔎 分类搜索</h2>
-      <div class="streamlit-text-area">
-        <label>输入关键词（ID/名称/描述，支持中英文）：</label>
-        <input
-          type="text"
-          v-model="keyword"
-          placeholder="例如：cs.AI、人工智能、quantum"
-          class="streamlit-input"
-        />
-        <div class="streamlit-help">支持在分类ID、英文/中文名称、英文/中文描述中搜索</div>
+      <!-- 搜索框 -->
+      <div class="streamlit-section">
+        <h2 class="streamlit-subheader">🔎 分类搜索</h2>
+        <div class="streamlit-text-input">
+          <label>输入关键词（ID/名称/描述，支持中英文）：</label>
+          <input
+            type="text"
+            v-model="keyword"
+            placeholder="例如：cs.AI、人工智能、quantum"
+            class="streamlit-input"
+          />
+          <div class="streamlit-help">支持在分类ID、英文/中文名称、英文/中文描述中搜索</div>
+        </div>
       </div>
     </div>
 

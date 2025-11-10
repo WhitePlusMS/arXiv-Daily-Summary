@@ -1,161 +1,177 @@
 <template>
   <div class="streamlit-dashboard">
-    <!-- 页面头部 - 完全复制Streamlit样式 -->
+    <!-- 页面头部 - 优化布局 -->
     <div class="streamlit-header">
-      <h1 class="streamlit-title">📚 ArXiv 每日论文推荐系统</h1>
-      <div class="streamlit-caption">
-        当前时间: {{ localTime }} ({{ localTimezone }}) | ArXiv时间: {{ arxivTime }} ({{
-          arxivTimezone
-        }})
+      <h1 class="streamlit-title">📚 ArXiv推荐系统 - 每日论文推荐</h1>
+      <div class="streamlit-caption time-info">
+        <span class="time-item">
+          <span class="time-label">当前时间</span>
+          <span class="time-value">{{ localTime }}</span>
+          <span class="time-zone">({{ localTimezone }})</span>
+        </span>
+        <span class="time-separator">|</span>
+        <span class="time-item">
+          <span class="time-label">ArXiv时间</span>
+          <span class="time-value">{{ arxivTime }}</span>
+          <span class="time-zone">({{ arxivTimezone }})</span>
+        </span>
       </div>
     </div>
 
-    <!-- 错误提示 - Streamlit样式 -->
+    <!-- 错误提示 -->
     <div v-if="error" class="streamlit-error">
       {{ error }}
     </div>
 
-    <!-- 用户配置区域（简化：去除内层套叠） -->
-    <div class="streamlit-section">
-      <h2 class="streamlit-subheader">👤 用户配置</h2>
-      <div class="streamlit-selectbox">
-        <label>选择用户配置：</label>
-        <select
-          v-model="selectedProfileName"
-          @change="handleProfileChange"
-          :disabled="isLoading"
-          class="streamlit-select"
+    <!-- 主要内容区域 - 单栏布局，按逻辑顺序排列 -->
+    <div class="dashboard-content">
+      <!-- 用户配置区域 -->
+      <div class="streamlit-section">
+        <h2 class="streamlit-subheader">👤 用户配置</h2>
+        <div class="streamlit-selectbox">
+          <label>选择用户配置：</label>
+          <select
+            v-model="selectedProfileName"
+            @change="handleProfileChange"
+            :disabled="isLoading"
+            class="streamlit-select"
+          >
+            <option value="自定义">自定义</option>
+            <option v-for="profile in userProfiles" :key="profile.username" :value="profile.username">
+              {{ profile.username }}
+            </option>
+          </select>
+        </div>
+
+        <!-- 用户配置成功信息 -->
+        <div v-if="selectedProfile && selectedProfileName !== '自定义'" class="streamlit-success">
+          <div class="success-content">
+            <strong>✅ 已加载用户 {{ selectedProfileName }} 的配置</strong>
+            <br /><br />
+            <strong>分类标签</strong>: <code>{{ selectedProfile.category_id || "未设置" }}</code>
+            <br /><br />
+            <strong>研究兴趣</strong>:
+            <pre class="research-interests-code">{{ selectedProfile.user_input || "未设置" }}</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- 研究兴趣区域 -->
+      <div class="streamlit-section">
+        <h2 class="streamlit-subheader">🎯 研究兴趣</h2>
+        <div class="streamlit-text-area">
+          <label>请输入您的研究方向，描述即可：</label>
+          <textarea
+            v-model="interestsText"
+            placeholder="输入您的研究方向，系统将基于这些方向推荐相关论文"
+            :disabled="isLoading"
+            class="streamlit-textarea"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- 推荐系统区域 -->
+      <div class="streamlit-section">
+        <h2 class="streamlit-subheader">🚀 运行推荐系统</h2>
+
+        <!-- 调试模式警告 -->
+        <div v-if="isDebugMode" class="streamlit-warning">
+          🔧 <strong>调试模式已启用</strong> - 系统将使用模拟数据，不会调用真实的ArXiv API和LLM服务
+        </div>
+
+        <!-- 主推荐按钮 -->
+        <div class="button-group">
+          <button
+            @click="runMainRecommendation"
+            :disabled="isLoading || !hasResearchInterests"
+            class="streamlit-button streamlit-button-primary"
+          >
+            🔍 生成最新推荐报告
+          </button>
+          <div class="streamlit-help">将优先查询：{{ yesterdayStr }}，若无则：{{ prevStr }}</div>
+        </div>
+      </div>
+
+      <!-- 高级选项 -->
+      <div class="streamlit-section">
+        <div
+          class="streamlit-expander-header"
+          @click="toggleAdvancedOptions"
+          :class="{ expanded: showAdvancedOptions }"
         >
-          <option value="自定义">自定义</option>
-          <option v-for="profile in userProfiles" :key="profile.username" :value="profile.username">
-            {{ profile.username }}
-          </option>
-        </select>
-      </div>
+          <span class="expander-icon">{{ showAdvancedOptions ? "▼" : "▶" }}</span>
+          🔧 高级选项：查询特定日期的报告
+        </div>
+        <div v-show="showAdvancedOptions" class="streamlit-expander-content">
+          <div class="streamlit-markdown">
+            <p>💡 <strong>提示：</strong> 如果您需要查看特定日期的论文推荐，可以在这里指定日期。</p>
+            <p>
+              ⚠️ <strong>注意：</strong> ArXiv通常在周日至周四发布论文，周五和周六不发布新论文。
+            </p>
+          </div>
 
-      <!-- 用户配置成功信息 -->
-      <div v-if="selectedProfile && selectedProfileName !== '自定义'" class="streamlit-success">
-        <div class="success-content">
-          <strong>✅ 已加载用户 {{ selectedProfileName }} 的配置</strong>
-          <br /><br />
-          <strong>分类标签</strong>: <code>{{ selectedProfile.category_id || "未设置" }}</code>
-          <br /><br />
-          <strong>研究兴趣</strong>:
-          <pre class="research-interests-code">{{ selectedProfile.user_input || "未设置" }}</pre>
+          <div class="streamlit-date-input">
+            <label>选择查询日期</label>
+            <input type="date" v-model="selectedDate" :max="todayStr" class="streamlit-date" />
+            <div class="streamlit-help">选择您想要查询论文的日期</div>
+          </div>
+
+          <button
+            @click="runSpecificDateRecommendation"
+            :disabled="isLoading"
+            class="streamlit-button"
+          >
+            🔍 查询指定日期（{{ selectedDate }}）
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- 研究兴趣区域 - 完全复制Streamlit样式 -->
-    <div class="streamlit-section">
-      <h2 class="streamlit-subheader">🎯 研究兴趣</h2>
-      <div class="streamlit-text-area">
-        <label>请输入您的研究方向，描述即可：</label>
-        <textarea
-          v-model="interestsText"
-          placeholder="输入您的研究方向，系统将基于这些方向推荐相关论文"
-          :disabled="isLoading"
-          class="streamlit-textarea"
-        ></textarea>
+    <!-- 运行状态和结果区域 -->
+    <div v-if="isRunning || lastRecommendationResult" class="dashboard-results">
+      <!-- 运行状态区域 -->
+      <div v-if="isRunning" class="streamlit-section">
+        <h2 class="streamlit-subheader">📋 运行状态</h2>
+        <div class="streamlit-spinner">
+          <div class="spinner"></div>
+          <span>{{ runningMessage }}</span>
+        </div>
+      </div>
+
+      <!-- 推荐结果 -->
+      <div v-if="lastRecommendationResult" class="streamlit-section">
+        <h2 class="streamlit-subheader">📊 推荐结果</h2>
+        <div v-if="lastRecommendationResult.success" class="streamlit-success">
+          <strong>✅ {{ lastRecommendationResult.message }}</strong>
+          <div v-if="lastRecommendationResult.report_path" class="result-details">
+            <p><strong>报告路径：</strong>{{ lastRecommendationResult.report_path }}</p>
+            <p v-if="lastRecommendationResult.execution_time">
+              <strong>执行时间：</strong>{{ lastRecommendationResult.execution_time }}秒
+            </p>
+          </div>
+        </div>
+        <div v-else class="streamlit-error">❌ {{ lastRecommendationResult.message }}</div>
       </div>
     </div>
 
-    <!-- 推荐系统区域（简化：高级选项移出为独立分区） -->
-    <div class="streamlit-section">
-      <h2 class="streamlit-subheader">🚀 运行推荐系统</h2>
-
-      <!-- 调试模式警告 -->
-      <div v-if="isDebugMode" class="streamlit-warning">
-        🔧 <strong>调试模式已启用</strong> - 系统将使用模拟数据，不会调用真实的ArXiv API和LLM服务
-      </div>
-
-      <!-- 主推荐按钮 -->
-      <button
-        @click="runMainRecommendation"
-        :disabled="isLoading || !hasResearchInterests"
-        class="streamlit-button streamlit-button-primary"
-      >
-        🔍 生成最新推荐报告（将优先查询：{{ yesterdayStr }}，若无则：{{ prevStr }}）
-      </button>
-      <div class="streamlit-help">系统将自动查找最近可用的论文并生成推荐报告</div>
-
-    </div>
-
-    <!-- 高级选项（独立分区，避免内层套叠） -->
-    <div class="streamlit-section">
-      <div
-        class="streamlit-expander-header"
-        @click="toggleAdvancedOptions"
-        :class="{ expanded: showAdvancedOptions }"
-        style="margin-bottom:8px;"
-      >
-        <span class="expander-icon">{{ showAdvancedOptions ? "▼" : "▶" }}</span>
-        🔧 高级选项：查询特定日期的报告
-      </div>
-      <div v-show="showAdvancedOptions" class="streamlit-expander-content">
-        <div class="streamlit-markdown">
-          <p>💡 <strong>提示：</strong> 如果您需要查看特定日期的论文推荐，可以在这里指定日期。</p>
-          <p>
-            ⚠️ <strong>注意：</strong> ArXiv通常在周日至周四发布论文，周五和周六不发布新论文。
-          </p>
-        </div>
-
-        <div class="streamlit-date-input">
-          <label>选择查询日期</label>
-          <input type="date" v-model="selectedDate" :max="todayStr" class="streamlit-date" />
-          <div class="streamlit-help">选择您想要查询论文的日期</div>
-        </div>
-
-        <button
-          @click="runSpecificDateRecommendation"
-          :disabled="isLoading"
-          class="streamlit-button"
-        >
-          🔍 查询指定日期（{{ selectedDate }}）
+    <!-- 历史报告区域 -->
+    <div class="streamlit-section dashboard-history">
+      <div class="section-header">
+        <h2 class="streamlit-subheader">📁 历史报告管理</h2>
+        <button @click="loadRecentReports" :disabled="isLoading" class="streamlit-button streamlit-button-small">
+          {{ isLoading ? "加载中..." : "🔄 刷新" }}
         </button>
       </div>
-    </div>
-
-    <!-- 运行状态区域 -->
-    <div v-if="isRunning" class="streamlit-section">
-      <h2 class="streamlit-subheader">📋 运行状态</h2>
-      <div class="streamlit-spinner">
-        <div class="spinner"></div>
-        <span>{{ runningMessage }}</span>
-      </div>
-    </div>
-
-    <!-- 推荐tresultult -->
-    <div v-if="lastRecommendationResult" class="streamlit-section">
-      <h2 class="streamlit-subheader">📊 推荐结果</h2>
-      <div v-if="lastRecommendationResult.success" class="streamlit-success">
-        <strong>✅ {{ lastRecommendationResult.message }}</strong>
-        <div v-if="lastRecommendationResult.report_path" class="result-details">
-          <p><strong>报告路径：</strong>{{ lastRecommendationResult.report_path }}</p>
-          <p v-if="lastRecommendationResult.execution_time">
-            <strong>执行时间：</strong>{{ lastRecommendationResult.execution_time }}秒
-          </p>
-        </div>
-      </div>
-      <div v-else class="streamlit-error">❌ {{ lastRecommendationResult.message }}</div>
-    </div>
-
-    <!-- 历史报告区域 - 完全复制Streamlit功能 -->
-    <div class="streamlit-section">
-      <h2 class="streamlit-subheader">📁 历史报告管理</h2>
-
-      <button @click="loadRecentReports" :disabled="isLoading" class="streamlit-button">
-        {{ isLoading ? "加载中..." : "🔄 刷新报告列表" }}
-      </button>
 
       <!-- 报告列表 -->
       <div v-if="recentReports.length > 0" class="reports-section">
-        <h3 class="streamlit-subheader">📋 最近报告：</h3>
         <div v-for="report in recentReports" :key="report.name" class="report-item">
           <div class="report-info">
             <div class="report-name">{{ report.name }}</div>
-            <div class="report-date">{{ formatDate(report.date) }}</div>
-            <div class="report-size">{{ formatFileSize(report.size) }}</div>
+            <div class="report-meta">
+              <span class="report-date">{{ formatDate(report.date) }}</span>
+              <span class="report-size">{{ formatFileSize(report.size) }}</span>
+            </div>
           </div>
           <div class="report-actions">
             <button
@@ -188,6 +204,9 @@
             </button>
           </div>
         </div>
+      </div>
+      <div v-else class="empty-state">
+        <p>暂无历史报告</p>
       </div>
     </div>
 

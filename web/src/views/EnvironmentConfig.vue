@@ -22,45 +22,47 @@
       </div>
     </div>
 
-    <!-- 概览状态卡片 -->
-    <div class="streamlit-section">
-      <div class="stats-card">
-        <div class="stat-item">
-          <div :class="['stat-value', hasDashscopeKey ? 'green' : 'red']">
-            {{ hasDashscopeKey ? "已配置" : "未配置" }}
+    <!-- 主要内容区域 -->
+    <div class="dashboard-content">
+      <!-- 概览状态卡片 -->
+      <div class="streamlit-section">
+        <h2 class="streamlit-subheader">📊 配置概览</h2>
+        <div class="stats-card">
+          <div class="stat-item">
+            <div :class="['stat-value', hasDashscopeKey ? 'green' : 'red']">
+              {{ hasDashscopeKey ? "已配置" : "未配置" }}
+            </div>
+            <div class="stat-label">DashScope API Key</div>
           </div>
-          <div class="stat-label">DashScope API Key</div>
-        </div>
-        <div class="stat-item">
-          <div :class="['stat-value', emailEnabled ? 'green' : 'red']">
-            {{ emailEnabled ? "已启用" : "未启用" }}
+          <div class="stat-item">
+            <div :class="['stat-value', emailEnabled ? 'green' : 'red']">
+              {{ emailEnabled ? "已启用" : "未启用" }}
+            </div>
+            <div class="stat-label">邮件发送</div>
           </div>
-          <div class="stat-label">邮件发送</div>
-        </div>
-        <div class="stat-item">
-          <div :class="['stat-value', debugEnabled ? 'green' : '']">
-            {{ debugEnabled ? "调试模式" : "生产模式" }}
+          <div class="stat-item">
+            <div :class="['stat-value', debugEnabled ? 'green' : '']">
+              {{ debugEnabled ? "调试模式" : "生产模式" }}
+            </div>
+            <div class="stat-label">运行模式</div>
           </div>
-          <div class="stat-label">运行模式</div>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat-item">
-          <div class="stat-value">{{ lightProviderLabel }}</div>
-          <div class="stat-label">轻量模型提供方</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value">{{ heavyProviderLabel }}</div>
-          <div class="stat-label">主模型提供方</div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <div class="stat-value">{{ lightProviderLabel }}</div>
+            <div class="stat-label">轻量模型提供方</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">{{ heavyProviderLabel }}</div>
+            <div class="stat-label">主模型提供方</div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- 未保存更改提示（展开详情） -->
-    <div class="streamlit-section">
-      <div v-if="changedKeys.length > 0">
-        <div v-if="showChanges" class="streamlit-warning">
-          📋 更改详情（未保存）
-          <div class="streamlit-expander-content">
+      <!-- 未保存更改提示 -->
+      <div v-if="changedKeys.length > 0 && showChanges" class="streamlit-section">
+        <div class="streamlit-warning">
+          <strong>📋 更改详情（未保存）</strong>
+          <div class="streamlit-expander-content" style="margin-top: 12px;">
             <ul class="changes-list">
               <li v-for="k in changedKeys" :key="k">
                 <strong>{{ k }}</strong
@@ -70,45 +72,37 @@
           </div>
         </div>
       </div>
-      <div v-else class="streamlit-success">✅ 所有配置已同步，无未保存更改</div>
-      
+      <div v-else-if="changedKeys.length === 0" class="streamlit-success">✅ 所有配置已同步，无未保存更改</div>
     </div>
 
-    <!-- 分组标签导航（更直观） -->
-    <div class="streamlit-section">
-      <h2 class="streamlit-subheader">📑 配置分组</h2>
-      <div class="button-row">
-        <button
-          v-for="s in sections"
-          :key="s"
-          class="streamlit-button streamlit-button-small"
-          :class="{ 'streamlit-button-primary': s === selectedSection }"
-          :disabled="isLoading"
-          @click="selectedSection = s"
-        >
-          {{ s }}
-        </button>
+    <!-- 配置分组和表单区域 -->
+    <div class="dashboard-content">
+      <!-- 分组标签导航 -->
+      <div class="streamlit-section">
+        <h2 class="streamlit-subheader">📑 配置分组</h2>
+        <div class="button-row">
+          <button
+            v-for="s in sections"
+            :key="s"
+            class="streamlit-button streamlit-button-small"
+            :class="{ 'streamlit-button-primary': s === selectedSection }"
+            :disabled="isLoading"
+            @click="selectedSection = s"
+          >
+            {{ s }}
+          </button>
+        </div>
       </div>
-    </div>
 
-    <!-- 配置表单区域 -->
-    <div class="streamlit-section">
-      <h2 class="streamlit-subheader">{{ selectedSection }}</h2>
+      <!-- 配置表单区域 -->
+      <div class="streamlit-section">
+        <h2 class="streamlit-subheader">{{ selectedSection }}</h2>
 
       <!-- 🤖 模型与API配置（卡片布局重构） -->
       <div v-if="selectedSection === '🤖 模型与API配置'" class="form-grid">
         <!-- 卡片1：提供商基础配置（始终显示） -->
-        <div
-          class="form-card"
-          style="
-            padding: 16px;
-            border: 1px solid #eaecef;
-            border-radius: 8px;
-            background: #fbfbfb;
-            margin-bottom: 16px;
-          "
-        >
-          <h3 class="streamlit-subheader">提供商基础配置</h3>
+        <div class="form-subsection">
+          <h3 class="form-subsection-title">提供商基础配置</h3>
           <div class="form-item">
             <label>DASHSCOPE_API_KEY</label>
             <div class="password-field">
@@ -143,17 +137,8 @@
         </div>
 
         <!-- 卡片2：分类匹配模型提供方与参数 -->
-        <div
-          class="form-card"
-          style="
-            padding: 16px;
-            border: 1px solid #eaecef;
-            border-radius: 8px;
-            background: #fbfbfb;
-            margin-bottom: 16px;
-          "
-        >
-          <h3 class="streamlit-subheader">分类匹配模型提供方与参数</h3>
+        <div class="form-subsection">
+          <h3 class="form-subsection-title">分类匹配模型提供方与参数</h3>
           <div class="form-item">
             <label>分类匹配模型提供方</label>
             <select v-model="configChanges.LIGHT_MODEL_PROVIDER" class="streamlit-select">
@@ -251,17 +236,8 @@
         </div>
 
         <!-- 卡片3：正文分析与报告模型提供方与参数 -->
-        <div
-          class="form-card"
-          style="
-            padding: 16px;
-            border: 1px solid #eaecef;
-            border-radius: 8px;
-            background: #fbfbfb;
-            margin-bottom: 16px;
-          "
-        >
-          <h3 class="streamlit-subheader">正文分析与报告模型提供方与参数</h3>
+        <div class="form-subsection">
+          <h3 class="form-subsection-title">正文分析与报告模型提供方与参数</h3>
           <div class="form-item">
             <label>正文分析与报告模型提供方</label>
             <select v-model="configChanges.HEAVY_MODEL_PROVIDER" class="streamlit-select">
@@ -628,7 +604,7 @@
           </div>
         </div>
       </div>
-
+      </div>
     </div>
 
     <!-- 底部操作按钮（除提示词分组外显示） -->

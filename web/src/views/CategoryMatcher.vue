@@ -3,8 +3,8 @@
   <div class="streamlit-dashboard">
     <!-- 页面头部 -->
     <div class="streamlit-header">
-      <h1 class="streamlit-title">📚 ArXiv 分类匹配器</h1>
-      <div class="guide-card" style="margin-top: 8px">
+      <h1 class="streamlit-title">📚 ArXiv推荐系统 - 分类匹配器</h1>
+      <div class="guide-card">
         <div class="sub-desc">
           步骤：1）填写用户名与研究描述 → 2）可选AI优化 → 3）开始匹配 → 4）查看结果与使用统计 →
           5）管理与导出历史记录
@@ -17,151 +17,161 @@
       {{ error }}
     </div>
 
-    <!-- 研究信息输入 -->
-    <div class="streamlit-section">
-      <h2 class="streamlit-subheader">📝 输入研究信息</h2>
-      <div class="streamlit-text-input">
-        <label>用户名</label>
-        <input
-          type="text"
-          v-model="username"
-          :disabled="isMatching"
-          class="streamlit-input"
-          placeholder="请输入您的用户名"
-        />
-      </div>
+    <!-- 主要内容区域 - 单栏布局 -->
+    <div class="dashboard-content">
+      <!-- 研究信息输入和匹配 -->
+      <div class="streamlit-section">
+        <h2 class="streamlit-subheader">📝 输入研究信息</h2>
+        <div class="streamlit-text-input">
+          <label>用户名</label>
+          <input
+            type="text"
+            v-model="username"
+            :disabled="isMatching"
+            class="streamlit-input"
+            placeholder="请输入您的用户名"
+          />
+        </div>
 
-      <div v-if="isMatching" class="streamlit-warning">
-        ⚠️ 正在进行分类匹配，请等待完成后再修改输入内容
-      </div>
+        <div v-if="isMatching" class="streamlit-warning">
+          ⚠️ 正在进行分类匹配，请等待完成后再修改输入内容
+        </div>
 
-      <div class="streamlit-text-area">
-        <label>研究内容描述</label>
-        <textarea
-          v-model="researchDescription"
-          :disabled="isMatching || isDescriptionLocked"
-          class="streamlit-textarea"
-          placeholder="请详细描述您的研究方向和兴趣领域…"
-        ></textarea>
-        <div class="streamlit-help">支持Markdown格式，请尽可能详细地描述您的研究方向</div>
-      </div>
+        <div class="streamlit-text-area">
+          <label>研究内容描述</label>
+          <textarea
+            v-model="researchDescription"
+            :disabled="isMatching || isDescriptionLocked"
+            class="streamlit-textarea"
+            placeholder="请详细描述您的研究方向和兴趣领域…"
+          ></textarea>
+          <div class="streamlit-help">支持Markdown格式，请尽可能详细地描述您的研究方向</div>
+        </div>
 
-      <div class="action-row">
-        <button
-          class="streamlit-button"
-          :disabled="isMatching || !researchDescription.trim()"
-          @click="optimizeDescription"
-        >
-          ✨ AI优化描述
-        </button>
+        <div class="form-actions">
+          <div class="action-buttons">
+            <button
+              class="streamlit-button"
+              :disabled="isMatching || !researchDescription.trim()"
+              @click="optimizeDescription"
+            >
+              ✨ AI优化描述
+            </button>
+          </div>
+          
+          <div class="match-config">
+            <div class="streamlit-text-input">
+              <label>返回结果数量</label>
+              <input 
+                type="number" 
+                min="1" 
+                max="10" 
+                v-model.number="topN" 
+                class="streamlit-input"
+                style="width: 100px;"
+              />
+            </div>
+            <button
+              class="streamlit-button streamlit-button-primary"
+              :disabled="isMatching || !username.trim() || !researchDescription.trim()"
+              @click="startMatching"
+            >
+              {{ isMatching ? "正在匹配中…" : "🔍 开始匹配分类" }}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- 匹配操作 -->
-    <div class="streamlit-section">
-      <h2 class="streamlit-subheader">🚀 开始匹配</h2>
-      <div class="streamlit-text-input" style="max-width: 600px; margin-bottom: 8px">
-        <label>返回结果数量</label>
-        <input type="range" min="1" max="10" v-model.number="topN" />
-        <div class="streamlit-help">Top {{ topN }}</div>
+    <!-- 运行状态和结果区域 -->
+    <div v-if="isMatching || matchCompleted || results.length > 0" class="dashboard-results">
+      <!-- 运行状态 -->
+      <div v-if="isMatching" class="streamlit-section">
+        <h2 class="streamlit-subheader">📋 运行状态</h2>
+        <div class="streamlit-spinner">
+          <div class="spinner"></div>
+          <span>{{ runningMessage }}</span>
+        </div>
       </div>
-      <button
-        class="streamlit-button streamlit-button-primary"
-        :disabled="isMatching"
-        @click="startMatching"
+
+      <!-- 匹配完成提示 -->
+      <div v-if="matchCompleted" class="streamlit-section">
+        <div class="streamlit-success">
+          ✅ 匹配完成！结果已保存到数据库。<br />
+          📊 全部115个分类的详细评分已保存到 data/users/detailed_scores/ 目录。
+        </div>
+      </div>
+
+      <!-- 匹配结果 -->
+      <div v-if="results.length > 0" class="streamlit-section">
+        <h2 class="streamlit-subheader">🎯 匹配结果</h2>
+        <div class="results-table">
+          <div class="table-header">
+            <div>#</div>
+            <div>分类ID</div>
+            <div>分类名称</div>
+            <div>匹配评分</div>
+          </div>
+          <div v-for="(r, idx) in results" :key="r.id" class="table-row">
+            <div>{{ idx + 1 }}</div>
+            <div>
+              <code>{{ r.id }}</code>
+            </div>
+            <div>{{ r.name }}</div>
+            <div>{{ r.score }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 用户数据管理（整合统计信息） -->
+    <div class="streamlit-section">
+      <div
+        class="streamlit-expander-header"
+        @click="toggleManagementCollapse"
+        :class="{ expanded: !managementCollapsed }"
       >
-        {{ isMatching ? "正在匹配中…" : "开始匹配分类" }}
-      </button>
-      <div class="streamlit-help">将根据研究描述匹配最相关的ArXiv分类</div>
-    </div>
-
-    <!-- 运行状态 -->
-    <div v-if="isMatching" class="streamlit-section">
-      <h2 class="streamlit-subheader">📋 运行状态</h2>
-      <div class="streamlit-spinner">
-        <div class="spinner"></div>
-        <span>{{ runningMessage }}</span>
+        <span class="expander-icon">{{ managementCollapsed ? "▶" : "▼" }}</span>
+        <strong>👥 用户数据管理</strong>
       </div>
-    </div>
-
-    <!-- 匹配完成提示 -->
-    <div v-if="matchCompleted" class="streamlit-success">
-      ✅ 匹配完成！结果已保存到数据库。<br />
-      📊 全部115个分类的详细评分已保存到 data/users/detailed_scores/ 目录。
-    </div>
-
-    <!-- 匹配结果 -->
-    <div v-if="results.length > 0" class="streamlit-section">
-      <h2 class="streamlit-subheader">🎯 匹配结果</h2>
-      <div class="results-table">
-        <div class="table-header">
-          <div>#</div>
-          <div>分类ID</div>
-          <div>分类名称</div>
-          <div>匹配评分</div>
-        </div>
-        <div v-for="(r, idx) in results" :key="r.id" class="table-row">
-          <div>{{ idx + 1 }}</div>
-          <div>
-            <code>{{ r.id }}</code>
-          </div>
-          <div>{{ r.name }}</div>
-          <div>{{ r.score }}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 统计（置于页面下方，统一样式） -->
-    <div class="streamlit-expander">
-      <div class="streamlit-expander-header" @click="toggleStatsCollapse">
-        <strong>📊 统计</strong>
-        <span style="float: right; color: var(--color-text-soft)">{{
-          statsCollapsed ? "展开" : "折叠"
-        }}</span>
-      </div>
-      <div class="streamlit-expander-content" v-show="!statsCollapsed">
-        <div v-if="tokenUsage.total_tokens > 0" style="margin-bottom: 12px">
-          <div class="token-grid">
-            <div class="token-item">
-              <div class="token-value">{{ tokenUsage.input_tokens }}</div>
-              <div class="token-label">输入Token</div>
+      <div class="streamlit-expander-content" v-show="!managementCollapsed">
+        <!-- 统计信息 -->
+        <div class="management-header">
+          <div class="stats-summary">
+            <div v-if="stats" class="stat-badge">
+              <span class="stat-badge-label">总记录数：</span>
+              <span class="stat-badge-value">{{ stats.total_records || 0 }}</span>
             </div>
-            <div class="token-item">
-              <div class="token-value">{{ tokenUsage.output_tokens }}</div>
-              <div class="token-label">输出Token</div>
-            </div>
-            <div class="token-item">
-              <div class="token-value">{{ tokenUsage.total_tokens }}</div>
-              <div class="token-label">总Token</div>
+            <div v-if="stats" class="stat-badge">
+              <span class="stat-badge-label">用户数量：</span>
+              <span class="stat-badge-value">{{ stats.unique_users || 0 }}</span>
             </div>
           </div>
-        </div>
-        <div class="status-grid">
-          <div v-if="stats" class="status-item">
-            <div class="status-label">总记录数</div>
-            <div class="status-value">{{ stats.total_records }}</div>
-          </div>
-          <div v-if="stats" class="status-item">
-            <div class="status-label">用户数量</div>
-            <div class="status-value">{{ stats.unique_users }}</div>
-          </div>
-          <button class="streamlit-button" :disabled="isLoading" @click="refreshData">
+          <button class="streamlit-button streamlit-button-small" :disabled="isLoading" @click="refreshData">
             🔄 刷新数据
           </button>
         </div>
-      </div>
-    </div>
 
-    <!-- 用户数据管理（可折叠） -->
-    <div class="streamlit-expander">
-      <div class="streamlit-expander-header" @click="toggleManagementCollapse">
-        <strong>👥 用户数据管理</strong>
-        <span style="float: right; color: var(--color-text-soft)">{{
-          managementCollapsed ? "展开" : "折叠"
-        }}</span>
-      </div>
-      <div class="streamlit-expander-content" v-show="!managementCollapsed">
-        <div class="streamlit-text-input" style="margin-bottom: 10px">
+        <!-- Token使用统计（如果有） -->
+        <div v-if="tokenUsage.total_tokens > 0" class="token-usage-section">
+          <div class="streamlit-help" style="margin-bottom: 8px;">📊 最近一次匹配的Token使用情况：</div>
+          <div class="token-grid-compact">
+            <div class="token-item-compact">
+              <span class="token-label-compact">输入：</span>
+              <span class="token-value-compact">{{ tokenUsage.input_tokens }}</span>
+            </div>
+            <div class="token-item-compact">
+              <span class="token-label-compact">输出：</span>
+              <span class="token-value-compact">{{ tokenUsage.output_tokens }}</span>
+            </div>
+            <div class="token-item-compact">
+              <span class="token-label-compact">总计：</span>
+              <span class="token-value-compact">{{ tokenUsage.total_tokens }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="streamlit-text-input" style="margin-top: 16px; margin-bottom: 10px">
           <label>🔍 搜索用户或内容</label>
           <input
             type="text"
@@ -189,10 +199,6 @@
           <button class="streamlit-button" :disabled="isMatching" @click="exportJSON">
             📥 导出JSON
           </button>
-        </div>
-
-        <div class="streamlit-help" style="margin-top: 10px; margin-bottom: 10px">
-          提示：当前前端仅展示与管理数据，编辑与删除需后端API支持。
         </div>
 
         <div class="records-list" v-if="filteredProfiles.length > 0">
