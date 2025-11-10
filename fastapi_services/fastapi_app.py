@@ -9,6 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from pathlib import Path
 import os
+import sys
+import logging
 from loguru import logger
 from typing import List, Optional
 
@@ -152,9 +154,125 @@ def _decorate_error_detail(detail: dict) -> dict:
     detail["fix_suggestions"] = fix_suggestions
     return detail
 
+# 日志配置标志，确保只配置一次
+_logging_configured = False
+
+def cleanup_old_logs_by_size(files: list, max_size_mb: int = 500):
+    """清理旧日志文件，确保总大小不超过指定值（MB）
+    
+    Args:
+        files: 日志文件路径列表（loguru传入的）
+        max_size_mb: 最大总大小（MB），默认500MB
+    """
+    if not files:
+        return
+    
+    max_size_bytes = max_size_mb * 1024 * 1024  # 转换为字节
+    
+    # 将文件路径转换为Path对象，并按修改时间排序（最旧的在前）
+    file_paths = [Path(f) for f in files if Path(f).exists()]
+    file_paths.sort(key=lambda f: f.stat().st_mtime)
+    
+    # 计算当前总大小
+    total_size = sum(f.stat().st_size for f in file_paths)
+    
+    # 如果总大小超过限制，删除最旧的文件
+    while total_size > max_size_bytes and len(file_paths) > 1:
+        oldest_file = file_paths.pop(0)
+        file_size = oldest_file.stat().st_size
+        try:
+            oldest_file.unlink()
+            total_size -= file_size
+        except Exception:
+            # 如果删除失败，跳过这个文件
+            pass
+
+def cleanup_old_logs(logs_dir: Path, max_size_mb: int = 500):
+    """清理旧日志文件，确保日志目录总大小不超过指定值（MB）
+    用于启动时的初始清理
+    """
+    # 获取所有日志文件（包括轮转的文件）
+    log_files = list(logs_dir.glob("fastapi.log*"))
+    if log_files:
+        cleanup_old_logs_by_size([str(f) for f in log_files], max_size_mb)
+
+def setup_logging():
+    """配置日志记录到文件"""
+    global _logging_configured
+    if _logging_configured:
+        return
+    
+    # 创建logs目录
+    project_root = Path(__file__).parent.parent
+    logs_dir = project_root / "logs"
+    logs_dir.mkdir(exist_ok=True)
+    
+    # 日志文件路径
+    log_file = logs_dir / "fastapi.log"
+    
+    # 移除默认的loguru处理器
+    logger.remove()
+    
+    # 添加控制台输出（保持原有格式）
+    logger.add(
+        sys.stdout,
+        format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
+        level="DEBUG"
+    )
+    
+    # 自定义retention函数，确保总大小不超过500MB
+    def retention_function(files):
+        """在日志轮转时调用，清理旧日志确保总大小不超过500MB
+        files: loguru传入的日志文件路径列表
+        """
+        cleanup_old_logs_by_size(files, max_size_mb=500)
+    
+    # 添加文件输出（纯文本格式，便于查看）
+    logger.add(
+        log_file,
+        format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} - {message}",
+        level="DEBUG",
+        rotation="10 MB",  # 文件大小达到10MB时轮转
+        retention=retention_function,  # 自定义清理函数，确保总大小不超过500MB
+        encoding="utf-8",
+        enqueue=True  # 异步写入，提高性能
+    )
+    
+    # 启动时也执行一次清理
+    cleanup_old_logs(logs_dir, max_size_mb=500)
+    
+    # 拦截uvicorn和uvicorn.access的日志，使其也写入文件
+    class InterceptHandler(logging.Handler):
+        def emit(self, record):
+            # 获取对应的loguru级别
+            try:
+                level = logger.level(record.levelname).name
+            except ValueError:
+                # 如果级别名称不存在，根据级别号映射
+                level_map = {
+                    logging.DEBUG: "DEBUG",
+                    logging.INFO: "INFO",
+                    logging.WARNING: "WARNING",
+                    logging.ERROR: "ERROR",
+                    logging.CRITICAL: "CRITICAL",
+                }
+                level = level_map.get(record.levelno, "INFO")
+
+            # 使用loguru记录日志
+            logger.opt(depth=6, exception=record.exc_info).log(level, record.getMessage())
+
+    # 拦截uvicorn的日志
+    logging.getLogger("uvicorn").handlers = [InterceptHandler()]
+    logging.getLogger("uvicorn.access").handlers = [InterceptHandler()]
+    logging.getLogger("uvicorn.error").handlers = [InterceptHandler()]
+    
+    _logging_configured = True
+
 @app.on_event("startup")
 async def startup_event():
     """应用启动事件"""
+    # 配置日志
+    setup_logging()
     logger.info("FastAPI应用启动")
 
 @app.on_event("shutdown")
