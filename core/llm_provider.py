@@ -1,6 +1,6 @@
 """LLM提供商模块
 
-为论文分析和总结提供OpenAI兼容API集成，支持通义千问、SiliconFlow、OLLAMA等。
+为论文分析和总结提供OpenAI兼容API集成，支持通义千问、SiliconFlow等。
 同时包含LLM提供商的抽象基类定义。
 """
 
@@ -432,7 +432,7 @@ class LLMProvider:
 
     @staticmethod
     def build_scoring_warmup_messages() -> List[Dict[str, str]]:
-        """用于 OLLAMA 预热的一组消息，确保仅返回整数评分。"""
+        """保留占位的评分预热消息（不再针对本地引擎）。"""
         system_msg = LLMProvider.build_scoring_system_message(strict=True)
         return [
             {
@@ -441,7 +441,7 @@ class LLMProvider:
             },
             {
                 "role": "user",
-                "content": "Output only a number 0-100. No text. Test warmup:",
+                "content": "Output only a number 0-100. No text.",
             },
         ]
 
@@ -1088,29 +1088,15 @@ def create_light_llm_provider(description: str = "", username: str = "TEST") -> 
     Returns:
         配置好的LLM提供者实例
     """
-    # 获取轻量模型提供商类型
-    provider_type = get_str('LIGHT_MODEL_PROVIDER', 'qwen').lower()
+    # 统一使用通义千问轻量模型配置
+    model = get_str('QWEN_MODEL_LIGHT', 'qwen3-30b-a3b-instruct-2507')
+    base_url = get_str('DASHSCOPE_BASE_URL', 'https://dashscope.aliyuncs.com/compatible-mode/v1')
+    api_key = get_str('DASHSCOPE_API_KEY', '')
+    temperature = get_float('QWEN_MODEL_LIGHT_TEMPERATURE', 0.5)
+    top_p = get_float('QWEN_MODEL_LIGHT_TOP_P', 0.8)
+    max_tokens = get_int('QWEN_MODEL_LIGHT_MAX_TOKENS', 2000)
     
-    if provider_type == 'ollama':
-        # OLLAMA配置
-        model = get_str('OLLAMA_MODEL_LIGHT', 'llama3.2:3b')
-        base_url = get_str('OLLAMA_BASE_URL', 'http://localhost:11434/v1')
-        api_key = 'ollama'  # OLLAMA通常不需要真实的API密钥
-        temperature = get_float('OLLAMA_MODEL_LIGHT_TEMPERATURE', 0.7)
-        top_p = get_float('OLLAMA_MODEL_LIGHT_TOP_P', 0.9)
-        max_tokens = get_int('OLLAMA_MODEL_LIGHT_MAX_TOKENS', 2000)
-        
-        logger.info(f"创建OLLAMA轻量模型提供者 - 模型: {model}, URL: {base_url}")
-    else:
-        # 通义千问配置（默认）
-        model = get_str('QWEN_MODEL_LIGHT', 'qwen3-30b-a3b-instruct-2507')
-        base_url = get_str('DASHSCOPE_BASE_URL', 'https://dashscope.aliyuncs.com/compatible-mode/v1')
-        api_key = get_str('DASHSCOPE_API_KEY', '')
-        temperature = get_float('QWEN_MODEL_LIGHT_TEMPERATURE', 0.5)
-        top_p = get_float('QWEN_MODEL_LIGHT_TOP_P', 0.8)
-        max_tokens = get_int('QWEN_MODEL_LIGHT_MAX_TOKENS', 2000)
-        
-        logger.info(f"创建通义千问轻量模型提供者 - 模型: {model}")
+    logger.info(f"创建通义千问轻量模型提供者 - 模型: {model}")
     
     return LLMProvider(
         model=model,

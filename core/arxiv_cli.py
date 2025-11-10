@@ -83,16 +83,6 @@ class ArxivRecommenderCLI:
             # 提供方与模型映射（前端需要感知）
             'heavy_model_provider': get_str('HEAVY_MODEL_PROVIDER', 'dashscope'),
             'light_model_provider': get_str('LIGHT_MODEL_PROVIDER', get_str('HEAVY_MODEL_PROVIDER', 'dashscope')),
-            'ollama_base_url': get_str('OLLAMA_BASE_URL', 'http://localhost:11434/v1'),
-            'ollama_model_heavy': get_str('OLLAMA_MODEL_HEAVY', ''),
-            'ollama_model_light': get_str('OLLAMA_MODEL_LIGHT', ''),
-            # Ollama 轻/重模型参数（用于独立配置）
-            'ollama_model_light_temperature': get_float('OLLAMA_MODEL_LIGHT_TEMPERATURE', get_float('QWEN_MODEL_LIGHT_TEMPERATURE', 0.5)),
-            'ollama_model_light_top_p': get_float('OLLAMA_MODEL_LIGHT_TOP_P', get_float('QWEN_MODEL_LIGHT_TOP_P', 0.8)),
-            'ollama_model_light_max_tokens': get_int('OLLAMA_MODEL_LIGHT_MAX_TOKENS', get_int('QWEN_MODEL_LIGHT_MAX_TOKENS', 2000)),
-            'ollama_model_heavy_temperature': get_float('OLLAMA_MODEL_HEAVY_TEMPERATURE', get_float('QWEN_MODEL_TEMPERATURE', 0.7)),
-            'ollama_model_heavy_top_p': get_float('OLLAMA_MODEL_HEAVY_TOP_P', get_float('QWEN_MODEL_TOP_P', 0.9)),
-            'ollama_model_heavy_max_tokens': get_int('OLLAMA_MODEL_HEAVY_MAX_TOKENS', get_int('QWEN_MODEL_MAX_TOKENS', 4000)),
             'qwen_model_light': get_str('QWEN_MODEL_LIGHT', ''),
             
             # ArXiv获取器配置
@@ -619,25 +609,15 @@ class ArxivRecommenderCLI:
             )
             logger.debug(f"ArXiv获取器初始化完成 - URL: {self.config['arxiv_base_url']}, 重试: {self.config['arxiv_retries']}, 延迟: {self.config['arxiv_delay']}s")
             
-            # 初始化LLM提供商（按重型模型提供方选择）
-            heavy_provider = get_str('HEAVY_MODEL_PROVIDER', 'dashscope').lower()
-            if heavy_provider == 'ollama':
-                heavy_model = get_str('OLLAMA_MODEL_HEAVY', self.config.get('ollama_model_heavy') or get_str('OLLAMA_MODEL_LIGHT', self.config.get('ollama_model_light') or 'llama3.2:3b'))
-                heavy_base_url = get_str('OLLAMA_BASE_URL', self.config.get('ollama_base_url', 'http://localhost:11434/v1'))
-                heavy_api_key = 'ollama'
-                # 使用 Ollama 独立的重模型参数（若缺失则回退到Qwen参数）
-                heavy_temperature = self.config.get('ollama_model_heavy_temperature', self.config['qwen_model_temperature'])
-                heavy_top_p = self.config.get('ollama_model_heavy_top_p', self.config['qwen_model_top_p'])
-                heavy_max_tokens = self.config.get('ollama_model_heavy_max_tokens', self.config['qwen_model_max_tokens'])
-            else:
-                heavy_model = get_str('QWEN_MODEL', self.config['qwen_model'])
-                heavy_base_url = get_str('DASHSCOPE_BASE_URL', self.config['dashscope_base_url'])
-                heavy_api_key = get_str('DASHSCOPE_API_KEY', self.config['dashscope_api_key'])
-                heavy_temperature = self.config['qwen_model_temperature']
-                heavy_top_p = self.config['qwen_model_top_p']
-                heavy_max_tokens = self.config['qwen_model_max_tokens']
+            # 初始化LLM提供商（统一使用 DashScope/Qwen）
+            heavy_model = get_str('QWEN_MODEL', self.config['qwen_model'])
+            heavy_base_url = get_str('DASHSCOPE_BASE_URL', self.config['dashscope_base_url'])
+            heavy_api_key = get_str('DASHSCOPE_API_KEY', self.config['dashscope_api_key'])
+            heavy_temperature = self.config['qwen_model_temperature']
+            heavy_top_p = self.config['qwen_model_top_p']
+            heavy_max_tokens = self.config['qwen_model_max_tokens']
 
-            logger.debug(f"初始化LLM提供商 - 提供方: {heavy_provider}, 模型: {heavy_model}")
+            logger.debug(f"初始化LLM提供商 - 提供方: dashscope, 模型: {heavy_model}")
             # 构造主LLM提供者，并作为依赖注入传递给推荐引擎
             # LLMProvider 的 description 参数仍然是字符串，提取 positive_query
             research_interests_dict = self._load_research_interests()

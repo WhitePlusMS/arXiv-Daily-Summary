@@ -122,46 +122,7 @@ class CategoryMatcher:
         # Token统计迁移至 LLMProvider（单一真源）
         logger.info(f"分类匹配器初始化完成 - 加载了 {len(self.categories)} 个分类")
     
-    def warmup(self, attempts: int = 2):
-        """预热OLLAMA模型，避免冷启动问题
-        
-        Args:
-            attempts: 预热尝试次数
-        """
-        # 检查是否为OLLAMA模型（通过base_url判断）
-        is_ollama = 'localhost' in self.base_url.lower() or 'ollama' in self.base_url.lower()
-        
-        if not is_ollama:
-            logger.info("检测到API模型，跳过预热过程")
-            return
-        
-        logger.info(f"检测到OLLAMA模型，开始预热，尝试 {attempts} 次...")
-        
-        for i in range(attempts):
-            try:
-                # 发送简单的预热请求（统一走 LLMProvider，确保限流与统计一致）
-                response = self.llm.chat_with_retry(
-                    messages=LLMProvider.build_scoring_warmup_messages(),
-                    temperature=0.0,
-                    max_tokens=3,
-                    max_retries=1,
-                    wait_time=0,
-                    return_raw=True,
-                )
-
-                output = (response.choices[0].message.content or "").strip()
-                logger.info(f"预热第{i+1}次成功，输出: '{output}'")
-
-                # 短暂延迟
-                if i < attempts - 1:
-                    time.sleep(0.5)
-
-            except Exception as e:
-                logger.warning(f"预热第{i+1}次失败: {e}")
-                # 继续尝试，不中断预热过程
-                continue
-        
-        logger.info("OLLAMA模型预热完成")
+    # 预热逻辑已移除：统一使用云端 API，无需本地引擎预热
     
     def _load_categories(self) -> List[Dict[str, str]]:
         """加载ArXiv分类数据
@@ -278,7 +239,7 @@ class CategoryMatcher:
             except Exception as e:
                 last_error = e
                 logger.warning(f"LLM调用失败(第{attempt+1}次): {e}")
-                # 指数退避等待，给Ollama冷启动/模型加载留时间
+                # 指数退避等待，适应云端API限流与瞬时波动
                 if attempt < max_retries - 1:
                     # 使用统一的退避休眠封装，保持时间公式一致
                     from core.common_utils import backoff_sleep

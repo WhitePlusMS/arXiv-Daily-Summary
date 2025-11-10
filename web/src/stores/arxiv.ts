@@ -21,16 +21,12 @@ export const useArxivStore = defineStore('arxiv', () => {
   const hasValidLightProviderConfig = computed(() => {
     const cfg = config.value
     if (!cfg) return false
-    const provider = (cfg.light_model_provider || 'dashscope').toLowerCase()
-    if (provider === 'ollama') return !!cfg.ollama_base_url
     return !!cfg.dashscope_api_key
   })
   // 重模型提供方有效性（用于摘要/推荐等重任务）
   const hasValidHeavyProviderConfig = computed(() => {
     const cfg = config.value
     if (!cfg) return false
-    const provider = (cfg.heavy_model_provider || 'dashscope').toLowerCase()
-    if (provider === 'ollama') return !!cfg.ollama_base_url
     return !!cfg.dashscope_api_key
   })
   // 保持向后兼容：原 hasValidConfig 等同于重模型配置有效性

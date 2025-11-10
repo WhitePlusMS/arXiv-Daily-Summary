@@ -87,34 +87,18 @@ class CategoryMatcherService:
         # 强制重新加载环境变量
         load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'), override=True)
         
-        # 根据提供商选择加载参数
-        provider = os.getenv("LIGHT_MODEL_PROVIDER", "dashscope").lower()
-
-        if provider == "ollama":
-            # 使用本地 OLLAMA
-            model = os.getenv("OLLAMA_MODEL_LIGHT", "qwen3:0.6B")
-            base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
-            # OpenAI SDK 需要 api_key 参数，但本地 OLLAMA 实际不会验证；传入占位值即可
-            api_key = os.getenv("OLLAMA_API_KEY", "ollama")
-        else:
-            # 默认使用 DashScope (通义千问) API
-            model = os.getenv("QWEN_MODEL_LIGHT", "qwen-plus")
-            base_url = os.getenv("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
-            api_key = os.getenv("DASHSCOPE_API_KEY")
-            
-            if not api_key:
-                st.error("❌ 请配置API密钥")
-                st.info("请前往 **环境配置** 页面设置 DASHSCOPE_API_KEY")
-                return None
+        # 统一使用 DashScope (通义千问) API
+        model = os.getenv("QWEN_MODEL_LIGHT", "qwen-plus")
+        base_url = os.getenv("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
+        api_key = os.getenv("DASHSCOPE_API_KEY")
+        
+        if not api_key:
+            st.error("❌ 请配置API密钥")
+            st.info("请前往 **环境配置** 页面设置 DASHSCOPE_API_KEY")
+            return None
         
         try:
-            self.matcher = CategoryMatcher(model, base_url, api_key or "ollama")
-            # 预热模型：对Ollama等本地服务首次加载较慢的情况进行一次小请求，降低冷启动失败概率
-            try:
-                self.matcher.warmup(attempts=10)
-            except Exception:
-                # 预热失败不影响后续流程
-                pass
+            self.matcher = CategoryMatcher(model, base_url, api_key)
             return self.matcher
         except Exception as e:
             st.error(f"❌ 初始化匹配器失败: {e}")
@@ -148,17 +132,11 @@ class CategoryMatcherService:
     def optimize_research_description(self, user_input):
         """使用AI优化研究描述"""
         # 初始化LLM提供商
-        provider = os.getenv("LIGHT_MODEL_PROVIDER", "dashscope").lower()
-        if provider == "ollama":
-            model = os.getenv("OLLAMA_MODEL_LIGHT", "qwen3:0.6B")
-            base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
-            api_key = os.getenv("OLLAMA_API_KEY", "ollama")
-        else:
-            model = os.getenv("QWEN_MODEL_LIGHT", "qwen-plus")
-            base_url = os.getenv("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
-            api_key = os.getenv("DASHSCOPE_API_KEY")
-            if not api_key:
-                raise Exception("请配置API密钥")
+        model = os.getenv("QWEN_MODEL_LIGHT", "qwen-plus")
+        base_url = os.getenv("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
+        api_key = os.getenv("DASHSCOPE_API_KEY")
+        if not api_key:
+            raise Exception("请配置API密钥")
         
         llm_provider = LLMProvider(model, base_url, api_key)
         return llm_provider.optimize_research_description(user_input)
@@ -300,23 +278,11 @@ class CategoryMatcherService:
 
     def get_provider_config(self):
         """获取提供商配置信息"""
-        provider = os.getenv("LIGHT_MODEL_PROVIDER", "dashscope").lower()
-        
-        if provider == "ollama":
-            base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
-            model = os.getenv("OLLAMA_MODEL_LIGHT", "qwen3:0.6B")
-            return {
-                'provider': 'ollama',
-                'model': model,
-                'base_url': base_url,
-                'configured': True
-            }
-        else:
-            api_key = os.getenv("DASHSCOPE_API_KEY")
-            return {
-                'provider': 'dashscope',
-                'configured': bool(api_key)
-            }
+        api_key = os.getenv("DASHSCOPE_API_KEY")
+        return {
+            'provider': 'dashscope',
+            'configured': bool(api_key)
+        }
 
     def get_statistics(self, existing_data):
         """获取统计信息"""

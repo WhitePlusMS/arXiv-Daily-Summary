@@ -113,17 +113,12 @@ def main():
     fetcher = ArxivFetcher()
     
     # 根据提供商选择加载参数
-    provider = os.getenv("HEAVY_MODEL_PROVIDER", "dashscope").lower()
-    if provider == "ollama":
-        model = os.getenv("OLLAMA_MODEL_HEAVY", "qwen2:7b")
-        base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
-        api_key = "ollama" # Ollama不需要key
-    else: # 默认使用 DashScope
-        model = os.getenv("QWEN_MODEL", "qwen-max")
-        base_url = os.getenv("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
-        api_key = os.getenv("DASHSCOPE_API_KEY")
+    # 统一使用 DashScope/Qwen
+    model = os.getenv("QWEN_MODEL", "qwen-max")
+    base_url = os.getenv("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
+    api_key = os.getenv("DASHSCOPE_API_KEY")
 
-    if not api_key and provider != "ollama":
+    if not api_key:
         print("错误：缺少 API 密钥。请检查 .env 文件中的 DASHSCOPE_API_KEY。")
         return
         

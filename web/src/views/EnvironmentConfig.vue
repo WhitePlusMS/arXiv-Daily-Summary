@@ -127,13 +127,7 @@
             <input type="text" v-model="configChanges.DASHSCOPE_BASE_URL" class="streamlit-input" />
             <div class="streamlit-help">通义服务的基地址，通常保留默认即可。</div>
           </div>
-          <div class="form-item">
-            <label>OLLAMA_BASE_URL</label>
-            <input type="text" v-model="configChanges.OLLAMA_BASE_URL" class="streamlit-input" />
-            <div class="streamlit-help">
-              Ollama 服务地址（本地/远程），例如 http://localhost:11434。
-            </div>
-          </div>
+          <!-- 已移除 Ollama 服务地址配置，统一使用 DashScope -->
         </div>
 
         <!-- 卡片2：分类匹配模型提供方与参数 -->
@@ -143,7 +137,6 @@
             <label>分类匹配模型提供方</label>
             <select v-model="configChanges.LIGHT_MODEL_PROVIDER" class="streamlit-select">
               <option value="dashscope">dashscope</option>
-              <option value="ollama">ollama</option>
             </select>
             <div class="streamlit-help">用于 Top-N 分类评分的分类匹配模型推理；dashscope=通义千问。</div>
           </div>
@@ -186,53 +179,7 @@
             </div>
           </div>
 
-          <!-- Ollama 分类匹配参数，仅当提供方选择 ollama 时显示 -->
-          <div v-if="configChanges.LIGHT_MODEL_PROVIDER === 'ollama'">
-            <div class="form-item">
-              <label>OLLAMA_MODEL_LIGHT</label>
-              <input
-                type="text"
-                v-model="configChanges.OLLAMA_MODEL_LIGHT"
-                class="streamlit-input"
-              />
-              <div class="streamlit-help">分类匹配模型名称，例如 `qwen2.5:7b`。</div>
-            </div>
-            <div class="form-item">
-              <label>OLLAMA_MODEL_LIGHT_TEMPERATURE</label>
-              <input
-                type="range"
-                min="0"
-                max="1.5"
-                step="0.1"
-                v-model.number="configChanges.OLLAMA_MODEL_LIGHT_TEMPERATURE"
-              />
-              <div class="streamlit-help">
-                当前值：{{ configChanges.OLLAMA_MODEL_LIGHT_TEMPERATURE }}（更大更发散）
-              </div>
-            </div>
-            <div class="form-item">
-              <label>OLLAMA_MODEL_LIGHT_TOP_P</label>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.05"
-                v-model.number="configChanges.OLLAMA_MODEL_LIGHT_TOP_P"
-              />
-              <div class="streamlit-help">
-                当前值：{{ configChanges.OLLAMA_MODEL_LIGHT_TOP_P }}（采样概率阈值）
-              </div>
-            </div>
-            <div class="form-item">
-              <label>OLLAMA_MODEL_LIGHT_MAX_TOKENS</label>
-              <input
-                type="number"
-                v-model="configChanges.OLLAMA_MODEL_LIGHT_MAX_TOKENS"
-                class="streamlit-input"
-              />
-              <div class="streamlit-help">分类匹配模型的最大生成长度，过大将影响性能。</div>
-            </div>
-          </div>
+          <!-- 已移除 Ollama 分类匹配参数配置 -->
         </div>
 
         <!-- 卡片3：正文分析与报告模型提供方与参数 -->
@@ -242,9 +189,8 @@
             <label>正文分析与报告模型提供方</label>
             <select v-model="configChanges.HEAVY_MODEL_PROVIDER" class="streamlit-select">
               <option value="dashscope">dashscope</option>
-              <option value="ollama">ollama</option>
             </select>
-            <div class="streamlit-help">用于正文分析与报告生成的模型；可选本地 Ollama。</div>
+            <div class="streamlit-help">用于正文分析与报告生成的模型；仅支持 DashScope。</div>
           </div>
 
           <!-- DashScope 正文分析与报告参数，仅当提供方选择 dashscope 时显示 -->
@@ -285,53 +231,7 @@
             </div>
           </div>
 
-          <!-- Ollama 正文分析与报告参数，仅当提供方选择 ollama 时显示 -->
-          <div v-if="configChanges.HEAVY_MODEL_PROVIDER === 'ollama'">
-            <div class="form-item">
-              <label>OLLAMA_MODEL_HEAVY</label>
-              <input
-                type="text"
-                v-model="configChanges.OLLAMA_MODEL_HEAVY"
-                class="streamlit-input"
-              />
-              <div class="streamlit-help">正文分析与报告模型名称，例如 `qwen2:7b` 或 `llama3.1:8b`。</div>
-            </div>
-            <div class="form-item">
-              <label>OLLAMA_MODEL_HEAVY_TEMPERATURE</label>
-              <input
-                type="range"
-                min="0"
-                max="1.5"
-                step="0.1"
-                v-model.number="configChanges.OLLAMA_MODEL_HEAVY_TEMPERATURE"
-              />
-              <div class="streamlit-help">
-                当前值：{{ configChanges.OLLAMA_MODEL_HEAVY_TEMPERATURE }}（正文分析与报告模型温度）
-              </div>
-            </div>
-            <div class="form-item">
-              <label>OLLAMA_MODEL_HEAVY_TOP_P</label>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.05"
-                v-model.number="configChanges.OLLAMA_MODEL_HEAVY_TOP_P"
-              />
-              <div class="streamlit-help">
-                当前值：{{ configChanges.OLLAMA_MODEL_HEAVY_TOP_P }}（正文分析与报告模型采样阈值）
-              </div>
-            </div>
-            <div class="form-item">
-              <label>OLLAMA_MODEL_HEAVY_MAX_TOKENS</label>
-              <input
-                type="number"
-                v-model="configChanges.OLLAMA_MODEL_HEAVY_MAX_TOKENS"
-                class="streamlit-input"
-              />
-              <div class="streamlit-help">正文分析与报告模型最大生成长度，建议比分类匹配模型更大。</div>
-            </div>
-          </div>
+          <!-- 已移除 Ollama 正文分析与报告参数配置 -->
         </div>
 
         <!-- 通用线程/并发设置（保持原有键） -->
@@ -997,13 +897,6 @@ const sectionFields: Record<string, string[]> = {
     "DASHSCOPE_BASE_URL",
     "QWEN_MODEL",
     "QWEN_MODEL_LIGHT",
-    // Ollama 服务与模型
-    "OLLAMA_BASE_URL",
-    "OLLAMA_MODEL_LIGHT",
-    "OLLAMA_MODEL_HEAVY",
-    "OLLAMA_MODEL_LIGHT_TEMPERATURE",
-    "OLLAMA_MODEL_LIGHT_TOP_P",
-    "OLLAMA_MODEL_LIGHT_MAX_TOKENS",
     // LLM 常用参数（DashScope）
     "MAX_WORKERS",
     "QWEN_MODEL_TEMPERATURE",

@@ -120,8 +120,8 @@ def render_api_config(config_manager):
         )
         st.session_state.config_changes['QWEN_MODEL'] = model
         
-        # 轻量模型提供商选择
-        provider_options = ["qwen", "ollama"]
+        # 轻量模型提供商选择（仅保留 DashScope/通义千问）
+        provider_options = ["dashscope"]
         current_provider = st.session_state.config_changes.get('LIGHT_MODEL_PROVIDER', '')
         # 如果当前提供商不在选项中，使用第一个选项
         if current_provider not in provider_options and provider_options:
@@ -131,12 +131,12 @@ def render_api_config(config_manager):
             "分类匹配模型提供方",
             options=provider_options,
             index=provider_options.index(current_provider) if current_provider in provider_options else 0,
-            help="选择分类匹配模型的提供方：通义千问或OLLAMA本地模型"
+            help="选择分类匹配模型的提供方：仅支持 DashScope（通义千问）"
         )
         st.session_state.config_changes['LIGHT_MODEL_PROVIDER'] = light_provider
         
         # 根据提供商显示不同的模型选择
-        if light_provider == "qwen":
+        if light_provider == "dashscope":
             current_light_model = st.session_state.config_changes.get('QWEN_MODEL_LIGHT', '')
             # 如果当前轻量模型不在选项中，使用第二个选项（如果存在）
             if current_light_model not in model_options and len(model_options) > 1:
@@ -151,20 +151,7 @@ def render_api_config(config_manager):
                 help="选择用于分类匹配的通义千问模型"
             )
             st.session_state.config_changes['QWEN_MODEL_LIGHT'] = light_model
-        else:  # ollama
-            ollama_model = st.text_input(
-                "OLLAMA 分类匹配模型名称",
-                value=st.session_state.config_changes.get('OLLAMA_MODEL_LIGHT', ''),
-                help="输入用于分类匹配的 OLLAMA 本地模型名称，如：llama3.2:3b, qwen2.5:7b等"
-            )
-            st.session_state.config_changes['OLLAMA_MODEL_LIGHT'] = ollama_model
-            
-            ollama_url = st.text_input(
-                "OLLAMA服务器地址",
-                value=st.session_state.config_changes.get('OLLAMA_BASE_URL', ''),
-                help="OLLAMA服务器的API地址"
-            )
-            st.session_state.config_changes['OLLAMA_BASE_URL'] = ollama_url
+        # 已移除本地引擎（Ollama）配置分支
 
 
 def render_arxiv_config(config_manager):
@@ -318,47 +305,7 @@ def render_llm_config(config_manager):
         # 使用辅助函数跟踪配置更改
         track_config_change('QWEN_MODEL_LIGHT_MAX_TOKENS', str(qwen_light_max_tokens))
     
-    # OLLAMA参数配置（如果启用）
-    if st.session_state.config_changes.get('LIGHT_MODEL_PROVIDER', '') == 'ollama':
-        st.markdown("#### OLLAMA参数")
-        col3, col4 = st.columns(2)
-        
-        with col3:
-            ollama_temp = st.slider(
-                "分类匹配模型温度（OLLAMA）",
-                min_value=0.0,
-                max_value=2.0,
-                value=float(st.session_state.config_changes.get('OLLAMA_MODEL_LIGHT_TEMPERATURE', 0.0)),
-                step=0.1,
-                help="用于分类匹配的 OLLAMA 模型温度参数",
-                key="ollama_temp_slider"
-            )
-            # 使用辅助函数跟踪配置更改
-            track_config_change('OLLAMA_MODEL_LIGHT_TEMPERATURE', str(ollama_temp))
-            
-            ollama_top_p = st.slider(
-                "分类匹配模型 Top-p（OLLAMA）",
-                min_value=0.0,
-                max_value=1.0,
-                value=float(st.session_state.config_changes.get('OLLAMA_MODEL_LIGHT_TOP_P', 0.0)),
-                step=0.05,
-                help="用于分类匹配的 OLLAMA 模型 Top-p 参数",
-                key="ollama_top_p_slider"
-            )
-            # 使用辅助函数跟踪配置更改
-            track_config_change('OLLAMA_MODEL_LIGHT_TOP_P', str(ollama_top_p))
-        
-        with col4:
-            ollama_max_tokens = st.number_input(
-                "分类匹配模型最大令牌数（OLLAMA）",
-                min_value=50,
-                max_value=2000,
-                value=int(st.session_state.config_changes.get('OLLAMA_MODEL_LIGHT_MAX_TOKENS', 50)),
-                help="用于分类匹配的 OLLAMA 模型生成文本的最大长度",
-                key="ollama_max_tokens_input"
-            )
-            # 使用辅助函数跟踪配置更改
-            track_config_change('OLLAMA_MODEL_LIGHT_MAX_TOKENS', str(ollama_max_tokens))
+    # 已移除 OLLAMA 参数配置
     
     # 通用配置
     st.markdown("#### 通用配置")

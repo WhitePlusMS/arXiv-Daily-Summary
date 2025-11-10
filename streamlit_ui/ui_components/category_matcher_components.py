@@ -213,16 +213,12 @@ def render_sidebar_config(service):
     with st.sidebar:
         st.header("⚙️ 配置选项")
         
-        # 根据提供商展示配置状态
+        # 展示 DashScope 配置状态
         config = service.get_provider_config()
-        if config['provider'] == 'ollama':
-            st.success(f"✅ 已使用本地 OLLAMA: {config['model']}")
-            st.caption(f"Base URL: {config['base_url']}")
+        if config['configured']:
+            st.success("✅ DashScope API密钥已配置")
         else:
-            if config['configured']:
-                st.success("✅ DashScope API密钥已配置")
-            else:
-                st.error("❌ 请配置DashScope API密钥")
+            st.error("❌ 请配置DashScope API密钥")
         
         # 匹配参数
         top_n = st.slider("返回结果数量", min_value=1, max_value=10, value=5)

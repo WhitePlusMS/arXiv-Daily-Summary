@@ -37,24 +37,13 @@ class CategoryMatcherService:
 
     # 配置/提供商信息
     def get_provider_config(self) -> Dict[str, Any]:
-        provider = os.getenv("LIGHT_MODEL_PROVIDER", "dashscope").lower()
-        if provider == "ollama":
-            base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
-            model = os.getenv("OLLAMA_MODEL_LIGHT", "qwen3:0.6B")
-            return {
-                "provider": "ollama",
-                "model": model,
-                "base_url": base_url,
-                "configured": True
-            }
-        else:
-            api_key = os.getenv("DASHSCOPE_API_KEY")
-            model = os.getenv("QWEN_MODEL_LIGHT", "qwen-plus")
-            return {
-                "provider": "dashscope",
-                "model": model,
-                "configured": bool(api_key)
-            }
+        api_key = os.getenv("DASHSCOPE_API_KEY")
+        model = os.getenv("QWEN_MODEL_LIGHT", "qwen-plus")
+        return {
+            "provider": "dashscope",
+            "model": model,
+            "configured": bool(api_key)
+        }
 
     # 数据读取/保存
     def load_existing_data(self) -> List[Dict[str, Any]]:
@@ -86,40 +75,24 @@ class CategoryMatcherService:
 
     # 匹配器初始化
     def initialize_matcher(self) -> Optional[CategoryMatcher]:
-        provider = os.getenv("LIGHT_MODEL_PROVIDER", "dashscope").lower()
-        if provider == "ollama":
-            model = os.getenv("OLLAMA_MODEL_LIGHT", "qwen3:0.6B")
-            base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
-            api_key = os.getenv("OLLAMA_API_KEY", "ollama")
-        else:
-            model = os.getenv("QWEN_MODEL_LIGHT", "qwen-plus")
-            base_url = os.getenv("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
-            api_key = os.getenv("DASHSCOPE_API_KEY")
-            if not api_key:
-                return None
+        model = os.getenv("QWEN_MODEL_LIGHT", "qwen-plus")
+        base_url = os.getenv("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
+        api_key = os.getenv("DASHSCOPE_API_KEY")
+        if not api_key:
+            return None
         try:
-            self.matcher = CategoryMatcher(model, base_url, api_key or "ollama")
-            try:
-                self.matcher.warmup(attempts=5)
-            except Exception:
-                pass
+            self.matcher = CategoryMatcher(model, base_url, api_key)
             return self.matcher
         except Exception:
             return None
 
     # AI优化描述
     def optimize_research_description(self, user_input: str) -> str:
-        provider = os.getenv("LIGHT_MODEL_PROVIDER", "dashscope").lower()
-        if provider == "ollama":
-            model = os.getenv("OLLAMA_MODEL_LIGHT", "qwen3:0.6B")
-            base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
-            api_key = os.getenv("OLLAMA_API_KEY", "ollama")
-        else:
-            model = os.getenv("QWEN_MODEL_LIGHT", "qwen-plus")
-            base_url = os.getenv("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
-            api_key = os.getenv("DASHSCOPE_API_KEY")
-            if not api_key:
-                raise Exception("请配置API密钥")
+        model = os.getenv("QWEN_MODEL_LIGHT", "qwen-plus")
+        base_url = os.getenv("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
+        api_key = os.getenv("DASHSCOPE_API_KEY")
+        if not api_key:
+            raise Exception("请配置API密钥")
         llm_provider = LLMProvider(model, base_url, api_key)
         return llm_provider.optimize_research_description(user_input)
 

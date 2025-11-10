@@ -49,9 +49,6 @@ export interface FrontendConfig {
   // Provider mapping
   heavy_model_provider?: string
   light_model_provider?: string
-  ollama_base_url?: string
-  ollama_model_heavy?: string
-  ollama_model_light?: string
   qwen_model_light?: string
 
   // ArXiv
