@@ -14,7 +14,6 @@ import os
 import json
 import time
 from pathlib import Path
-from dotenv import load_dotenv
 from datetime import datetime
 
 # 确保项目根目录在 Python 路径中
@@ -23,9 +22,7 @@ sys.path.insert(0, str(project_root))
 
 from core.arxiv_fetcher import ArxivFetcher
 from core.llm_provider import LLMProvider
-
-# 加载环境变量
-load_dotenv(project_root / '.env', override=True)
+from core.env_config import get_str
 
 def generate_category_profile(llm_provider: LLMProvider, category: dict, papers: list) -> tuple[dict | None, dict | None]:
     """使用 LLM 为单个分类生成画像，并返回 token 使用情况"""
@@ -114,9 +111,9 @@ def main():
     
     # 根据提供商选择加载参数
     # 统一使用 DashScope/Qwen
-    model = os.getenv("QWEN_MODEL", "qwen-max")
-    base_url = os.getenv("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
-    api_key = os.getenv("DASHSCOPE_API_KEY")
+    model = get_str("QWEN_MODEL", "qwen-max")
+    base_url = get_str("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
+    api_key = get_str("DASHSCOPE_API_KEY", "")
 
     if not api_key:
         print("错误：缺少 API 密钥。请检查 .env 文件中的 DASHSCOPE_API_KEY。")

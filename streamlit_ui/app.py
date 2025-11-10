@@ -14,7 +14,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-# 加载环境变量
+
 from dotenv import load_dotenv
 load_dotenv(os.path.join(project_root, '.env'), override=True)
 

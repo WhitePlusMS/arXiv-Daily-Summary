@@ -11,7 +11,6 @@ from typing import List, Dict, Any, Tuple
 from datetime import datetime
 import datetime as dt
 import streamlit as st
-from dotenv import load_dotenv
 
 # 添加项目根目录到 Python 路径
 from pathlib import Path
@@ -20,6 +19,7 @@ sys.path.insert(0, str(project_root))
 
 from core.category_matcher import CategoryMatcher, MultiUserDataManager
 from core.llm_provider import LLMProvider
+from core.env_config import get_str, reload
 
 
 class CategoryMatcherService:
@@ -85,12 +85,12 @@ class CategoryMatcherService:
     def initialize_matcher(self):
         """初始化分类匹配器（缓存以提高性能）"""
         # 强制重新加载环境变量
-        load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'), override=True)
+        reload()
         
         # 统一使用 DashScope (通义千问) API
-        model = os.getenv("QWEN_MODEL_LIGHT", "qwen-plus")
-        base_url = os.getenv("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
-        api_key = os.getenv("DASHSCOPE_API_KEY")
+        model = get_str("QWEN_MODEL_LIGHT", "qwen-plus")
+        base_url = get_str("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
+        api_key = get_str("DASHSCOPE_API_KEY", "")
         
         if not api_key:
             st.error("❌ 请配置API密钥")
@@ -132,9 +132,9 @@ class CategoryMatcherService:
     def optimize_research_description(self, user_input):
         """使用AI优化研究描述"""
         # 初始化LLM提供商
-        model = os.getenv("QWEN_MODEL_LIGHT", "qwen-plus")
-        base_url = os.getenv("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
-        api_key = os.getenv("DASHSCOPE_API_KEY")
+        model = get_str("QWEN_MODEL_LIGHT", "qwen-plus")
+        base_url = get_str("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
+        api_key = get_str("DASHSCOPE_API_KEY", "")
         if not api_key:
             raise Exception("请配置API密钥")
         
@@ -278,7 +278,7 @@ class CategoryMatcherService:
 
     def get_provider_config(self):
         """获取提供商配置信息"""
-        api_key = os.getenv("DASHSCOPE_API_KEY")
+        api_key = get_str("DASHSCOPE_API_KEY", "")
         return {
             'provider': 'dashscope',
             'configured': bool(api_key)
@@ -300,4 +300,4 @@ class CategoryMatcherService:
         st.cache_data.clear()
         st.cache_resource.clear()
         # 强制重新加载环境变量
-        load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'), override=True)
+        reload()

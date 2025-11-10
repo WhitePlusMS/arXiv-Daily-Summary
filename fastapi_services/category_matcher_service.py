@@ -14,11 +14,9 @@ from typing import List, Dict, Any, Tuple, Optional
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from dotenv import load_dotenv
-load_dotenv(project_root / '.env', override=True)
-
 from core.category_matcher import CategoryMatcher, MultiUserDataManager
 from core.llm_provider import LLMProvider
+from core.env_config import get_str, reload
 from loguru import logger
 
 
@@ -37,8 +35,8 @@ class CategoryMatcherService:
 
     # 配置/提供商信息
     def get_provider_config(self) -> Dict[str, Any]:
-        api_key = os.getenv("DASHSCOPE_API_KEY")
-        model = os.getenv("QWEN_MODEL_LIGHT", "qwen-plus")
+        api_key = get_str("DASHSCOPE_API_KEY", "")
+        model = get_str("QWEN_MODEL_LIGHT", "qwen-plus")
         return {
             "provider": "dashscope",
             "model": model,
@@ -75,9 +73,9 @@ class CategoryMatcherService:
 
     # 匹配器初始化
     def initialize_matcher(self) -> Optional[CategoryMatcher]:
-        model = os.getenv("QWEN_MODEL_LIGHT", "qwen-plus")
-        base_url = os.getenv("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
-        api_key = os.getenv("DASHSCOPE_API_KEY")
+        model = get_str("QWEN_MODEL_LIGHT", "qwen-plus")
+        base_url = get_str("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
+        api_key = get_str("DASHSCOPE_API_KEY", "")
         if not api_key:
             return None
         try:
@@ -88,9 +86,9 @@ class CategoryMatcherService:
 
     # AI优化描述
     def optimize_research_description(self, user_input: str) -> str:
-        model = os.getenv("QWEN_MODEL_LIGHT", "qwen-plus")
-        base_url = os.getenv("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
-        api_key = os.getenv("DASHSCOPE_API_KEY")
+        model = get_str("QWEN_MODEL_LIGHT", "qwen-plus")
+        base_url = get_str("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
+        api_key = get_str("DASHSCOPE_API_KEY", "")
         if not api_key:
             raise Exception("请配置API密钥")
         llm_provider = LLMProvider(model, base_url, api_key)

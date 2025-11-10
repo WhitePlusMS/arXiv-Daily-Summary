@@ -1,8 +1,8 @@
 import json
 import time
 import os
-from dotenv import load_dotenv
 from core.llm_provider import LLMProvider
+from core.env_config import get_str, get_float, get_int
 from loguru import logger
 
 # --- 配置 ---
@@ -19,23 +19,15 @@ class CategoryTranslator:
         """
         初始化翻译器，加载LLM提供商。
         """
-        # 加载.env文件中的环境变量
-        # 注意: 脚本在项目根目录运行，所以路径是相对于根目录的
-        dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
-        if not os.path.exists(dotenv_path):
-            dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env')
-
-        load_dotenv(dotenv_path)
-
         # 从环境变量读取通义千问配置
-        qwen_model = os.getenv("QWEN_MODEL")
-        dashscope_base_url = os.getenv("DASHSCOPE_BASE_URL")
-        dashscope_api_key = os.getenv("DASHSCOPE_API_KEY")
+        qwen_model = get_str("QWEN_MODEL", "")
+        dashscope_base_url = get_str("DASHSCOPE_BASE_URL", "")
+        dashscope_api_key = get_str("DASHSCOPE_API_KEY", "")
         
         # 读取模型参数配置
-        temperature = float(os.getenv("QWEN_MODEL_TEMPERATURE", "0.7"))
-        top_p = float(os.getenv("QWEN_MODEL_TOP_P", "0.9"))
-        max_tokens = int(os.getenv("QWEN_MODEL_MAX_TOKENS", "4000"))
+        temperature = get_float("QWEN_MODEL_TEMPERATURE", 0.7)
+        top_p = get_float("QWEN_MODEL_TOP_P", 0.9)
+        max_tokens = get_int("QWEN_MODEL_MAX_TOKENS", 4000)
 
         if not all([qwen_model, dashscope_base_url, dashscope_api_key]):
             raise ValueError("错误：请确保 .env 文件中已配置 QWEN_MODEL, DASHSCOPE_BASE_URL, 和 DASHSCOPE_API_KEY")
