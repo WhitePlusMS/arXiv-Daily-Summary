@@ -131,8 +131,9 @@ def format_timezone_date(date_format: Optional[str] = None, timezone_str: Option
     Returns:
         格式化后的日期字符串
     """
+    # 硬编码日期格式为 '%Y-%m-%d'
     if date_format is None:
-        date_format = env_get_str('DATE_FORMAT', '%Y-%m-%d')
+        date_format = '%Y-%m-%d'
     
     now = get_timezone_aware_now(timezone_str)
     return now.strftime(date_format)

@@ -64,6 +64,7 @@ class MatchRequest(BaseModel):
     """执行分类匹配请求"""
     username: str
     user_input: str
+    negative_query: Optional[str] = ""
     top_n: int = 5
 
 
@@ -73,6 +74,7 @@ class UpdateRecordRequest(BaseModel):
     username: str
     category_id: str
     user_input: str
+    negative_query: Optional[str] = ""
 
 
 class BatchDeleteRequest(BaseModel):

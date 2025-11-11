@@ -325,30 +325,12 @@ def render_file_config(config_manager):
     """渲染文件路径配置"""
     st.subheader("📁 文件路径配置")
     
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        user_categories_file = st.text_input(
-            "研究兴趣描述文件",
-            value=st.session_state.config_changes.get('USER_CATEGORIES_FILE', '../../data/users/user_categories.json'),
-            help="研究兴趣描述文件路径"
-        )
-        st.session_state.config_changes['USER_CATEGORIES_FILE'] = user_categories_file
-        
-        save_directory = st.text_input(
-            "保存目录",
-            value=st.session_state.config_changes.get('SAVE_DIRECTORY', './arxiv_history'),
-            help="报告保存目录路径"
-        )
-        st.session_state.config_changes['SAVE_DIRECTORY'] = save_directory
-    
-    with col2:
-        save_markdown = st.checkbox(
-            "保存为Markdown格式",
-            value=st.session_state.config_changes.get('SAVE_MARKDOWN', 'true').lower() == 'true',
-            help="是否保存为Markdown格式"
-        )
-        st.session_state.config_changes['SAVE_MARKDOWN'] = str(save_markdown).lower()
+    save_markdown = st.checkbox(
+        "保存为Markdown格式",
+        value=st.session_state.config_changes.get('SAVE_MARKDOWN', 'true').lower() == 'true',
+        help="是否保存为Markdown格式"
+    )
+    st.session_state.config_changes['SAVE_MARKDOWN'] = str(save_markdown).lower()
 
 
 def render_email_config(config_manager):
@@ -417,48 +399,23 @@ def render_timezone_config(config_manager):
     """渲染时区格式配置"""
     st.subheader("🕐 时区格式配置")
     
-    col1, col2 = st.columns(2)
+    timezone_options = [
+        "Asia/Shanghai",
+        "US/Eastern", 
+        "US/Pacific",
+        "Europe/London",
+        "Europe/Paris",
+        "UTC"
+    ]
     
-    with col1:
-        timezone_options = [
-            "Asia/Shanghai",
-            "US/Eastern", 
-            "US/Pacific",
-            "Europe/London",
-            "Europe/Paris",
-            "UTC"
-        ]
-        
-        current_tz = st.session_state.config_changes.get('TIMEZONE', 'Asia/Shanghai')
-        timezone = st.selectbox(
-            "时区设置",
-            options=timezone_options,
-            index=timezone_options.index(current_tz) if current_tz in timezone_options else 0,
-            help="选择系统使用的时区"
-        )
-        st.session_state.config_changes['TIMEZONE'] = timezone
-        
-        date_format = st.text_input(
-            "日期格式",
-            value=st.session_state.config_changes.get('DATE_FORMAT', '%Y-%m-%d'),
-            help="日期显示格式，如：%Y-%m-%d"
-        )
-        st.session_state.config_changes['DATE_FORMAT'] = date_format
-    
-    with col2:
-        time_format = st.text_input(
-            "时间格式",
-            value=st.session_state.config_changes.get('TIME_FORMAT', '%H:%M:%S'),
-            help="时间显示格式，如：%H:%M:%S"
-        )
-        st.session_state.config_changes['TIME_FORMAT'] = time_format
-        
-        enable_mcp_time = st.checkbox(
-            "启用MCP时间服务",
-            value=st.session_state.config_changes.get('ENABLE_MCP_TIME_SERVICE', 'false').lower() == 'true',
-            help="是否启用MCP时间服务"
-        )
-        st.session_state.config_changes['ENABLE_MCP_TIME_SERVICE'] = str(enable_mcp_time).lower()
+    current_tz = st.session_state.config_changes.get('TIMEZONE', 'Asia/Shanghai')
+    timezone = st.selectbox(
+        "时区设置",
+        options=timezone_options,
+        index=timezone_options.index(current_tz) if current_tz in timezone_options else 0,
+        help="选择系统使用的时区"
+    )
+    st.session_state.config_changes['TIMEZONE'] = timezone
 
 
 def render_log_config(config_manager):

@@ -746,6 +746,7 @@ def _run_category_matching_task(
     user_input: str,
     username: str,
     top_n: int,
+    negative_query: str,
     service
 ):
     """在后台线程中运行分类匹配任务"""
@@ -755,7 +756,7 @@ def _run_category_matching_task(
     
     try:
         # 执行匹配
-        results, token_usage = service.execute_matching(user_input, username, top_n, task_id=task_id)
+        results, token_usage = service.execute_matching(user_input, username, top_n, negative_query, task_id=task_id)
         
         # 保存结果
         progress_manager.update_progress(
@@ -764,7 +765,7 @@ def _run_category_matching_task(
             percentage=98,
             log_message="正在保存匹配结果到数据库"
         )
-        service.save_matching_results(username, user_input, results)
+        service.save_matching_results(username, user_input, results, negative_query)
         
         # 完成
         progress_manager.complete_task(task_id, f"分类匹配完成，共匹配到 {len(results)} 个分类")
@@ -799,6 +800,7 @@ async def run_category_matching(
                 request.user_input,
                 request.username,
                 request.top_n,
+                request.negative_query or "",
                 service
             )
         )
@@ -826,7 +828,7 @@ async def update_matcher_record(
     """更新单条匹配记录"""
     logger.info(f"API调用: 更新匹配记录 - 索引: {request.index}")
     try:
-        success = service.update_record(request.index, request.username, request.category_id, request.user_input)
+        success = service.update_record(request.index, request.username, request.category_id, request.user_input, request.negative_query or "")
         if not success:
             raise HTTPException(status_code=400, detail="更新失败或索引无效")
         return {"success": True, "message": "更新成功"}

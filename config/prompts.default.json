@@ -38,11 +38,6 @@
     "template": "You are a scoring assistant. You MUST respond with only a single integer between 0-100. NEVER use <think> tags or any thinking process. NEVER provide explanations. Output format: just the number, nothing else.",
     "variables": []
   },
-  "time_service_system_message": {
-    "name": "时间服务系统消息",
-    "template": "你是一个只会返回标准时间格式的机器人。请根据工具返回的结果，直接输出格式为 YYYY-MM-DD HH:MM:SS 的时间字符串，不要包含任何其他文字、标点或解释。",
-    "variables": []
-  },
   "paper_evaluation_single_interest": {
     "name": "论文评估（单兴趣场景）",
     "template": "你是一个严谨的学术论文评估专家。\n你的任务是根据用户的研究兴趣，严格评估一篇论文的相关性。\n\n研究兴趣 (A)：我想要关于 [{positive_query}] 的论文。\n\n---\n\n论文信息：\n\n标题：{paper_title}\n\n摘要：{paper_abstract}\n\n---\n\n评分标准（请严格遵守）：\n\n* 9-10 分（高度相关）：论文的核心问题和方法 **完全** 符合 [A: {positive_query}]。\n\n* 7-8 分（中度相关）：论文的主题与 [A] 相关，但可能不是核心，或方法不同。\n\n* 5-6 分（一般相关）：论文只在背景或某个方面与 [A] 相关。\n\n* 1-4 分（低度相关）：论文只是关键词蹭到 [A]。\n\n* 0 分（完全无关）：论文与 [A] 完全无关。\n\n---\n\n请严格按照以下JSON格式返回结果，不要包含任何其他文字：\n\n{{\n    \"relevance_score\": <一个 0-10 之间的数字>\n\n}}",

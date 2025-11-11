@@ -37,25 +37,38 @@
           ⚠️ 正在进行分类匹配，请等待完成后再修改输入内容
         </div>
 
-        <div class="streamlit-text-area">
-          <label>研究内容描述</label>
-          <textarea
-            v-model="researchDescription"
-            :disabled="isMatching || isDescriptionLocked"
-            class="streamlit-textarea"
-            placeholder="请详细描述您的研究方向和兴趣领域…"
-          ></textarea>
-          <div class="streamlit-help">支持Markdown格式，请尽可能详细地描述您的研究方向</div>
+        <div style="display: flex; gap: 16px; margin-bottom: 16px;">
+          <div class="streamlit-text-area" style="flex: 1;">
+            <label>研究内容描述（感兴趣的方向）</label>
+            <textarea
+              v-model="researchDescription"
+              :disabled="isMatching || isOptimizing"
+              class="streamlit-textarea"
+              placeholder="请详细描述您的研究方向和兴趣领域…"
+            ></textarea>
+            <div class="streamlit-help">支持Markdown格式，请尽可能详细地描述您的研究方向</div>
+          </div>
+
+          <div class="streamlit-text-area" style="flex: 1;">
+            <label>不感兴趣的方向（可选）</label>
+            <textarea
+              v-model="negativeDescription"
+              :disabled="isMatching || isOptimizing"
+              class="streamlit-textarea"
+              placeholder="请描述您不感兴趣或希望排除的研究方向…"
+            ></textarea>
+            <div class="streamlit-help">支持Markdown格式，描述您希望排除的研究领域或主题</div>
+          </div>
         </div>
 
         <div class="form-actions">
           <div class="action-buttons">
             <button
               class="streamlit-button"
-              :disabled="isMatching || !researchDescription.trim()"
+              :disabled="isMatching || isOptimizing || !researchDescription.trim()"
               @click="optimizeDescription"
             >
-              ✨ AI优化描述
+              {{ isOptimizing ? "正在优化中…" : "✨ AI优化描述（感兴趣方向）" }}
             </button>
           </div>
           
@@ -261,10 +274,17 @@
                         />
                       </div>
                       <div class="edit-field">
-                        <label>研究内容描述</label>
+                        <label>研究内容描述（感兴趣的方向）</label>
                         <textarea
                           class="streamlit-textarea"
                           v-model="editDrafts[i].user_input"
+                        ></textarea>
+                      </div>
+                      <div class="edit-field">
+                        <label>不感兴趣的方向（可选）</label>
+                        <textarea
+                          class="streamlit-textarea"
+                          v-model="editDrafts[i].negative_query"
                         ></textarea>
                       </div>
                     </div>
@@ -274,8 +294,12 @@
                       <strong>分类标签：</strong><code>{{ item.category_id || "未设置" }}</code>
                     </div>
                     <div class="record-field">
-                      <strong>研究兴趣：</strong>
+                      <strong>研究兴趣（感兴趣的方向）：</strong>
                       <pre class="research-interests-code">{{ item.user_input || "未设置" }}</pre>
+                    </div>
+                    <div class="record-field" v-if="item.negative_query">
+                      <strong>不感兴趣的方向：</strong>
+                      <pre class="research-interests-code">{{ item.negative_query }}</pre>
                     </div>
                   </template>
                 </div>
@@ -305,9 +329,10 @@ const { isLoading, error, userProfiles } = storeToRefs(store);
 // 本地状态
 const username = ref("");
 const researchDescription = ref("");
+const negativeDescription = ref("");
 const topN = ref(5);
 const isMatching = ref(false);
-const isDescriptionLocked = ref(false);
+const isOptimizing = ref(false);
 const runningMessage = ref("");
 const matchCompleted = ref(false);
 const results = ref<{ id: string; name: string; score: number }[]>([]);
@@ -344,15 +369,18 @@ const searchTerm = ref("");
 const selectedIndices = ref<Set<number>>(new Set());
 const editModes = ref<Set<number>>(new Set());
 const editDrafts = ref<
-  Record<number, { username: string; category_id: string; user_input: string }>
+  Record<number, { username: string; category_id: string; user_input: string; negative_query: string }>
 >({});
 const filteredProfiles = computed(() => {
   const term = searchTerm.value.trim().toLowerCase();
-  if (!term) return userProfiles.value;
-  return userProfiles.value.filter(
+  // 先倒序排列，使最新的记录在最上面
+  const reversedProfiles = [...userProfiles.value].reverse();
+  if (!term) return reversedProfiles;
+  return reversedProfiles.filter(
     (item) =>
       (item.username || "").toLowerCase().includes(term) ||
       (item.user_input || "").toLowerCase().includes(term) ||
+      (item.negative_query || "").toLowerCase().includes(term) ||
       (item.category_id || "").toLowerCase().includes(term)
   );
 });
@@ -387,6 +415,7 @@ const optimizeDescription = async () => {
     store.setError("❌ 请先输入研究内容描述");
     return;
   }
+  isOptimizing.value = true;
   try {
     store.clearError();
     const resp = await api.optimizeMatcherDescription({
@@ -394,8 +423,6 @@ const optimizeDescription = async () => {
     });
     if (resp.success && resp.data?.optimized) {
       researchDescription.value = resp.data.optimized;
-      // 优化后禁止再次编辑研究内容描述
-      isDescriptionLocked.value = true;
     } else {
       // 模板错误友好提示
       const tmpl = (resp as any).template_error as
@@ -418,6 +445,9 @@ const optimizeDescription = async () => {
   } catch (err) {
     store.setError("优化描述时发生错误");
     console.error("优化错误:", err);
+  } finally {
+    // 优化完成后，重新启用输入框
+    isOptimizing.value = false;
   }
 };
 
@@ -436,6 +466,7 @@ const startMatching = async () => {
     store.clearError();
     const resp = await api.runCategoryMatching({
       user_input: researchDescription.value.trim(),
+      negative_query: negativeDescription.value.trim(),
       username: username.value.trim(),
       top_n: topN.value,
     });
@@ -606,6 +637,7 @@ const toggleEdit = (i: number) => {
         username: draft.username || "",
         category_id: draft.category_id || "",
         user_input: draft.user_input || "",
+        negative_query: draft.negative_query || "",
       })
       .then(async (resp) => {
         if (resp.success) {
@@ -630,6 +662,7 @@ const toggleEdit = (i: number) => {
       username: item.username || "",
       category_id: item.category_id || "",
       user_input: item.user_input || "",
+      negative_query: item.negative_query || "",
     };
   }
 };

@@ -17,8 +17,6 @@ from core.arxiv_fetcher import ArxivFetcher
 from core.llm_provider import LLMProvider
 from core.recommendation_engine import RecommendationEngine
 from core.template_renderer import TemplateRenderer
-from core.mcp_time_service import MCPTimeService
-from core.mcp_time_service import get_current_time
 from core.output_manager import OutputManager
 from core.common_utils import sanitize_username, format_timezone_date, get_timezone_aware_now
 from core.env_config import get_str, get_int, get_bool, get_list, get_float
@@ -61,12 +59,9 @@ class ArxivRecommenderCLI(ProgressTracker):
         self._load_user_categories()
         logger.success(f"系统配置加载完成 - 简要分析论文数: {self.config['num_brief_papers']}, 详细分析: {self.config['num_detailed_papers']}, 分类标签: {self.config['arxiv_categories']}")
         
-        # 使用MCP时间服务获取当前时间并记录INFO日志
-        try:
-            current_time = get_current_time()
-            logger.info(f"系统启动时间（MCP时间服务）: {current_time}")
-        except Exception as e:
-            logger.warning(f"MCP时间服务调用失败: {e}，将使用本地时间")
+        # 记录系统启动时间
+        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        logger.info(f"系统启动时间: {current_time}")
         
     def _load_config(self) -> Dict[str, Any]:
         """从集中化 env 配置模块加载配置。
@@ -112,9 +107,9 @@ class ArxivRecommenderCLI(ProgressTracker):
             'qwen_model_light_max_tokens': get_int('QWEN_MODEL_LIGHT_MAX_TOKENS', 2000),
             'max_workers': get_int('MAX_WORKERS', 5),
             
-            # 文件路径配置
-            'user_categories_file': get_str('USER_CATEGORIES_FILE', 'data/users/user_categories.json'),
-            'save_directory': get_str('SAVE_DIRECTORY', 'arxiv_history'),
+            # 文件路径配置（硬编码）
+            'user_categories_file': str(project_root / 'data' / 'users' / 'user_categories.json'),
+            'save_directory': str(project_root / 'arxiv_history'),
             'save_markdown': get_bool('SAVE_MARKDOWN', True),
             
             # 邮件配置
@@ -128,10 +123,8 @@ class ArxivRecommenderCLI(ProgressTracker):
             'use_tls': get_bool('USE_TLS', True),
             'subject_prefix': get_str('SUBJECT_PREFIX', '每日arXiv'),
             
-            # 时区和格式配置
+            # 时区配置
             'timezone': get_str('TIMEZONE', 'Asia/Shanghai'),
-            'date_format': get_str('DATE_FORMAT', '%Y-%m-%d'),
-            'time_format': get_str('TIME_FORMAT', '%H:%M:%S'),
             
             # 日志配置（简化：只保留用户可配置的3项）
             'log_level': 'DEBUG',  # 固定为DEBUG，不再可配置
@@ -516,7 +509,7 @@ class ArxivRecommenderCLI(ProgressTracker):
             list: 报告文件信息列表
         """
         try:
-            # 使用与保存一致的目录：来自配置 SAVE_DIRECTORY
+            # 使用硬编码的保存目录
             save_dir = self.config.get('save_directory', 'arxiv_history')
             reports_dir = Path(save_dir)
             if not reports_dir.is_absolute():
@@ -832,16 +825,6 @@ class ArxivRecommenderCLI(ProgressTracker):
             格式化的当前时间字符串
         """
         logger.debug("获取当前时间")
-        try:
-            # 尝试通过LLM工具获取时间
-            current_time = get_current_time()
-            if current_time:
-                logger.debug(f"LLM时间服务获取成功: {current_time}")
-                return current_time
-        except Exception as e:
-            logger.warning(f"LLM时间服务失败，回退到本地时间: {e}")
-        
-        # 回退到本地时间
         local_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         logger.debug(f"使用本地时间: {local_time}")
         return local_time

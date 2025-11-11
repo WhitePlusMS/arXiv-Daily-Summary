@@ -366,20 +366,6 @@ class LLMProvider:
     # =========================
 
     @staticmethod
-    def build_time_service_system_message() -> str:
-        """用于时间工具调用后的最终系统消息，要求仅输出标准时间字符串。"""
-        try:
-            pm = get_prompt_manager()
-            tpl = pm.get_template("time_service_system_message")
-            if tpl:
-                return tpl
-        except Exception:
-            pass
-        return (
-            "你是一个只会返回标准时间格式的机器人。请根据工具返回的结果，直接输出格式为 YYYY-MM-DD HH:MM:SS 的时间字符串，不要包含任何其他文字、标点或解释。"
-        )
-
-    @staticmethod
     def build_scoring_warmup_messages() -> List[Dict[str, str]]:
         """保留占位的评分预热消息（不再针对本地引擎）。"""
         system_msg = LLMProvider.build_scoring_system_message(strict=True)

@@ -67,7 +67,6 @@ export interface FrontendConfig {
 
   // 时间与日志
   timezone?: string
-  date_format?: string
   log_level?: string
 }
 

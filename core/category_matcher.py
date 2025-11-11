@@ -35,13 +35,14 @@ class MultiUserDataManager:
         self.users_data = {}  # 存储本次新增的用户数据
         self.existing_records = []  # 存储现有的记录
         
-    def add_user_result(self, username: str, top_matches: List[Tuple[str, str, int]], user_input: str):
+    def add_user_result(self, username: str, top_matches: List[Tuple[str, str, int]], user_input: str, negative_query: str = ""):
         """添加用户匹配结果
         
         Args:
             username: 用户名
             top_matches: 前N个匹配结果列表
             user_input: 用户输入的研究方向描述
+            negative_query: 用户不感兴趣的研究方向描述（可选）
         """
         # 提取前5个分类ID
         category_ids = [match[0] for match in top_matches[:5]]
@@ -52,6 +53,10 @@ class MultiUserDataManager:
             "category_id": category_ids_str,
             "user_input": user_input
         }
+        
+        # 如果提供了 negative_query，添加到记录中
+        if negative_query:
+            user_record["negative_query"] = negative_query
         
         # 使用用户名和输入作为唯一键
         key = f"{username}_{hash(user_input)}"

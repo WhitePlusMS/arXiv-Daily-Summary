@@ -95,7 +95,7 @@ class CategoryMatcherService:
         return llm_provider.optimize_research_description(user_input)
 
     # 执行匹配
-    def execute_matching(self, user_input: str, username: str, top_n: int = 5, task_id: Optional[str] = None):
+    def execute_matching(self, user_input: str, username: str, top_n: int = 5, negative_query: str = "", task_id: Optional[str] = None):
         if not self.matcher or (task_id and self.matcher.task_id != task_id):
             matcher = self.initialize_matcher(task_id=task_id)
             if matcher is None:
@@ -129,7 +129,7 @@ class CategoryMatcherService:
         } for r in results], token_usage
 
     # 保存匹配结果
-    def save_matching_results(self, username: str, user_input: str, results: List[Dict[str, Any]]) -> bool:
+    def save_matching_results(self, username: str, user_input: str, results: List[Dict[str, Any]], negative_query: str = "") -> bool:
         try:
             # 确保输出目录存在，避免因目录缺失导致写入失败
             self._ensure_users_dir()
@@ -153,7 +153,7 @@ class CategoryMatcherService:
                 top_matches = [(r[0], r[1], int(r[2])) for r in results]  # type: ignore
 
             # 调用数据管理器保存（追加模式）
-            data_manager.add_user_result(username, top_matches, user_input)
+            data_manager.add_user_result(username, top_matches, user_input, negative_query)
             data_manager.save_to_json()
             return True
         except Exception as e:
@@ -201,12 +201,13 @@ class CategoryMatcherService:
         self.save_user_data(data)
         return len(indices)
 
-    def update_record(self, index: int, username: str, category_id: str, user_input: str) -> bool:
+    def update_record(self, index: int, username: str, category_id: str, user_input: str, negative_query: str = "") -> bool:
         data = self.load_existing_data()
         if 0 <= index < len(data):
             data[index]['username'] = username
             data[index]['category_id'] = category_id
             data[index]['user_input'] = user_input
+            data[index]['negative_query'] = negative_query
             return self.save_user_data(data)
         return False
 

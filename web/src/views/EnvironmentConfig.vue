@@ -247,7 +247,13 @@
       <div v-if="selectedSection === '📚 ArXiv配置'" class="form-grid">
         <div class="form-item">
           <label>ARXIV_BASE_URL</label>
-          <input type="text" v-model="configChanges.ARXIV_BASE_URL" class="streamlit-input" />
+          <input
+            type="text"
+            v-model="configChanges.ARXIV_BASE_URL"
+            class="streamlit-input"
+            readonly
+            style="background-color: #f5f5f5; cursor: not-allowed;"
+          />
           <div class="streamlit-help">ArXiv API 基地址，通常保持默认。</div>
         </div>
         <div class="form-item">
@@ -295,16 +301,6 @@
 
       <!-- 📁 文件路径配置 -->
       <div v-if="selectedSection === '📁 文件路径配置'" class="form-grid">
-        <div class="form-item">
-          <label>USER_CATEGORIES_FILE</label>
-          <input type="text" v-model="configChanges.USER_CATEGORIES_FILE" class="streamlit-input" />
-          <div class="streamlit-help">用户自定义分类文件路径（JSON）。</div>
-        </div>
-        <div class="form-item">
-          <label>SAVE_DIRECTORY</label>
-          <input type="text" v-model="configChanges.SAVE_DIRECTORY" class="streamlit-input" />
-          <div class="streamlit-help">报告保存目录，例如 `output/reports`。</div>
-        </div>
         <div class="form-item">
           <label>SAVE_MARKDOWN</label>
           <select v-model="configChanges.SAVE_MARKDOWN" class="streamlit-select">
@@ -401,24 +397,6 @@
           <label>TIMEZONE</label>
           <input type="text" v-model="configChanges.TIMEZONE" class="streamlit-input" />
           <div class="streamlit-help">例如 `Asia/Shanghai`；用于展示时间与报告生成。</div>
-        </div>
-        <div class="form-item">
-          <label>DATE_FORMAT</label>
-          <input type="text" v-model="configChanges.DATE_FORMAT" class="streamlit-input" />
-          <div class="streamlit-help">日期格式模板，例如 `YYYY-MM-DD`。</div>
-        </div>
-        <div class="form-item">
-          <label>TIME_FORMAT</label>
-          <input type="text" v-model="configChanges.TIME_FORMAT" class="streamlit-input" />
-          <div class="streamlit-help">时间格式模板，例如 `HH:mm:ss`。</div>
-        </div>
-        <div class="form-item">
-          <label>ENABLE_MCP_TIME_SERVICE</label>
-          <select v-model="configChanges.ENABLE_MCP_TIME_SERVICE" class="streamlit-select">
-            <option value="true">true</option>
-            <option value="false">false</option>
-          </select>
-          <div class="streamlit-help">启用后可使用 MCP 时间服务进行更准确的时间处理。</div>
         </div>
       </div>
 
@@ -948,7 +926,7 @@ const sectionFields: Record<string, string[]> = {
     "NUM_BRIEF_PAPERS",
     "RELEVANCE_FILTER_THRESHOLD",
   ],
-  "📁 文件路径配置": ["USER_CATEGORIES_FILE", "SAVE_DIRECTORY", "SAVE_MARKDOWN"],
+  "📁 文件路径配置": ["SAVE_MARKDOWN"],
   "📧 邮件配置": [
     "SEND_EMAIL",
     "SENDER_EMAIL",
@@ -962,9 +940,6 @@ const sectionFields: Record<string, string[]> = {
   ],
   "🕐 时区格式配置": [
     "TIMEZONE",
-    "DATE_FORMAT",
-    "TIME_FORMAT",
-    "ENABLE_MCP_TIME_SERVICE",
   ],
   "📝 日志配置": ["LOG_TO_CONSOLE", "LOG_MAX_SIZE", "LOG_BACKUP_COUNT"],
 };

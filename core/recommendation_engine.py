@@ -525,8 +525,8 @@ def main():
         logger.error("错误：请确保设置了DASHSCOPE_API_KEY、DASHSCOPE_BASE_URL和QWEN_MODEL环境变量")
         return
     
-    # 读取研究兴趣描述
-    description_path = get_str("USER_CATEGORIES_FILE", "data/users/user_categories.json")
+    # 读取研究兴趣描述（硬编码路径）
+    description_path = "data/users/user_categories.json"
     try:
         import json
         with open(description_path, "r", encoding="utf-8") as f:

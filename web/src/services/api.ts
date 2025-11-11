@@ -364,6 +364,7 @@ export const optimizeMatcherDescription = async (request: {
 // 执行分类匹配
 export const runCategoryMatching = async (request: {
   user_input: string;
+  negative_query?: string;
   username: string;
   top_n: number;
 }): Promise<
@@ -401,6 +402,7 @@ export const updateMatcherRecord = async (request: {
   username: string;
   category_id: string;
   user_input: string;
+  negative_query?: string;
 }): Promise<ApiResponse<{ updated: boolean }>> => {
   const response = await api.put("/api/matcher/record", request, {
     signal: getAbortSignal("PUT /api/matcher/record"),
