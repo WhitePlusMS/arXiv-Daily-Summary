@@ -83,10 +83,6 @@
       <div class="streamlit-section">
         <h2 class="streamlit-subheader">🚀 运行推荐系统</h2>
 
-        <!-- 调试模式警告 -->
-        <div v-if="isDebugMode" class="streamlit-warning">
-          🔧 <strong>调试模式已启用</strong> - 系统将使用模拟数据，不会调用真实的ArXiv API和LLM服务
-        </div>
 
         <!-- 主推荐按钮 -->
         <div class="button-group">
@@ -317,6 +313,9 @@ const currentTaskId = ref<string | null>(null);
 const currentProgress = ref<ProgressData | null>(null);
 const showProgress = ref(false);
 
+// localStorage key，用于保存运行中的task_id
+const RUNNING_TASK_KEY = "arxiv_running_task_id";
+
 // 计算属性（使用 storeToRefs 保持响应性）
 const {
   config,
@@ -329,7 +328,6 @@ const {
   error,
   lastRecommendationResult,
   recentReports,
-  isDebugMode,
   hasValidConfig,
   hasResearchInterests,
 } = storeToRefs(store);
@@ -459,7 +457,6 @@ const runMainRecommendation = async () => {
   try {
     const response = await api.runRecommendation({
       profile_name: selectedProfileName.value,
-      debug_mode: isDebugMode.value,
     });
 
     // 检查是否返回了task_id（新的异步模式）
@@ -467,6 +464,13 @@ const runMainRecommendation = async () => {
       const taskId = (response.data as any).task_id;
       currentTaskId.value = taskId;
       showProgress.value = true;
+      
+      // 保存task_id到localStorage，用于页面刷新后恢复
+      try {
+        localStorage.setItem(RUNNING_TASK_KEY, taskId);
+      } catch (e) {
+        console.warn("无法保存task_id到localStorage:", e);
+      }
       
       // 开始轮询进度
       progressService.startPolling(
@@ -481,6 +485,13 @@ const runMainRecommendation = async () => {
           showProgress.value = false;
           isRunning.value = false;
           
+          // 清除localStorage中的task_id
+          try {
+            localStorage.removeItem(RUNNING_TASK_KEY);
+          } catch (e) {
+            console.warn("无法清除localStorage:", e);
+          }
+          
           // 刷新报告列表
           await loadRecentReports();
           
@@ -492,6 +503,14 @@ const runMainRecommendation = async () => {
           console.error("推荐任务失败", error);
           showProgress.value = false;
           isRunning.value = false;
+          
+          // 清除localStorage中的task_id
+          try {
+            localStorage.removeItem(RUNNING_TASK_KEY);
+          } catch (e) {
+            console.warn("无法清除localStorage:", e);
+          }
+          
           store.setError(error);
         }
       );
@@ -525,7 +544,7 @@ const runMainRecommendation = async () => {
       const obj = e as { code?: string; message?: string; name?: string };
       const msg = String(obj?.message || "");
       if (obj?.code === "ECONNABORTED" || msg.toLowerCase().includes("timeout")) {
-        return "请求超时（生成报告可能较慢）。请稍后重试或启用调试模式。";
+        return "请求超时（生成报告可能较慢）。请稍后重试。";
       }
       if (msg.includes("ERR_ABORTED") || obj?.name === "CanceledError") {
         return "请求被取消（页面刷新或HMR导致）。请重试。";
@@ -563,7 +582,6 @@ const runSpecificDateRecommendation = async () => {
   try {
     const response = await api.runRecommendation({
       profile_name: selectedProfileName.value,
-      debug_mode: isDebugMode.value,
       target_date: selectedDate.value,
     });
 
@@ -572,6 +590,13 @@ const runSpecificDateRecommendation = async () => {
       const taskId = (response.data as any).task_id;
       currentTaskId.value = taskId;
       showProgress.value = true;
+      
+      // 保存task_id到localStorage，用于页面刷新后恢复
+      try {
+        localStorage.setItem(RUNNING_TASK_KEY, taskId);
+      } catch (e) {
+        console.warn("无法保存task_id到localStorage:", e);
+      }
       
       // 开始轮询进度
       progressService.startPolling(
@@ -586,6 +611,13 @@ const runSpecificDateRecommendation = async () => {
           showProgress.value = false;
           isRunning.value = false;
           
+          // 清除localStorage中的task_id
+          try {
+            localStorage.removeItem(RUNNING_TASK_KEY);
+          } catch (e) {
+            console.warn("无法清除localStorage:", e);
+          }
+          
           // 刷新报告列表
           await loadRecentReports();
           
@@ -597,6 +629,14 @@ const runSpecificDateRecommendation = async () => {
           console.error("推荐任务失败", error);
           showProgress.value = false;
           isRunning.value = false;
+          
+          // 清除localStorage中的task_id
+          try {
+            localStorage.removeItem(RUNNING_TASK_KEY);
+          } catch (e) {
+            console.warn("无法清除localStorage:", e);
+          }
+          
           store.setError(error);
         }
       );
@@ -629,7 +669,7 @@ const runSpecificDateRecommendation = async () => {
       const obj = e as { code?: string; message?: string; name?: string };
       const msg = String(obj?.message || "");
       if (obj?.code === "ECONNABORTED" || msg.toLowerCase().includes("timeout")) {
-        return `请求超时（生成 ${selectedDate.value} 的报告可能较慢）。请稍后重试或启用调试模式。`;
+        return `请求超时（生成 ${selectedDate.value} 的报告可能较慢）。请稍后重试。`;
       }
       if (msg.includes("ERR_ABORTED") || obj?.name === "CanceledError") {
         return "请求被取消（页面刷新或HMR导致）。请重试。";
@@ -763,6 +803,63 @@ watch(negativeInterestsText, (newText) => {
   store.setNegativeInterests(interests);
 });
 
+// 恢复运行中的任务进度
+const restoreRunningTask = async () => {
+  try {
+    const savedTaskId = localStorage.getItem(RUNNING_TASK_KEY);
+    if (!savedTaskId) return;
+    
+    // 检查任务是否还在运行
+    const progressResponse = await api.getTaskProgress(savedTaskId);
+    if (progressResponse.success && progressResponse.data) {
+      const progress = progressResponse.data as ProgressData;
+      
+      // 如果任务还在运行，恢复进度显示
+      if (progress.status === "running") {
+        console.log("恢复运行中的任务:", savedTaskId);
+        currentTaskId.value = savedTaskId;
+        currentProgress.value = progress;
+        showProgress.value = true;
+        isRunning.value = true;
+        
+        // 继续轮询进度
+        progressService.startPolling(
+          savedTaskId,
+          (updatedProgress) => {
+            currentProgress.value = updatedProgress;
+          },
+          async (finalProgress) => {
+            // 任务完成
+            console.log("恢复的任务已完成", finalProgress);
+            showProgress.value = false;
+            isRunning.value = false;
+            localStorage.removeItem(RUNNING_TASK_KEY);
+            await loadRecentReports();
+            store.setError("");
+          },
+          (error) => {
+            // 任务失败
+            console.error("恢复的任务失败", error);
+            showProgress.value = false;
+            isRunning.value = false;
+            localStorage.removeItem(RUNNING_TASK_KEY);
+            store.setError(error);
+          }
+        );
+      } else {
+        // 任务已完成或失败，清除localStorage
+        localStorage.removeItem(RUNNING_TASK_KEY);
+      }
+    } else {
+      // 任务不存在或已过期，清除localStorage
+      localStorage.removeItem(RUNNING_TASK_KEY);
+    }
+  } catch (err) {
+    console.warn("恢复任务失败:", err);
+    localStorage.removeItem(RUNNING_TASK_KEY);
+  }
+};
+
 // 初始化
 onMounted(async () => {
   // 更新时间和日期
@@ -787,11 +884,11 @@ onMounted(async () => {
     const profilesResponse = await api.getUserProfiles();
     if (profilesResponse.success && profilesResponse.data) {
       store.setUserProfiles(profilesResponse.data);
-      // 若当前未选择任何配置，默认设为“自定义”，避免下拉框出现空白
+      // 若当前未选择任何配置，默认设为"自定义"，避免下拉框出现空白
       if (!selectedProfileName.value) {
         selectedProfileName.value = "自定义";
       }
-      // 同步选中配置（默认“自定义”不加载具体配置）
+      // 同步选中配置（默认"自定义"不加载具体配置）
       handleProfileChange();
     }
 
@@ -803,6 +900,9 @@ onMounted(async () => {
 
     // 页面初始化完成后，加载最近报告列表
     await loadRecentReports();
+    
+    // 恢复运行中的任务（如果有）
+    await restoreRunningTask();
   } catch (err) {
     store.setError("初始化应用时发生错误");
     console.error("初始化错误:", err);

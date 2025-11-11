@@ -229,6 +229,8 @@ class FastAPIWebLauncher:
         cmd = [str(self.venv_python), "-m", "uvicorn", self.fastapi_module, "--host", host, "--port", str(port), "--log-level", log_level]
         if reload:
             cmd.append("--reload")
+        # 禁用 uvicorn 默认的访问日志，避免进度查询接口产生大量日志
+        cmd.append("--no-access-log")
         Logger.info(f"启动 FastAPI: http://{host}:{port}")
         try:
             proc = subprocess.Popen(cmd, cwd=self.project_root)

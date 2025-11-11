@@ -140,12 +140,10 @@ export const initializeComponents = async (request: {
 
 export const runRecommendation = async (request: {
   profile_name: string;
-  debug_mode: boolean;
   target_date?: string;
 }): Promise<ApiResponse<RecommendationResult>> => {
   const payload: Record<string, unknown> = {
     profile_name: request.profile_name,
-    debug_mode: request.debug_mode,
   };
   if (request.target_date) {
     payload.target_date = request.target_date;

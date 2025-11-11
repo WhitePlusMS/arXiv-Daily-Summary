@@ -133,9 +133,9 @@ class ArxivRecommenderCLI(ProgressTracker):
             'date_format': get_str('DATE_FORMAT', '%Y-%m-%d'),
             'time_format': get_str('TIME_FORMAT', '%H:%M:%S'),
             
-            # 日志配置
-            'log_level': get_str('LOG_LEVEL', 'INFO'),
-            'log_file': get_str('LOG_FILE', 'logs/arxiv_recommender.log'),
+            # 日志配置（简化：只保留用户可配置的3项）
+            'log_level': 'DEBUG',  # 固定为DEBUG，不再可配置
+            'log_file': 'logs/arxiv_recommender.log',  # 固定路径，不再可配置
             'log_to_console': get_bool('LOG_TO_CONSOLE', True),
             'log_max_size': get_int('LOG_MAX_SIZE', 10),
             'log_backup_count': get_int('LOG_BACKUP_COUNT', 5),
@@ -1194,9 +1194,10 @@ def main():
         # 配置日志（使用集中化 env 配置模块）
         logger.remove()  # 移除默认处理器
         
-        log_level = get_str('LOG_LEVEL', 'INFO')
+        # 日志配置（简化：LOG_LEVEL和LOG_FILE使用固定值，不再从环境变量读取）
+        log_level = 'DEBUG'  # 固定为DEBUG
         log_to_console = get_bool('LOG_TO_CONSOLE', True)
-        log_file = get_str('LOG_FILE', 'logs/arxiv_recommender.log')
+        log_file = 'logs/arxiv_recommender.log'  # 固定路径
         
         # 控制台日志
         if log_to_console:

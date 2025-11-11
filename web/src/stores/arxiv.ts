@@ -16,7 +16,6 @@ export const useArxivStore = defineStore('arxiv', () => {
   const recentReports = ref<ReportItem[]>([])
 
   // 计算属性
-  const isDebugMode = computed(() => config.value?.debug_mode || false)
   // 轻模型提供方有效性（用于分类匹配页、优化等）
   const hasValidLightProviderConfig = computed(() => {
     const cfg = config.value
@@ -108,7 +107,6 @@ export const useArxivStore = defineStore('arxiv', () => {
     recentReports,
     
     // 计算属性
-    isDebugMode,
     hasValidLightProviderConfig,
     hasValidHeavyProviderConfig,
     hasValidConfig,

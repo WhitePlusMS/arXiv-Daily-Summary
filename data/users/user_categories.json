@@ -126,8 +126,13 @@
     "negative_query": ""
   },
   {
-    "username": "ce",
+    "username": "测试11",
     "category_id": "cs.CE,cs.DC,cs.GR,eess.SY,cs.ET",
     "user_input": "- 关键主题：数字孪生系统构建与集成  \n- 核心任务：物理实体与虚拟模型的实时同步、动态仿真与预测分析  \n- 核心方法：多源数据融合、高保真建模、边缘-云协同计算  \n- 应用场景：智能制造、智慧运维、城市基础设施管理  \n- 关键词标签：数字孪生、实时同步、虚拟仿真、数据融合、智能建模"
+  },
+  {
+    "username": "测试12",
+    "category_id": "cs.PF,cs.RO,eess.SY,math.OC,cs.CG",
+    "user_input": "仓储物流中的四向车运动"
   }
 ]

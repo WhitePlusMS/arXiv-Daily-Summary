@@ -100,11 +100,9 @@
       </div>
 
       <!-- 匹配完成提示 -->
-      <div v-if="matchCompleted" class="streamlit-section">
-        <div class="streamlit-success">
-          ✅ 匹配完成！结果已保存到数据库。<br />
-          📊 全部115个分类的详细评分已保存到 data/users/detailed_scores/ 目录。
-        </div>
+      <div v-if="matchCompleted" class="streamlit-success">
+        ✅ 匹配完成！结果已保存到数据库。<br />
+        📊 全部115个分类的详细评分已保存到 data/users/detailed_scores/ 目录。
       </div>
 
       <!-- 匹配结果 -->
@@ -338,6 +336,9 @@ const currentTaskId = ref<string | null>(null);
 const currentProgress = ref<ProgressData | null>(null);
 const showProgress = ref(false);
 
+// localStorage key，用于保存运行中的task_id
+const RUNNING_TASK_KEY = "arxiv_category_matcher_task_id";
+
 // 用户数据管理
 const searchTerm = ref("");
 const selectedIndices = ref<Set<number>>(new Set());
@@ -445,6 +446,13 @@ const startMatching = async () => {
       currentTaskId.value = taskId;
       showProgress.value = true;
       
+      // 保存task_id到localStorage，用于页面刷新后恢复
+      try {
+        localStorage.setItem(RUNNING_TASK_KEY, taskId);
+      } catch (e) {
+        console.warn("无法保存task_id到localStorage:", e);
+      }
+      
       // 开始轮询进度
       progressService.startPolling(
         taskId,
@@ -459,6 +467,13 @@ const startMatching = async () => {
           isMatching.value = false;
           matchCompleted.value = true;
           
+          // 清除localStorage中的task_id
+          try {
+            localStorage.removeItem(RUNNING_TASK_KEY);
+          } catch (e) {
+            console.warn("无法清除localStorage:", e);
+          }
+          
           // 刷新数据列表
           await refreshData();
           
@@ -470,6 +485,14 @@ const startMatching = async () => {
           console.error("分类匹配失败", error);
           showProgress.value = false;
           isMatching.value = false;
+          
+          // 清除localStorage中的task_id
+          try {
+            localStorage.removeItem(RUNNING_TASK_KEY);
+          } catch (e) {
+            console.warn("无法清除localStorage:", e);
+          }
+          
           store.setError(error);
         }
       );
@@ -639,6 +662,64 @@ const deleteRecord = (i: number) => {
     });
 };
 
+// 恢复运行中的任务进度
+const restoreRunningTask = async () => {
+  try {
+    const savedTaskId = localStorage.getItem(RUNNING_TASK_KEY);
+    if (!savedTaskId) return;
+    
+    // 检查任务是否还在运行
+    const progressResponse = await api.getTaskProgress(savedTaskId);
+    if (progressResponse.success && progressResponse.data) {
+      const progress = progressResponse.data as ProgressData;
+      
+      // 如果任务还在运行，恢复进度显示
+      if (progress.status === "running") {
+        console.log("恢复运行中的匹配任务:", savedTaskId);
+        currentTaskId.value = savedTaskId;
+        currentProgress.value = progress;
+        showProgress.value = true;
+        isMatching.value = true;
+        
+        // 继续轮询进度
+        progressService.startPolling(
+          savedTaskId,
+          (updatedProgress) => {
+            currentProgress.value = updatedProgress;
+          },
+          async (finalProgress) => {
+            // 任务完成
+            console.log("恢复的匹配任务已完成", finalProgress);
+            showProgress.value = false;
+            isMatching.value = false;
+            matchCompleted.value = true;
+            localStorage.removeItem(RUNNING_TASK_KEY);
+            await refreshData();
+            store.setError("");
+          },
+          (error) => {
+            // 任务失败
+            console.error("恢复的匹配任务失败", error);
+            showProgress.value = false;
+            isMatching.value = false;
+            localStorage.removeItem(RUNNING_TASK_KEY);
+            store.setError(error);
+          }
+        );
+      } else {
+        // 任务已完成或失败，清除localStorage
+        localStorage.removeItem(RUNNING_TASK_KEY);
+      }
+    } else {
+      // 任务不存在或已过期，清除localStorage
+      localStorage.removeItem(RUNNING_TASK_KEY);
+    }
+  } catch (err) {
+    console.warn("恢复匹配任务失败:", err);
+    localStorage.removeItem(RUNNING_TASK_KEY);
+  }
+};
+
 onMounted(async () => {
   // 读取折叠状态持久化
   try {
@@ -655,5 +736,8 @@ onMounted(async () => {
     await api.initializeService();
   } catch {}
   await refreshData();
+  
+  // 恢复运行中的任务（如果有）
+  await restoreRunningTask();
 });
 </script>

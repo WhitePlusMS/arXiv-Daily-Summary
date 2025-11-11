@@ -468,22 +468,8 @@ def render_log_config(config_manager):
     col1, col2 = st.columns(2)
     
     with col1:
-        log_level_options = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-        current_level = st.session_state.config_changes.get('LOG_LEVEL', 'INFO')
-        log_level = st.selectbox(
-            "日志级别",
-            options=log_level_options,
-            index=log_level_options.index(current_level) if current_level in log_level_options else 1,
-            help="设置日志记录级别"
-        )
-        st.session_state.config_changes['LOG_LEVEL'] = log_level
-        
-        log_file = st.text_input(
-            "日志文件路径",
-            value=st.session_state.config_changes.get('LOG_FILE', './logs/arxiv_recommender.log'),
-            help="日志文件保存路径"
-        )
-        st.session_state.config_changes['LOG_FILE'] = log_file
+        # 日志配置已简化：LOG_LEVEL和LOG_FILE不再可配置，使用固定值
+        st.info("📝 日志配置已简化：\n- 日志级别：固定为 DEBUG\n- 日志文件路径：固定为 logs/arxiv_recommender.log")
     
     with col2:
         log_max_size = st.number_input(

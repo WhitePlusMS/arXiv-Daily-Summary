@@ -947,7 +947,6 @@ async def get_task_progress(task_id: str):
     Returns:
         任务进度数据
     """
-    logger.debug(f"API调用: 获取任务进度 - {task_id}")
     try:
         progress_manager = get_progress_manager()
         progress = progress_manager.get_progress(task_id)

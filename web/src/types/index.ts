@@ -17,7 +17,6 @@ export interface RecommendationResult {
   html_filepath?: string
   filename?: string
   target_date?: string
-  debug_mode?: boolean
   error?: string
   warning?: string
   show_weekend_tip?: boolean
@@ -60,9 +59,6 @@ export interface FrontendConfig {
   num_brief_papers?: number
   num_detailed_papers?: number
   num_recommendations?: number
-
-  // 运行控制
-  debug_mode?: boolean
 
   // 邮件
   email_to?: string

@@ -120,16 +120,17 @@
 }
 
 .streamlit-section {
-  background: var(--color-background-soft);
-  border: 1px solid var(--color-border);
-  border-radius: var(--st-radius);
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
   padding: 20px;
   margin: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.2s ease;
 }
 
 .streamlit-section:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .streamlit-subheader {
@@ -641,11 +642,12 @@
 
 /* 表单子区域样式 */
 .form-subsection {
-  padding: 16px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--st-radius);
-  background: var(--color-background-soft);
+  padding: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #ffffff;
   margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .form-subsection-title {

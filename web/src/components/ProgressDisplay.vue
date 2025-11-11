@@ -62,24 +62,20 @@ interface Props {
   progress: ProgressData | null;
   title?: string;
   showLogs?: boolean;
-  maxLogs?: number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   title: "任务进度",
   showLogs: true,
-  maxLogs: 50,
 });
 
 const logsExpanded = ref(true);
 const logsContainer = ref<HTMLElement | null>(null);
 
-// 显示的日志（限制数量）
+// 显示所有日志（不截断）
 const displayLogs = computed(() => {
   if (!props.progress || !props.progress.logs) return [];
-  const logs = props.progress.logs;
-  // 只显示最新的 N 条日志
-  return logs.slice(-props.maxLogs);
+  return props.progress.logs;
 });
 
 // 获取状态文本

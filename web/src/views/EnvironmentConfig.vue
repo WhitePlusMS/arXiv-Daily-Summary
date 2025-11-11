@@ -155,8 +155,10 @@
                 step="0.1"
                 v-model="configChanges.QWEN_MODEL_LIGHT_TEMPERATURE"
                 class="streamlit-input"
+                readonly
+                style="background-color: #f5f5f5; cursor: not-allowed;"
               />
-              <div class="streamlit-help">分类匹配模型温度（适用于 DashScope）。</div>
+              <div class="streamlit-help">分类匹配模型温度（适用于 DashScope）。此参数为只读，禁止手动修改。</div>
             </div>
             <div class="form-item">
               <label>QWEN_MODEL_LIGHT_TOP_P</label>
@@ -418,40 +420,33 @@
           </select>
           <div class="streamlit-help">启用后可使用 MCP 时间服务进行更准确的时间处理。</div>
         </div>
-        <div class="form-item">
-          <label>DEBUG_MODE</label>
-          <select v-model="configChanges.DEBUG_MODE" class="streamlit-select">
-            <option value="true">true</option>
-            <option value="false">false</option>
-          </select>
-          <div class="streamlit-help">调试模式将使用模拟数据，便于快速验证流程。</div>
-        </div>
       </div>
 
       <!-- 📝 日志配置 -->
       <div v-if="selectedSection === '📝 日志配置'" class="form-grid">
         <div class="form-item">
-          <label>LOG_LEVEL</label>
-          <input type="text" v-model="configChanges.LOG_LEVEL" class="streamlit-input" />
-        </div>
-        <div class="form-item">
-          <label>LOG_FILE</label>
-          <input type="text" v-model="configChanges.LOG_FILE" class="streamlit-input" />
-        </div>
-        <div class="form-item">
-          <label>LOG_TO_CONSOLE</label>
+          <label>是否打开日志</label>
           <select v-model="configChanges.LOG_TO_CONSOLE" class="streamlit-select">
-            <option value="true">true</option>
-            <option value="false">false</option>
+            <option value="true">是</option>
+            <option value="false">否</option>
           </select>
+          <div class="streamlit-help">是否启用日志记录功能。</div>
         </div>
         <div class="form-item">
-          <label>LOG_MAX_SIZE</label>
-          <input type="number" v-model="configChanges.LOG_MAX_SIZE" class="streamlit-input" />
+          <label>每个文件大小 (MB)</label>
+          <input type="number" v-model="configChanges.LOG_MAX_SIZE" class="streamlit-input" min="1" />
+          <div class="streamlit-help">单个日志文件的最大大小，单位为MB。</div>
         </div>
         <div class="form-item">
-          <label>LOG_BACKUP_COUNT</label>
-          <input type="number" v-model="configChanges.LOG_BACKUP_COUNT" class="streamlit-input" />
+          <label>总体LOG区域大小 (MB)</label>
+          <input 
+            type="number" 
+            v-model.number="totalLogSize" 
+            class="streamlit-input" 
+            min="1"
+            @input="updateLogBackupCount"
+          />
+          <div class="streamlit-help">所有日志文件的总大小限制，单位为MB。系统会自动计算备份文件数量。</div>
         </div>
       </div>
 
@@ -558,14 +553,52 @@ const hasDashscopeKey = computed(
 const emailEnabled = computed(
   () => String(configChanges.value?.SEND_EMAIL || "").trim() === "true"
 );
-const debugEnabled = computed(
-  () => String(configChanges.value?.DEBUG_MODE || "").trim() === "true"
-);
 const lightProviderLabel = computed(
   () => String(configChanges.value?.LIGHT_MODEL_PROVIDER || "").trim() || "未设置"
 );
 const heavyProviderLabel = computed(
   () => String(configChanges.value?.HEAVY_MODEL_PROVIDER || "").trim() || "未设置"
+);
+
+// 计算总体日志大小（MB）
+const totalLogSize = computed({
+  get: () => {
+    const maxSize = Number(configChanges.value?.LOG_MAX_SIZE || 10);
+    const backupCount = Number(configChanges.value?.LOG_BACKUP_COUNT || 5);
+    return maxSize * backupCount;
+  },
+  set: (value: number) => {
+    const maxSize = Number(configChanges.value?.LOG_MAX_SIZE || 10);
+    if (maxSize > 0) {
+      const backupCount = Math.max(1, Math.floor(value / maxSize));
+      configChanges.value.LOG_BACKUP_COUNT = String(backupCount);
+    }
+  }
+});
+
+// 更新备份数量（当总体大小改变时）
+const updateLogBackupCount = () => {
+  const maxSize = Number(configChanges.value?.LOG_MAX_SIZE || 10);
+  const totalSize = totalLogSize.value;
+  if (maxSize > 0 && totalSize > 0) {
+    const backupCount = Math.max(1, Math.floor(totalSize / maxSize));
+    configChanges.value.LOG_BACKUP_COUNT = String(backupCount);
+  }
+};
+
+// 监听每个文件大小的变化，自动更新备份数量以保持总体大小
+watch(
+  () => configChanges.value?.LOG_MAX_SIZE,
+  (newSize, oldSize) => {
+    if (newSize && oldSize && Number(newSize) !== Number(oldSize)) {
+      const maxSize = Number(newSize);
+      const totalSize = totalLogSize.value;
+      if (maxSize > 0 && totalSize > 0) {
+        const backupCount = Math.max(1, Math.floor(totalSize / maxSize));
+        configChanges.value.LOG_BACKUP_COUNT = String(backupCount);
+      }
+    }
+  }
 );
 
 // 计算未保存更改
@@ -932,9 +965,8 @@ const sectionFields: Record<string, string[]> = {
     "DATE_FORMAT",
     "TIME_FORMAT",
     "ENABLE_MCP_TIME_SERVICE",
-    "DEBUG_MODE",
   ],
-  "📝 日志配置": ["LOG_LEVEL", "LOG_FILE", "LOG_TO_CONSOLE", "LOG_MAX_SIZE", "LOG_BACKUP_COUNT"],
+  "📝 日志配置": ["LOG_TO_CONSOLE", "LOG_MAX_SIZE", "LOG_BACKUP_COUNT"],
 };
 
 const resetSectionChanges = () => {
@@ -962,11 +994,12 @@ onBeforeUnmount(() => {
 
 .prompt-card {
   width: 100%;
-  padding: 16px;
-  border: 1px solid #eaecef;
+  padding: 20px;
+  border: 1px solid #e0e0e0;
   border-radius: 8px;
-  background: #fbfbfb;
+  background: #ffffff;
   margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
 }
 
