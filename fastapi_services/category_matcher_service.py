@@ -72,14 +72,14 @@ class CategoryMatcherService:
         return {"total_records": len(existing_data), "unique_users": len(set(usernames))}
 
     # 匹配器初始化
-    def initialize_matcher(self) -> Optional[CategoryMatcher]:
+    def initialize_matcher(self, task_id: Optional[str] = None) -> Optional[CategoryMatcher]:
         model = get_str("QWEN_MODEL_LIGHT", "qwen-plus")
         base_url = get_str("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
         api_key = get_str("DASHSCOPE_API_KEY", "")
         if not api_key:
             return None
         try:
-            self.matcher = CategoryMatcher(model, base_url, api_key)
+            self.matcher = CategoryMatcher(model, base_url, api_key, task_id=task_id)
             return self.matcher
         except Exception:
             return None
@@ -95,9 +95,9 @@ class CategoryMatcherService:
         return llm_provider.optimize_research_description(user_input)
 
     # 执行匹配
-    def execute_matching(self, user_input: str, username: str, top_n: int = 5):
-        if not self.matcher:
-            matcher = self.initialize_matcher()
+    def execute_matching(self, user_input: str, username: str, top_n: int = 5, task_id: Optional[str] = None):
+        if not self.matcher or (task_id and self.matcher.task_id != task_id):
+            matcher = self.initialize_matcher(task_id=task_id)
             if matcher is None:
                 raise Exception("匹配器未初始化或API密钥未配置")
 
@@ -117,11 +117,11 @@ class CategoryMatcherService:
 
         # 返回结构化结果及 token 使用情况（统一蛇形命名）
         token_usage = None
-        if hasattr(self.matcher, 'total_tokens'):
+        if hasattr(self.matcher, 'llm') and hasattr(self.matcher.llm, 'total_tokens'):
             token_usage = {
-                'input_tokens': getattr(self.matcher, 'total_input_tokens', 0),
-                'output_tokens': getattr(self.matcher, 'total_output_tokens', 0),
-                'total_tokens': getattr(self.matcher, 'total_tokens', 0),
+                'input_tokens': getattr(self.matcher.llm, 'total_input_tokens', 0),
+                'output_tokens': getattr(self.matcher.llm, 'total_output_tokens', 0),
+                'total_tokens': getattr(self.matcher.llm, 'total_tokens', 0),
             }
 
         return [{

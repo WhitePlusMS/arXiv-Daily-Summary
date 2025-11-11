@@ -136,10 +136,15 @@
       </div>
     </div>
 
-    <!-- 运行状态和结果区域 -->
-    <div v-if="isRunning || lastRecommendationResult" class="dashboard-results">
+    <!-- 进度显示区域 -->
+    <div v-if="showProgress" class="dashboard-progress">
+      <ProgressDisplay :progress="currentProgress" title="推荐系统运行进度" :show-logs="true" />
+    </div>
+
+    <!-- 运行状态和结果区域（兼容旧模式） -->
+    <div v-if="(isRunning && !showProgress) || lastRecommendationResult" class="dashboard-results">
       <!-- 运行状态区域 -->
-      <div v-if="isRunning" class="streamlit-section">
+      <div v-if="isRunning && !showProgress" class="streamlit-section">
         <h2 class="streamlit-subheader">📋 运行状态</h2>
         <div class="streamlit-spinner">
           <div class="spinner"></div>
@@ -165,57 +170,94 @@
 
     <!-- 历史报告区域 -->
     <div class="streamlit-section dashboard-history">
-      <div class="section-header">
-        <h2 class="streamlit-subheader">📁 历史报告管理</h2>
-        <button @click="loadRecentReports" :disabled="isLoading" class="streamlit-button streamlit-button-small">
-          {{ isLoading ? "加载中..." : "🔄 刷新" }}
-        </button>
+      <div
+        class="streamlit-expander-header"
+        @click="toggleHistorySection"
+        :class="{ expanded: showHistorySection }"
+      >
+        <span class="expander-icon">{{ showHistorySection ? "▼" : "▶" }}</span>
+        <h2 class="streamlit-subheader" style="margin: 0; flex: 1;">📁 历史报告管理</h2>
       </div>
-
-      <!-- 报告列表 -->
-      <div v-if="recentReports.length > 0" class="reports-section">
-        <div v-for="report in recentReports" :key="report.name" class="report-item">
-          <div class="report-info">
-            <div class="report-name">{{ report.name }}</div>
-            <div class="report-meta">
-              <span class="report-date">{{ formatDate(report.date) }}</span>
-              <span class="report-size">{{ formatFileSize(report.size) }}</span>
-            </div>
+      <div v-show="showHistorySection" class="streamlit-expander-content">
+        <!-- 筛选和搜索控制区域 -->
+        <div class="history-controls">
+          <div class="streamlit-selectbox">
+            <label>筛选用户：</label>
+            <select
+              v-model="selectedReportFilter"
+              @change="loadRecentReports"
+              :disabled="isLoading"
+              class="streamlit-select"
+            >
+              <option value="">全部</option>
+              <option v-for="profile in userProfiles" :key="profile.username" :value="profile.username">
+                {{ profile.username }}
+              </option>
+            </select>
           </div>
-          <div class="report-actions">
-            <button
-              @click="downloadReport(report, 'md')"
-              class="streamlit-button streamlit-button-small"
-              title="下载Markdown版本"
-            >
-              📄 MD
-            </button>
-            <button
-              @click="downloadReport(report, 'html')"
-              class="streamlit-button streamlit-button-small"
-              title="下载HTML版本"
-            >
-              🌐 HTML
-            </button>
-            <button
-              @click="previewReport(report)"
-              class="streamlit-button streamlit-button-small"
-              title="预览报告"
-            >
-              👁️ 预览
-            </button>
-            <button
-              @click="deleteReport(report)"
-              class="streamlit-button streamlit-button-small streamlit-button-danger"
-              title="删除报告"
-            >
-              🗑️ 删除
+          <div class="streamlit-text-input">
+            <label>搜索报告：</label>
+            <input
+              v-model="reportSearchText"
+              type="text"
+              placeholder="输入关键词搜索..."
+              :disabled="isLoading"
+              class="streamlit-input"
+            />
+          </div>
+          <div class="history-refresh-button">
+            <button @click="loadRecentReports" :disabled="isLoading" class="streamlit-button streamlit-button-small">
+              {{ isLoading ? "加载中..." : "🔄 刷新" }}
             </button>
           </div>
         </div>
-      </div>
-      <div v-else class="empty-state">
-        <p>暂无历史报告</p>
+
+        <!-- 报告列表 -->
+        <div v-if="filteredReports.length > 0" class="reports-section">
+          <div v-for="report in filteredReports" :key="report.name" class="report-item">
+            <div class="report-info">
+              <div class="report-name">{{ report.name }}</div>
+              <div class="report-meta">
+                <span class="report-date">{{ formatDate(report.date) }}</span>
+                <span class="report-size">{{ formatFileSize(report.size) }}</span>
+              </div>
+            </div>
+            <div class="report-actions">
+              <button
+                @click="downloadReport(report, 'md')"
+                class="streamlit-button streamlit-button-small"
+                title="下载Markdown版本"
+              >
+                📄 MD
+              </button>
+              <button
+                @click="downloadReport(report, 'html')"
+                class="streamlit-button streamlit-button-small"
+                title="下载HTML版本"
+              >
+                🌐 HTML
+              </button>
+              <button
+                @click="previewReport(report)"
+                class="streamlit-button streamlit-button-small"
+                title="预览报告"
+              >
+                👁️ 预览
+              </button>
+              <button
+                @click="deleteReport(report)"
+                class="streamlit-button streamlit-button-small streamlit-button-danger"
+                title="删除报告"
+              >
+                🗑️ 删除
+              </button>
+            </div>
+          </div>
+        </div>
+        <div v-else class="empty-state">
+          <p v-if="reportSearchText">未找到匹配的报告</p>
+          <p v-else>暂无历史报告</p>
+        </div>
       </div>
     </div>
 
@@ -235,11 +277,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { useArxivStore } from "@/stores/arxiv";
 import * as api from "@/services/api";
-import type { ReportItem } from "@/types";
+import type { ReportItem, ProgressData } from "@/types";
+import { progressService } from "@/services/progress";
+import ProgressDisplay from "@/components/ProgressDisplay.vue";
 
 // 使用store
 const store = useArxivStore();
@@ -261,6 +305,17 @@ const runningMessage = ref("");
 // 使用 store 中的选中配置，避免本地重复状态
 const showPreviewModal = ref(false);
 const previewContent = ref("");
+// 历史报告筛选
+const selectedReportFilter = ref("");
+// 历史报告搜索
+const reportSearchText = ref("");
+// 历史报告区域折叠状态
+const showHistorySection = ref(true);
+
+// 进度相关状态
+const currentTaskId = ref<string | null>(null);
+const currentProgress = ref<ProgressData | null>(null);
+const showProgress = ref(false);
 
 // 计算属性（使用 storeToRefs 保持响应性）
 const {
@@ -278,6 +333,17 @@ const {
   hasValidConfig,
   hasResearchInterests,
 } = storeToRefs(store);
+
+// 过滤后的报告列表（根据搜索文本进行模糊匹配）
+const filteredReports = computed(() => {
+  if (!reportSearchText.value.trim()) {
+    return recentReports.value;
+  }
+  const searchLower = reportSearchText.value.toLowerCase().trim();
+  return recentReports.value.filter((report: ReportItem) => {
+    return report.name.toLowerCase().includes(searchLower);
+  });
+});
 
 // 方法
 const updateTime = () => {
@@ -331,10 +397,20 @@ const updateDates = () => {
 
 const handleProfileChange = () => {
   store.setSelectedProfile(selectedProfileName.value);
+  // 当选择用户配置时，自动同步历史报告筛选
+  if (selectedProfileName.value && selectedProfileName.value !== "自定义") {
+    selectedReportFilter.value = selectedProfileName.value;
+    // 自动刷新报告列表
+    loadRecentReports();
+  }
 };
 
 const toggleAdvancedOptions = () => {
   showAdvancedOptions.value = !showAdvancedOptions.value;
+};
+
+const toggleHistorySection = () => {
+  showHistorySection.value = !showHistorySection.value;
 };
 
 const initializeComponents = async () => {
@@ -376,9 +452,9 @@ const runMainRecommendation = async () => {
   const initSuccess = await initializeComponents();
   if (!initSuccess) return;
 
-  // 运行推荐
+  // 运行推荐（异步模式）
   isRunning.value = true;
-  runningMessage.value = "🚀 开始运行推荐系统...";
+  runningMessage.value = "🚀 启动推荐系统...";
 
   try {
     const response = await api.runRecommendation({
@@ -386,26 +462,63 @@ const runMainRecommendation = async () => {
       debug_mode: isDebugMode.value,
     });
 
-    store.setLastRecommendationResult(response);
-
-    if (!response.success) {
-      // 模板错误友好提示（后端400）
-      const tmpl = (response as any).template_error as {
-        friendly_message?: string;
-        fix_suggestions?: string[];
-        details?: Record<string, unknown>;
-      } | undefined;
-      if (tmpl?.friendly_message) {
-        const tips = Array.isArray(tmpl.fix_suggestions) && tmpl.fix_suggestions.length
-          ? `\n修复建议：\n• ${tmpl.fix_suggestions.join("\n• ")}`
-          : "";
-        store.setError(`${tmpl.friendly_message}${tips}`);
-      } else {
-        store.setError(response.message || "推荐执行失败");
-      }
+    // 检查是否返回了task_id（新的异步模式）
+    if (response.success && response.data && (response.data as any).task_id) {
+      const taskId = (response.data as any).task_id;
+      currentTaskId.value = taskId;
+      showProgress.value = true;
+      
+      // 开始轮询进度
+      progressService.startPolling(
+        taskId,
+        (progress) => {
+          // 更新进度
+          currentProgress.value = progress;
+        },
+        async (progress) => {
+          // 任务完成
+          console.log("推荐任务完成", progress);
+          showProgress.value = false;
+          isRunning.value = false;
+          
+          // 刷新报告列表
+          await loadRecentReports();
+          
+          // 显示成功消息
+          store.setError("");  // 清除之前的错误
+        },
+        (error) => {
+          // 任务失败
+          console.error("推荐任务失败", error);
+          showProgress.value = false;
+          isRunning.value = false;
+          store.setError(error);
+        }
+      );
     } else {
-      // 推荐成功后，自动刷新历史报告列表
-      await loadRecentReports();
+      // 兼容旧的同步模式或错误响应
+      store.setLastRecommendationResult(response);
+
+      if (!response.success) {
+        // 模板错误友好提示（后端400）
+        const tmpl = (response as any).template_error as {
+          friendly_message?: string;
+          fix_suggestions?: string[];
+          details?: Record<string, unknown>;
+        } | undefined;
+        if (tmpl?.friendly_message) {
+          const tips = Array.isArray(tmpl.fix_suggestions) && tmpl.fix_suggestions.length
+            ? `\n修复建议：\n• ${tmpl.fix_suggestions.join("\n• ")}`
+            : "";
+          store.setError(`${tmpl.friendly_message}${tips}`);
+        } else {
+          store.setError(response.message || "推荐执行失败");
+        }
+      } else {
+        // 推荐成功后，自动刷新历史报告列表
+        await loadRecentReports();
+      }
+      isRunning.value = false;
     }
   } catch (err: unknown) {
     const getMsg = (e: unknown): string => {
@@ -421,8 +534,9 @@ const runMainRecommendation = async () => {
     };
     store.setError(getMsg(err));
     console.error("执行推荐错误:", err);
-  } finally {
     isRunning.value = false;
+    showProgress.value = false;
+  } finally {
     runningMessage.value = "";
   }
 };
@@ -442,9 +556,9 @@ const runSpecificDateRecommendation = async () => {
   const initSuccess = await initializeComponents();
   if (!initSuccess) return;
 
-  // 运行特定日期推荐
+  // 运行特定日期推荐（异步模式）
   isRunning.value = true;
-  runningMessage.value = `🚀 开始查询 ${selectedDate.value} 的论文...`;
+  runningMessage.value = `🚀 启动查询 ${selectedDate.value} 的论文...`;
 
   try {
     const response = await api.runRecommendation({
@@ -453,25 +567,62 @@ const runSpecificDateRecommendation = async () => {
       target_date: selectedDate.value,
     });
 
-    store.setLastRecommendationResult(response);
-
-    if (!response.success) {
-      const tmpl = (response as any).template_error as {
-        friendly_message?: string;
-        fix_suggestions?: string[];
-        details?: Record<string, unknown>;
-      } | undefined;
-      if (tmpl?.friendly_message) {
-        const tips = Array.isArray(tmpl.fix_suggestions) && tmpl.fix_suggestions.length
-          ? `\n修复建议：\n• ${tmpl.fix_suggestions.join("\n• ")}`
-          : "";
-        store.setError(`${tmpl.friendly_message}${tips}`);
-      } else {
-        store.setError(response.message || "推荐执行失败");
-      }
+    // 检查是否返回了task_id（新的异步模式）
+    if (response.success && response.data && (response.data as any).task_id) {
+      const taskId = (response.data as any).task_id;
+      currentTaskId.value = taskId;
+      showProgress.value = true;
+      
+      // 开始轮询进度
+      progressService.startPolling(
+        taskId,
+        (progress) => {
+          // 更新进度
+          currentProgress.value = progress;
+        },
+        async (progress) => {
+          // 任务完成
+          console.log("推荐任务完成", progress);
+          showProgress.value = false;
+          isRunning.value = false;
+          
+          // 刷新报告列表
+          await loadRecentReports();
+          
+          // 显示成功消息
+          store.setError("");  // 清除之前的错误
+        },
+        (error) => {
+          // 任务失败
+          console.error("推荐任务失败", error);
+          showProgress.value = false;
+          isRunning.value = false;
+          store.setError(error);
+        }
+      );
     } else {
-      // 推荐成功后，自动刷新历史报告列表
-      await loadRecentReports();
+      // 兼容旧的同步模式或错误响应
+      store.setLastRecommendationResult(response);
+
+      if (!response.success) {
+        const tmpl = (response as any).template_error as {
+          friendly_message?: string;
+          fix_suggestions?: string[];
+          details?: Record<string, unknown>;
+        } | undefined;
+        if (tmpl?.friendly_message) {
+          const tips = Array.isArray(tmpl.fix_suggestions) && tmpl.fix_suggestions.length
+            ? `\n修复建议：\n• ${tmpl.fix_suggestions.join("\n• ")}`
+            : "";
+          store.setError(`${tmpl.friendly_message}${tips}`);
+        } else {
+          store.setError(response.message || "推荐执行失败");
+        }
+      } else {
+        // 推荐成功后，自动刷新历史报告列表
+        await loadRecentReports();
+      }
+      isRunning.value = false;
     }
   } catch (err: unknown) {
     const getMsg = (e: unknown): string => {
@@ -487,8 +638,9 @@ const runSpecificDateRecommendation = async () => {
     };
     store.setError(getMsg(err));
     console.error("执行推荐错误:", err);
-  } finally {
     isRunning.value = false;
+    showProgress.value = false;
+  } finally {
     runningMessage.value = "";
   }
 };
@@ -498,7 +650,9 @@ const loadRecentReports = async () => {
   store.clearError();
 
   try {
-    const response = await api.getRecentReports();
+    // 根据筛选条件调用 API，如果选择"全部"则传入 undefined
+    const username = selectedReportFilter.value || undefined;
+    const response = await api.getRecentReports(username);
 
     if (response.success && response.data) {
       store.setRecentReports(response.data);

@@ -153,6 +153,53 @@
   margin: 0;
 }
 
+.section-header .header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 历史报告控制区域 */
+.history-controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.history-controls .streamlit-selectbox,
+.history-controls .streamlit-text-input {
+  flex: 1;
+  min-width: 200px;
+}
+
+.history-controls .history-refresh-button {
+  display: flex;
+  align-items: flex-end;
+  height: fit-content;
+}
+
+@media (max-width: 768px) {
+  .history-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .history-controls .streamlit-selectbox,
+  .history-controls .streamlit-text-input {
+    min-width: auto;
+  }
+  
+  .history-controls .history-refresh-button {
+    width: 100%;
+  }
+  
+  .history-controls .history-refresh-button button {
+    width: 100%;
+  }
+}
+
 @media (max-width: 768px) {
   .section-header {
     flex-direction: column;

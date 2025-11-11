@@ -20,15 +20,16 @@ from core.template_renderer import TemplateRenderer
 from core.mcp_time_service import MCPTimeService
 from core.mcp_time_service import get_current_time
 from core.output_manager import OutputManager
-from core.common_utils import sanitize_username
+from core.common_utils import sanitize_username, format_timezone_date, get_timezone_aware_now
 from core.env_config import get_str, get_int, get_bool, get_list, get_float
+from core.progress_utils import ProgressTracker
 import re
 
 # 项目根目录路径（用于文件读取）
 project_root = Path(__file__).parent.parent
 
 
-class ArxivRecommenderCLI:
+class ArxivRecommenderCLI(ProgressTracker):
     """ArXiv推荐系统CLI主类。"""
     
     def __init__(self, username=None):
@@ -49,6 +50,9 @@ class ArxivRecommenderCLI:
         # 初始化数据存储
         self.research_interests = []
         self.user_profiles = []
+        
+        # 进度跟踪
+        self.task_id = None  # 当前任务ID（用于进度更新）
         
         # 配置参数
         logger.debug("加载系统配置")
@@ -309,6 +313,17 @@ class ArxivRecommenderCLI:
         
         logger.debug(f"更新研究兴趣: {len(self.research_interests)} 条")
     
+    def set_task_id(self, task_id: str):
+        """设置当前任务ID（用于进度更新）
+        
+        Args:
+            task_id: 任务ID
+        """
+        self.task_id = task_id
+        logger.debug(f"设置任务ID: {task_id}")
+    
+    # 进度更新方法已从 ProgressTracker 继承
+    
     def run_debug_mode(self, target_date=None):
         """运行调试模式（用于Streamlit界面）
         
@@ -324,7 +339,7 @@ class ArxivRecommenderCLI:
             from datetime import datetime
             
             if target_date is None:
-                target_date = datetime.now().strftime('%Y-%m-%d')
+                target_date = format_timezone_date()
             
             logger.info(f"🔧 调试模式启动 - 目标日期: {target_date}")
             
@@ -362,7 +377,7 @@ class ArxivRecommenderCLI:
             fake_summary = f"""# ArXiv 每日论文推荐报告
 
 **日期**: {target_date}
-**生成时间**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+**生成时间**: {get_timezone_aware_now().strftime('%Y-%m-%d %H:%M:%S')}
 **模式**: 调试模式 🔧
 
 ## 📊 今日概览
@@ -448,7 +463,7 @@ class ArxivRecommenderCLI:
     <div class="debug-badge">调试模式</div>
     <h1>ArXiv 每日论文推荐报告</h1>
     <p><strong>日期</strong>: {target_date}</p>
-    <p><strong>生成时间</strong>: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+    <p><strong>生成时间</strong>: {get_timezone_aware_now().strftime('%Y-%m-%d %H:%M:%S')}</p>
     <p>这是调试模式生成的示例报告。</p>
 </body>
 </html>"""
@@ -490,11 +505,12 @@ class ArxivRecommenderCLI:
             logger.error(f"实时日志设置失败: {str(e)}")
             return False
     
-    def get_recent_reports(self, limit=10):
+    def get_recent_reports(self, limit=None, username_filter=None):
         """获取最近的报告文件（用于Streamlit界面）
         
         Args:
-            limit: 返回的报告数量限制
+            limit: 返回的报告数量限制，如果为 None 则不限制数量
+            username_filter: 可选的用户名筛选，如果提供则只返回匹配的报告
             
         Returns:
             list: 报告文件信息列表
@@ -515,14 +531,38 @@ class ArxivRecommenderCLI:
             # 按修改时间排序
             report_files.sort(key=lambda x: x.stat().st_mtime, reverse=True)
             
-            # 限制数量
-            report_files = report_files[:limit]
-            
             # 构建报告信息
             reports = []
             for file_path in report_files:
                 try:
                     stat = file_path.stat()
+                    # 文件名格式：YYYY-MM-DD_{username}_ARXIV_summary.md
+                    # 提取用户名：按 _ 分割，取索引1的部分（索引0是日期）
+                    stem_parts = file_path.stem.split('_')
+                    date_str = stem_parts[0] if len(stem_parts) > 0 else 'unknown'
+                    
+                    # 提取用户名：找到 "ARXIV" 的位置，用户名在日期和ARXIV之间
+                    username = None
+                    if len(stem_parts) >= 3:
+                        # 查找 "ARXIV" 的位置
+                        arxiv_index = None
+                        for i, part in enumerate(stem_parts):
+                            if part.upper() == 'ARXIV':
+                                arxiv_index = i
+                                break
+                        
+                        if arxiv_index and arxiv_index > 1:
+                            # 用户名是索引1到arxiv_index-1之间的所有部分，用下划线连接
+                            username_parts = stem_parts[1:arxiv_index]
+                            username = '_'.join(username_parts)
+                        elif len(stem_parts) >= 2:
+                            # 如果没有找到ARXIV，假设第二个片段是用户名（向后兼容）
+                            username = stem_parts[1]
+                    
+                    # 如果提供了用户名筛选，只返回匹配的报告
+                    if username_filter and username != username_filter:
+                        continue
+                    
                     reports.append({
                         'filename': file_path.name,
                         'name': file_path.name,
@@ -530,12 +570,16 @@ class ArxivRecommenderCLI:
                         'path': file_path,
                         'size': stat.st_size,
                         'modified_time': stat.st_mtime,
-                        # 文件名格式：YYYY-MM-DD_{username}_ARXIV_summary -> 取第一个片段为日期
-                        'date': file_path.stem.split('_')[0] if '_' in file_path.stem else 'unknown'
+                        'date': date_str,
+                        'username': username  # 添加用户名字段
                     })
                 except Exception as e:
                     logger.warning(f"无法获取文件信息 {file_path}: {str(e)}")
                     continue
+            
+            # 限制数量（在筛选后），只有当 limit 不为 None 时才限制
+            if limit is not None:
+                reports = reports[:limit]
             
             return reports
             
@@ -553,10 +597,29 @@ class ArxivRecommenderCLI:
             tuple: (success, result_data, error_msg)
         """
         try:
+            # 更新进度：初始化组件
+            self._update_progress(
+                step="初始化系统组件...",
+                percentage=5,
+                log_message="正在初始化ArXiv获取器和LLM提供商"
+            )
+            
             # 获取推荐结果
+            self._update_progress(
+                step="获取论文推荐...",
+                percentage=10,
+                log_message="开始获取推荐结果"
+            )
+            
             cli_result = self.get_recommendations(specific_date=specific_date)
             
             if not cli_result['success']:
+                self._update_progress(
+                    step="推荐失败",
+                    percentage=0,
+                    log_message=f"推荐失败: {cli_result.get('error', '未知错误')}",
+                    log_level="error"
+                )
                 return False, cli_result.get('data'), cli_result.get('error', '未知错误')
             
             # 获取推荐数据
@@ -565,6 +628,12 @@ class ArxivRecommenderCLI:
             current_time = cli_result['current_time']
             
             # 保存报告
+            self._update_progress(
+                step="保存报告...",
+                percentage=70,
+                log_message="正在生成并保存推荐报告"
+            )
+            
             save_result = self.save_reports(report_data, current_time, target_date=target_date)
             
             # 获取分离的内容
@@ -576,7 +645,7 @@ class ArxivRecommenderCLI:
             markdown_content = summary_content + detailed_analysis + brief_analysis
             
             # 生成文件名
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            timestamp = get_timezone_aware_now().strftime("%Y%m%d_%H%M%S")
             filename = f"arxiv_recommendations_{timestamp}.md"
             
             result_data = {
@@ -590,10 +659,23 @@ class ArxivRecommenderCLI:
                 'target_date': target_date
             }
             
+            # 完成
+            self._update_progress(
+                step="推荐完成",
+                percentage=100,
+                log_message=f"推荐报告已生成: {filename}"
+            )
+            
             return True, result_data, None
             
         except Exception as e:
             logger.error(f"完整推荐流程失败: {str(e)}")
+            self._update_progress(
+                step="推荐失败",
+                percentage=0,
+                log_message=f"完整推荐流程失败: {str(e)}",
+                log_level="error"
+            )
             return False, None, f"完整推荐流程失败: {str(e)}"
     
     def _initialize_components(self):
@@ -658,6 +740,7 @@ class ArxivRecommenderCLI:
                 max_tokens=heavy_max_tokens,
                 arxiv_fetcher=self.arxiv_fetcher,
                 llm_provider=self.llm_provider,
+                task_id=self.task_id,  # 传递task_id用于进度更新
             )
             logger.debug(f"推荐引擎初始化完成 - 类别: {self.config['arxiv_categories']}, 工作线程: {self.config['max_workers']}")
             
@@ -825,7 +908,7 @@ class ArxivRecommenderCLI:
         logger.debug("Markdown报告保存开始")
         try:
             # 生成文件名
-            date_str = target_date if target_date else datetime.now().strftime("%Y-%m-%d")
+            date_str = target_date if target_date else format_timezone_date()
             username = self._get_current_username()
             safe_username = sanitize_username(username)
             filename = f"{date_str}_{safe_username}_ARXIV_summary.md"
@@ -861,7 +944,7 @@ class ArxivRecommenderCLI:
         
         try:
             # 生成文件名
-            date_str = target_date if target_date else datetime.now().strftime("%Y-%m-%d")
+            date_str = target_date if target_date else format_timezone_date()
             username = self._get_current_username()
             safe_username = sanitize_username(username)
             filename = f"{date_str}_{safe_username}_ARXIV_summary.html"
@@ -904,7 +987,7 @@ class ArxivRecommenderCLI:
         logger.debug("HTML报告生成开始")
         try:
             # 生成文件名
-            date_str = target_date if target_date else datetime.now().strftime("%Y-%m-%d")
+            date_str = target_date if target_date else format_timezone_date()
             username = self._get_current_username()
             safe_username = sanitize_username(username)
             filename = f"{date_str}_{safe_username}_ARXIV_summary.html"
@@ -980,7 +1063,7 @@ class ArxivRecommenderCLI:
             else:
                 # 智能回溯模式：尝试获取昨天和前天的论文
                 for days_back in [1, 2]:  # 先尝试昨天，再尝试前天
-                    target_date = datetime.now() - timedelta(days=days_back)
+                    target_date = get_timezone_aware_now() - timedelta(days=days_back)
                     target_date_str = target_date.strftime('%Y-%m-%d')
                     logger.info(f"论文获取日期: {target_date_str} (往前{days_back}天)")
                     
@@ -1010,7 +1093,7 @@ class ArxivRecommenderCLI:
                     error_msg = f"在指定日期 {target_date_str} 未找到相关论文"
                 else:
                     # 智能回溯模式的错误信息
-                    final_target_date_str = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d')
+                    final_target_date_str = (get_timezone_aware_now() - timedelta(days=2)).strftime('%Y-%m-%d')
                     error_msg = f"在目标日期 {final_target_date_str} 未找到相关论文"
                     target_date_str = final_target_date_str
                 

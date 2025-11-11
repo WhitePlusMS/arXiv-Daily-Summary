@@ -3,8 +3,10 @@ import re
 import json
 import os
 from typing import Callable, Optional, Any
+from datetime import datetime
+import pytz
 from loguru import logger
-from core.env_config import get_int as env_get_int, get_bool as env_get_bool
+from core.env_config import get_int as env_get_int, get_bool as env_get_bool, get_str as env_get_str
 
 # 星级评分的统一阈值（与现有逻辑保持一致）
 STAR_LOW_THRESHOLD = 2
@@ -91,3 +93,46 @@ def make_on_retry_logger(prefix: str, context: str, retries: int, delay: float) 
         logger.warning(f"{prefix}失败 ({attempt_idx}/{retries}) - {context}: {exc}")
         logger.debug(f"等待 {delay} 秒后重试")
     return _on_retry
+
+
+def get_timezone_aware_now(timezone_str: Optional[str] = None) -> datetime:
+    """获取时区感知的当前时间。
+    
+    Args:
+        timezone_str: 时区字符串，如 'Asia/Shanghai'。如果为None，从环境变量TIMEZONE读取，默认为'Asia/Shanghai'
+        
+    Returns:
+        时区感知的datetime对象
+        
+    Raises:
+        如果时区字符串无效，则返回UTC时间并记录警告
+    """
+    if timezone_str is None:
+        timezone_str = env_get_str('TIMEZONE', 'Asia/Shanghai')
+    
+    try:
+        tz = pytz.timezone(timezone_str)
+        return datetime.now(tz)
+    except pytz.exceptions.UnknownTimeZoneError:
+        logger.warning(f"无效的时区字符串: {timezone_str}，使用UTC时区")
+        return datetime.now(pytz.UTC)
+    except Exception as e:
+        logger.error(f"获取时区时间失败: {e}，使用UTC时区")
+        return datetime.now(pytz.UTC)
+
+
+def format_timezone_date(date_format: Optional[str] = None, timezone_str: Optional[str] = None) -> str:
+    """格式化时区感知的当前日期。
+    
+    Args:
+        date_format: 日期格式字符串，默认为'%Y-%m-%d'
+        timezone_str: 时区字符串，如 'Asia/Shanghai'。如果为None，从环境变量TIMEZONE读取
+        
+    Returns:
+        格式化后的日期字符串
+    """
+    if date_format is None:
+        date_format = env_get_str('DATE_FORMAT', '%Y-%m-%d')
+    
+    now = get_timezone_aware_now(timezone_str)
+    return now.strftime(date_format)

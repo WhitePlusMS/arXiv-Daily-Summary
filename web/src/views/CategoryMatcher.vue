@@ -83,10 +83,15 @@
       </div>
     </div>
 
-    <!-- 运行状态和结果区域 -->
-    <div v-if="isMatching || matchCompleted || results.length > 0" class="dashboard-results">
+    <!-- 进度显示区域 -->
+    <div v-if="showProgress" class="dashboard-progress">
+      <ProgressDisplay :progress="currentProgress" title="分类匹配运行进度" :show-logs="true" />
+    </div>
+
+    <!-- 运行状态和结果区域（兼容旧模式） -->
+    <div v-if="(isMatching && !showProgress) || matchCompleted || results.length > 0" class="dashboard-results">
       <!-- 运行状态 -->
-      <div v-if="isMatching" class="streamlit-section">
+      <div v-if="isMatching && !showProgress" class="streamlit-section">
         <h2 class="streamlit-subheader">📋 运行状态</h2>
         <div class="streamlit-spinner">
           <div class="spinner"></div>
@@ -291,7 +296,9 @@ import { ref, computed, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useArxivStore } from "@/stores/arxiv";
 import * as api from "@/services/api";
-import type { UserProfile } from "@/types";
+import type { UserProfile, ProgressData } from "@/types";
+import { progressService } from "@/services/progress";
+import ProgressDisplay from "@/components/ProgressDisplay.vue";
 
 // Store
 const store = useArxivStore();
@@ -325,6 +332,11 @@ const toggleManagementCollapse = () => {
     localStorage.setItem("matcher_management_collapsed", managementCollapsed.value ? "1" : "0");
   } catch {}
 };
+
+// 进度相关状态
+const currentTaskId = ref<string | null>(null);
+const currentProgress = ref<ProgressData | null>(null);
+const showProgress = ref(false);
 
 // 用户数据管理
 const searchTerm = ref("");
@@ -418,7 +430,7 @@ const startMatching = async () => {
     return;
   }
   isMatching.value = true;
-  runningMessage.value = `🔄 正在处理匹配请求（Top ${topN.value}）...`;
+  runningMessage.value = `🔄 启动分类匹配（Top ${topN.value}）...`;
   try {
     store.clearError();
     const resp = await api.runCategoryMatching({
@@ -426,41 +438,81 @@ const startMatching = async () => {
       username: username.value.trim(),
       top_n: topN.value,
     });
-    if (resp.success && resp.data) {
-      const resList = Array.isArray(resp.data.results) ? resp.data.results : [];
-      results.value = resList.map((r) => ({ id: r.id, name: r.name, score: r.score }));
-      const tuRaw = resp.data.token_usage || {};
-      const input_tokens = (tuRaw as any).input_tokens ?? 0;
-      const output_tokens = (tuRaw as any).output_tokens ?? 0;
-      const total_tokens = (tuRaw as any).total_tokens ?? 0;
-      tokenUsage.value = { input_tokens, output_tokens, total_tokens };
-      matchCompleted.value = true;
-      // 匹配成功后刷新数据列表
-      await refreshData();
+    
+    // 检查是否返回了task_id（新的异步模式）
+    if (resp.success && resp.data && (resp.data as any).task_id) {
+      const taskId = (resp.data as any).task_id;
+      currentTaskId.value = taskId;
+      showProgress.value = true;
+      
+      // 开始轮询进度
+      progressService.startPolling(
+        taskId,
+        (progress) => {
+          // 更新进度
+          currentProgress.value = progress;
+        },
+        async (progress) => {
+          // 任务完成
+          console.log("分类匹配完成", progress);
+          showProgress.value = false;
+          isMatching.value = false;
+          matchCompleted.value = true;
+          
+          // 刷新数据列表
+          await refreshData();
+          
+          // 清除错误
+          store.setError("");
+        },
+        (error) => {
+          // 任务失败
+          console.error("分类匹配失败", error);
+          showProgress.value = false;
+          isMatching.value = false;
+          store.setError(error);
+        }
+      );
     } else {
-      // 模板错误友好提示
-      const tmpl = (resp as any).template_error as
-        | {
-            friendly_message?: string;
-            fix_suggestions?: string[];
-            details?: Record<string, unknown>;
-          }
-        | undefined;
-      if (tmpl?.friendly_message) {
-        const tips =
-          Array.isArray(tmpl.fix_suggestions) && tmpl.fix_suggestions.length
-            ? `\n修复建议：\n• ${tmpl.fix_suggestions.join("\n• ")}`
-            : "";
-        store.setError(`${tmpl.friendly_message}${tips}`);
+      // 兼容旧的同步模式或错误响应
+      if (resp.success && resp.data) {
+        const resList = Array.isArray(resp.data.results) ? resp.data.results : [];
+        results.value = resList.map((r) => ({ id: r.id, name: r.name, score: r.score }));
+        const tuRaw = resp.data.token_usage || {};
+        const input_tokens = (tuRaw as any).input_tokens ?? 0;
+        const output_tokens = (tuRaw as any).output_tokens ?? 0;
+        const total_tokens = (tuRaw as any).total_tokens ?? 0;
+        tokenUsage.value = { input_tokens, output_tokens, total_tokens };
+        matchCompleted.value = true;
+        // 匹配成功后刷新数据列表
+        await refreshData();
       } else {
-        store.setError("分类匹配失败");
+        // 模板错误友好提示
+        const tmpl = (resp as any).template_error as
+          | {
+              friendly_message?: string;
+              fix_suggestions?: string[];
+              details?: Record<string, unknown>;
+            }
+          | undefined;
+        if (tmpl?.friendly_message) {
+          const tips =
+            Array.isArray(tmpl.fix_suggestions) && tmpl.fix_suggestions.length
+              ? `\n修复建议：\n• ${tmpl.fix_suggestions.join("\n• ")}`
+              : "";
+          store.setError(`${tmpl.friendly_message}${tips}`);
+        } else {
+          store.setError("分类匹配失败");
+        }
       }
+      isMatching.value = false;
     }
   } catch (err) {
     store.setError("执行匹配时发生错误");
     console.error("匹配错误:", err);
-  } finally {
     isMatching.value = false;
+    showProgress.value = false;
+  } finally {
     runningMessage.value = "";
   }
 };

@@ -13,9 +13,10 @@ from loguru import logger
 from .arxiv_fetcher import ArxivFetcher
 from .llm_provider import LLMProvider, create_light_llm_provider
 from .pdf_text_extractor import PDFTextExtractor
+from .progress_utils import ProgressTracker
 
 
-class RecommendationEngine:
+class RecommendationEngine(ProgressTracker):
     """论文推荐引擎，负责获取、评估和推荐ArXiv论文。"""
 
     def __init__(
@@ -38,6 +39,7 @@ class RecommendationEngine:
         llm_provider: Optional[LLMProvider] = None,
         light_llm_provider: Optional[LLMProvider] = None,
         pdf_text_extractor: Optional[PDFTextExtractor] = None,
+        task_id: Optional[str] = None,
     ):
         """初始化推荐引擎。
         
@@ -57,8 +59,10 @@ class RecommendationEngine:
             temperature: LLM生成温度
             top_p: LLM top_p参数
             max_tokens: LLM最大token数
+            task_id: 任务ID（用于进度更新）
         """
         logger.info("推荐引擎初始化开始")
+        self.task_id = task_id
         
         # 向后兼容：如果 description 是字符串，转换为字典格式
         if isinstance(description, str):
@@ -107,6 +111,8 @@ class RecommendationEngine:
         
         logger.success(f"推荐引擎初始化完成 - 分类: {categories}, 详细分析: {num_detailed_papers}, 简要分析: {num_brief_papers}")
         logger.debug(f"推荐引擎配置 - num_detailed_papers={self.num_detailed_papers}, num_brief_papers={self.num_brief_papers}, max_total={self.num_detailed_papers + self.num_brief_papers}")
+    
+    # 进度更新方法已从 ProgressTracker 继承
 
     def _fetch_papers_from_categories(self, date: str = None) -> List[Dict[str, Any]]:
         """从所有指定分类中获取论文。
@@ -196,10 +202,17 @@ class RecommendationEngine:
     def get_recommendations(self, papers: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """获取论文推荐列表。"""
         logger.info(f"相关性评估开始 - 待评估: {len(papers)} 篇")
+        self._update_progress(
+            step="评估论文相关性...",
+            percentage=30,
+            log_message=f"开始评估 {len(papers)} 篇论文的相关性"
+        )
         
         recommended_papers = []
         api_failure_count = 0
         max_failures = 5  # 最大允许失败次数
+        total_papers = len(papers)
+        processed_count = 0
         
         # 使用线程池并行处理论文，降低并发数
         max_concurrent = min(self.num_workers, 2)  # 最多2个并发线程
@@ -210,6 +223,14 @@ class RecommendationEngine:
             }
             
             for future in as_completed(future_to_paper):
+                processed_count += 1
+                # 更新细粒度进度 (30-60%)
+                progress_pct = 30 + int((processed_count / total_papers) * 30)
+                self._update_progress(
+                    step=f"评估论文相关性... ({processed_count}/{total_papers})",
+                    percentage=progress_pct,
+                    log_message=f"已评估 {processed_count}/{total_papers} 篇论文"
+                )
                 paper = future_to_paper[future]
                 try:
                     result = future.result()
@@ -392,19 +413,53 @@ class RecommendationEngine:
         logger.info("推荐引擎流程开始")
         
         # 1. 获取论文
+        self._update_progress(
+            step="获取ArXiv论文...",
+            percentage=15,
+            log_message="正在从ArXiv获取论文"
+        )
         papers = self._fetch_papers_from_categories(date)
         if not papers:
             logger.warning("论文获取失败 - 未获取到任何论文，流程终止")
+            self._update_progress(
+                step="论文获取失败",
+                percentage=0,
+                log_message="未获取到任何论文",
+                log_level="warning"
+            )
             return None
+
+        self._update_progress(
+            step=f"获取到 {len(papers)} 篇论文",
+            percentage=25,
+            log_message=f"成功获取 {len(papers)} 篇论文"
+        )
 
         # 2. 获取推荐
         recommended_papers = self.get_recommendations(papers)
         if not recommended_papers:
             logger.warning("推荐生成失败 - 未找到相关论文，流程终止")
+            self._update_progress(
+                step="推荐失败",
+                percentage=0,
+                log_message="未找到相关论文",
+                log_level="warning"
+            )
             return None
+        
+        self._update_progress(
+            step=f"筛选出 {len(recommended_papers)} 篇相关论文",
+            percentage=60,
+            log_message=f"共筛选出 {len(recommended_papers)} 篇相关论文"
+        )
         
         # 3. 使用多线程并发执行总结生成、详细分析和简要分析
         logger.info("内容生成开始 - 并发执行总结、详细分析和简要分析")
+        self._update_progress(
+            step="生成报告内容...",
+            percentage=65,
+            log_message="开始生成报告内容（总结、详细分析、简要分析）"
+        )
         
         with ThreadPoolExecutor(max_workers=3) as executor:
             # 提交三个任务到线程池（直接使用llm_provider生成总结报告，移除无用包装）
@@ -417,12 +472,27 @@ class RecommendationEngine:
             # 等待三个任务完成并获取结果
             markdown_summary = summary_future.result()
             logger.debug("Markdown总结报告生成完成")
+            self._update_progress(
+                step="生成报告内容... (1/3)",
+                percentage=70,
+                log_message="总结报告生成完成"
+            )
             
             detailed_analysis = analysis_future.result()
             logger.debug("详细分析生成完成")
+            self._update_progress(
+                step="生成报告内容... (2/3)",
+                percentage=80,
+                log_message="详细分析生成完成"
+            )
             
             brief_analysis = brief_future.result()
             logger.debug("简要分析生成完成")
+            self._update_progress(
+                step="生成报告内容... (3/3)",
+                percentage=90,
+                log_message="简要分析生成完成"
+            )
         
         # 4. 返回分离的内容而不是合并，同时包含papers数据
         result = {
@@ -432,6 +502,11 @@ class RecommendationEngine:
             'papers': recommended_papers  # 添加papers数据用于统计
         }
         
+        self._update_progress(
+            step="报告生成完成",
+            percentage=95,
+            log_message="推荐引擎流程完成，报告已生成"
+        )
         logger.success("推荐引擎流程完成")
         return result
 

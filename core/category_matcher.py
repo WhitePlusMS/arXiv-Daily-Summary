@@ -10,6 +10,7 @@ import time
 from typing import List, Dict, Optional, Tuple, Any
 from core.llm_provider import LLMProvider
 from core.common_utils import write_json
+from core.progress_utils import ProgressTracker
 from loguru import logger
 from datetime import datetime
 import re
@@ -102,16 +103,17 @@ class MultiUserDataManager:
             self.existing_records = []
 
 
-class CategoryMatcher:
+class CategoryMatcher(ProgressTracker):
     """ArXiv分类匹配器，用于将用户研究方向匹配到最相关的ArXiv分类"""
     
-    def __init__(self, model: str, base_url: str, api_key: str):
+    def __init__(self, model: str, base_url: str, api_key: str, task_id: Optional[str] = None):
         """初始化分类匹配器
         
         Args:
             model: LLM模型名称
             base_url: API基础URL
             api_key: API密钥
+            task_id: 任务ID（用于进度更新）
         """
         self.model = model
         self.base_url = base_url
@@ -120,7 +122,10 @@ class CategoryMatcher:
         self.categories = self._load_categories()
         self.enhanced_categories = self._load_enhanced_categories()
         # Token统计迁移至 LLMProvider（单一真源）
+        self.task_id = task_id  # 存储任务ID用于进度更新
         logger.info(f"分类匹配器初始化完成 - 加载了 {len(self.categories)} 个分类")
+    
+    # 进度更新方法已从 ProgressTracker 继承
     
     # 预热逻辑已移除：统一使用云端 API，无需本地引擎预热
     
@@ -304,11 +309,17 @@ class CategoryMatcher:
             包含(category_id, category_name, score)的列表，按评分降序排列
         """
         logger.info(f"开始分类匹配 - 用户描述长度: {len(user_description)} 字符")
+        self._update_progress(
+            step="开始分类匹配...",
+            percentage=5,
+            log_message=f"开始评估 {len(self.enhanced_categories)} 个分类"
+        )
         
         results = []
+        total_categories = len(self.enhanced_categories)
         
-        for i, category in enumerate[Dict[str, str]](self.enhanced_categories):
-            logger.debug(f"评估分类 {i+1}/{len(self.enhanced_categories)}: {category['id']}")
+        for i, category in enumerate(self.enhanced_categories):
+            logger.debug(f"评估分类 {i+1}/{total_categories}: {category['id']}")
             
             prompt = self.llm.build_category_evaluation_prompt(user_description, category)
             score = self._call_llm(prompt)
@@ -316,23 +327,52 @@ class CategoryMatcher:
             category_name = category.get('name_cn', category.get('name', ''))
             results.append((category['id'], category_name, score))
             
-            # 简单的进度显示
+            # 更新细粒度进度 (10-85%)
+            progress_pct = 10 + int(((i + 1) / total_categories) * 75)
+            if (i + 1) % 5 == 0 or (i + 1) == total_categories:
+                self._update_progress(
+                    step=f"评估分类... ({i+1}/{total_categories})",
+                    percentage=progress_pct,
+                    log_message=f"已评估 {i+1}/{total_categories} 个分类"
+                )
+            
+            # 简单的进度显示（控制台）
             if (i + 1) % 10 == 0:
-                logger.info(f"已评估 {i+1}/{len(self.enhanced_categories)} 个分类")
+                logger.info(f"已评估 {i+1}/{total_categories} 个分类")
         
         # 按评分降序排序
+        self._update_progress(
+            step="排序结果...",
+            percentage=88,
+            log_message="对分类结果进行排序"
+        )
         results.sort(key=lambda x: x[2], reverse=True)
         
         # 保存详细评分（如果启用且提供了用户名）
         if save_detailed and username:
+            self._update_progress(
+                step="保存详细评分...",
+                percentage=92,
+                log_message="保存详细评分到文件"
+            )
             self.save_detailed_scores(username, user_description, results)
         
         # 输出token统计和费用计算
+        self._update_progress(
+            step="生成统计信息...",
+            percentage=95,
+            log_message="计算Token使用情况"
+        )
         try:
             self.llm.log_usage_and_cost()
         except Exception:
             pass
         
+        self._update_progress(
+            step="匹配完成",
+            percentage=100,
+            log_message=f"分类匹配完成，返回前 {top_n} 个结果"
+        )
         logger.success(f"分类匹配完成 - 返回前 {top_n} 个结果")
         return results[:top_n]
 

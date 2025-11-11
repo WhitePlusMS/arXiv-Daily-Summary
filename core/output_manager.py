@@ -16,7 +16,7 @@ from pathlib import Path
 
 from loguru import logger
 from .template_renderer import TemplateRenderer
-from .common_utils import sanitize_username
+from .common_utils import sanitize_username, format_timezone_date
 from .email_sender import EmailSender
 import re
 
@@ -69,7 +69,7 @@ class OutputManager:
             
             # 生成文件名
             if filename is None:
-                date_str = target_date if target_date else datetime.datetime.now().strftime("%Y-%m-%d")
+                date_str = target_date if target_date else format_timezone_date()
                 safe_username = sanitize_username(username)
                 filename = f"{date_str}_{safe_username}_ARXIV_summary.md"
             
@@ -114,7 +114,7 @@ class OutputManager:
             
             # 生成文件名
             if filename is None:
-                date_str = target_date if target_date else datetime.datetime.now().strftime("%Y-%m-%d")
+                date_str = target_date if target_date else format_timezone_date()
                 safe_username = sanitize_username(username)
                 filename = f"{date_str}_{safe_username}_ARXIV_summary.html"
             
@@ -163,7 +163,7 @@ class OutputManager:
             
             # 生成文件名
             if filename is None:
-                date_str = target_date if target_date else datetime.datetime.now().strftime("%Y-%m-%d")
+                date_str = target_date if target_date else format_timezone_date()
                 safe_username = sanitize_username(username)
                 filename = f"{date_str}_{safe_username}_ARXIV_summary.html"
             

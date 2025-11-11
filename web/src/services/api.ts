@@ -170,8 +170,10 @@ export const runRecommendation = async (request: {
   }
 };
 
-export const getRecentReports = async (): Promise<ApiResponse<ReportItem[]>> => {
+export const getRecentReports = async (username?: string): Promise<ApiResponse<ReportItem[]>> => {
+  const params = username ? { username } : {};
   const response = await api.get("/api/recent-reports", {
+    params,
     signal: getAbortSignal("GET /api/recent-reports"),
   });
   return response.data;
@@ -472,6 +474,34 @@ export const getMatcherDataOrProfiles = async (): Promise<
   return { ...fallback, stats: undefined } as ApiResponse<UserProfile[]> & {
     stats?: Record<string, unknown>;
   };
+};
+
+// =====================
+// 进度管理相关 API
+// =====================
+
+// 获取任务进度
+export const getTaskProgress = async (taskId: string): Promise<ApiResponse<import("@/types").ProgressData>> => {
+  const response = await api.get(`/api/tasks/${taskId}/progress`, {
+    signal: getAbortSignal(`GET /api/tasks/${taskId}/progress`),
+  });
+  return response.data;
+};
+
+// 删除任务
+export const deleteTask = async (taskId: string): Promise<ApiResponse<{ deleted: boolean }>> => {
+  const response = await api.delete(`/api/tasks/${taskId}`, {
+    signal: getAbortSignal(`DELETE /api/tasks/${taskId}`),
+  });
+  return response.data;
+};
+
+// 清理过期任务（管理接口）
+export const cleanupExpiredTasks = async (): Promise<ApiResponse<{ cleaned: number }>> => {
+  const response = await api.post("/api/tasks/cleanup", undefined, {
+    signal: getAbortSignal("POST /api/tasks/cleanup"),
+  });
+  return response.data;
 };
 
 export default api;

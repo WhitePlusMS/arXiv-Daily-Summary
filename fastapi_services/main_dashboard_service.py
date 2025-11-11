@@ -24,6 +24,7 @@ load_dotenv(os.path.join(project_root, '.env'), override=True)
 from core.arxiv_cli import ArxivRecommenderCLI
 from core.output_manager import OutputManager
 from .base_service import BaseService, ServiceResponse
+from .progress_manager import get_progress_manager
 
 
 class ArxivRecommenderService(BaseService):
@@ -182,37 +183,74 @@ class ArxivRecommenderService(BaseService):
                 'debug_mode': True
             }
     
-    async def run_recommendation(
+    async def run_recommendation_with_progress(
         self,
+        task_id: str,
         profile_name: str,
         debug_mode: bool = False,
         target_date: Optional[str] = None,
     ) -> ServiceResponse:
-        """运行推荐系统（调用CLI核心逻辑）
+        """运行推荐系统（支持进度更新）
         
         Args:
+            task_id: 任务ID
             profile_name: 用户配置名称
             debug_mode: 是否启用调试模式
             target_date: 指定日期（YYYY-MM-DD），可选
         """
+        progress_manager = get_progress_manager()
+        
         self.log_info(
-            "开始运行推荐系统", profile_name=profile_name, debug_mode=debug_mode, target_date=target_date
+            "开始运行推荐系统（带进度）", profile_name=profile_name, debug_mode=debug_mode, target_date=target_date
         )
+        
         try:
+            # 更新进度：初始化
+            progress_manager.update_progress(
+                task_id,
+                step="初始化系统组件...",
+                percentage=5,
+                log_message="开始初始化推荐系统"
+            )
+            
             # 检查是否启用调试模式
             if debug_mode:
                 self.log_info("使用调试模式运行")
+                progress_manager.update_progress(
+                    task_id,
+                    step="运行调试模式...",
+                    percentage=10,
+                    log_message="正在使用调试模式运行"
+                )
                 result = await self._run_debug_mode(profile_name)
-                return self.success_response(result) if result['success'] else self.error_response(result['error'], result)
+                
+                if result['success']:
+                    progress_manager.complete_task(task_id, "调试模式运行成功")
+                    return self.success_response(result)
+                else:
+                    progress_manager.fail_task(task_id, result['error'])
+                    return self.error_response(result['error'], result)
             
             if self.cli_app is None:
                 self.cli_app = ArxivRecommenderCLI()
             
+            # 传递 task_id 给 CLI，让它能更新进度
+            self.cli_app.set_task_id(task_id)
+            
             # 调用CLI的完整推荐流程
+            progress_manager.update_progress(
+                task_id,
+                step="开始推荐流程...",
+                percentage=10,
+                log_message="调用推荐引擎"
+            )
+            
             success, result_data, error_msg = self.cli_app.run_full_recommendation(target_date)
             
             if success:
                 self.log_info("推荐系统运行成功", target_date=result_data['target_date'])
+                progress_manager.complete_task(task_id, f"推荐完成：{result_data['filename']}")
+                
                 result = {
                     'success': True,
                     'report': result_data['markdown_content'],
@@ -251,23 +289,62 @@ class ArxivRecommenderService(BaseService):
                     return self.error_response(error_msg, result)
                 else:
                     self.log_error("推荐系统运行失败", error_msg)
+                    progress_manager.fail_task(task_id, error_msg)
                     return self.error_response(error_msg)
                     
         except Exception as e:
             self.log_error("推荐系统运行异常", e)
+            error_msg = f"推荐系统运行失败: {str(e)}"
+            progress_manager.fail_task(task_id, error_msg)
             result = {
                 'success': False, 
-                'error': f"推荐系统运行失败: {str(e)}",
+                'error': error_msg,
                 'traceback': traceback.format_exc()
             }
-            return self.error_response(f"推荐系统运行失败: {str(e)}", result)
+            return self.error_response(error_msg, result)
     
-    async def get_recent_reports(self, limit: int = 10) -> ServiceResponse:
-        """获取最近的报告文件"""
-        self.log_info("开始获取最近的报告文件", limit=limit)
+    async def run_recommendation(
+        self,
+        profile_name: str,
+        debug_mode: bool = False,
+        target_date: Optional[str] = None,
+    ) -> ServiceResponse:
+        """运行推荐系统（调用CLI核心逻辑）- 兼容旧接口
+        
+        Args:
+            profile_name: 用户配置名称
+            debug_mode: 是否启用调试模式
+            target_date: 指定日期（YYYY-MM-DD），可选
+        """
+        # 创建一个临时任务ID（用于不需要进度跟踪的调用）
+        progress_manager = get_progress_manager()
+        task_id = progress_manager.create_task("运行推荐（无进度跟踪）")
+        
+        try:
+            return await self.run_recommendation_with_progress(
+                task_id, profile_name, debug_mode, target_date
+            )
+        finally:
+            # 清理临时任务
+            progress_manager.delete_task(task_id)
+    
+    async def get_recent_reports(self, limit: Optional[int] = None, username: Optional[str] = None) -> ServiceResponse:
+        """获取最近的报告文件
+        
+        Args:
+            limit: 返回的报告数量限制，如果为 None 则不限制数量
+            username: 可选的用户名筛选，如果提供则只返回匹配的报告
+        """
+        self.log_info("开始获取最近的报告文件", limit=limit, username=username)
         try:
             cli_app = ArxivRecommenderCLI()
-            reports = cli_app.get_recent_reports(limit)
+            # 如果提供了用户名，需要先 sanitize 以匹配文件名中的格式
+            username_filter = None
+            if username:
+                from core.common_utils import sanitize_username
+                username_filter = sanitize_username(username)
+            
+            reports = cli_app.get_recent_reports(limit, username_filter=username_filter)
             self.log_info("获取报告文件成功", count=len(reports))
             return self.success_response(reports, f"获取到 {len(reports)} 个报告文件")
         except Exception as e:

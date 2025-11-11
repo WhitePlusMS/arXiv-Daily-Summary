@@ -119,3 +119,19 @@ export interface PromptItem {
   template: string
   variables?: string[]
 }
+
+// 进度相关接口
+export interface LogEntry {
+  timestamp: string
+  level: string
+  message: string
+}
+
+export interface ProgressData {
+  task_id: string
+  status: "running" | "completed" | "failed"
+  step: string
+  percentage: number
+  logs: LogEntry[]
+  error: string | null
+}

@@ -4,13 +4,14 @@
 FastAPI应用程序 - ArXiv推荐系统
 """
 
-from fastapi import FastAPI, Depends, HTTPException, Query
+from fastapi import FastAPI, Depends, HTTPException, Query, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from pathlib import Path
 import os
 import sys
 import logging
+import asyncio
 from loguru import logger
 from typing import List, Optional
 
@@ -33,6 +34,7 @@ from .service_container import (
 )
 from .main_dashboard_service import ArxivRecommenderService
 from .environment_config_service import EnvConfigService
+from .progress_manager import get_progress_manager
 from streamlit_ui.services.category_browser_service import CategoryService
 
 # 创建FastAPI应用
@@ -368,47 +370,98 @@ async def initialize_components(
         logger.error(f"初始化系统组件失败: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+def _run_recommendation_task(
+    task_id: str,
+    profile_name: str,
+    debug_mode: bool,
+    target_date: Optional[str],
+    service: ArxivRecommenderService
+):
+    """在后台线程中运行推荐任务"""
+    import asyncio
+    from concurrent.futures import ThreadPoolExecutor
+    
+    progress_manager = get_progress_manager()
+    
+    try:
+        # 创建新的事件循环（因为在新线程中）
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
+        # 运行推荐
+        result = loop.run_until_complete(
+            service.run_recommendation_with_progress(
+                task_id,
+                profile_name,
+                debug_mode,
+                target_date
+            )
+        )
+        
+        loop.close()
+        
+    except (KeyError, ValueError) as e:
+        # 模板错误
+        error_msg = f"模板错误: {str(e)}"
+        logger.error(f"运行推荐系统失败（模板错误）: {error_msg}")
+        progress_manager.fail_task(task_id, error_msg)
+    except Exception as e:
+        error_msg = f"推荐系统运行失败: {str(e)}"
+        logger.error(error_msg)
+        progress_manager.fail_task(task_id, error_msg)
+
 @app.post("/api/run-recommendation")
 async def run_recommendation(
     request: RecommendationRequest,
+    background_tasks: BackgroundTasks,
     service: ArxivRecommenderService = Depends(get_arxiv_service)
 ):
-    """运行推荐系统"""
+    """运行推荐系统（异步模式，立即返回task_id）"""
     logger.info(
         f"API调用: 运行推荐系统 - 配置: {request.profile_name}, 调试模式: {request.debug_mode}, 目标日期: {getattr(request, 'target_date', None)}"
     )
     try:
-        result = await service.run_recommendation(
-            request.profile_name,
-            request.debug_mode,
-            getattr(request, "target_date", None),
+        # 创建任务
+        progress_manager = get_progress_manager()
+        task_id = progress_manager.create_task("初始化推荐系统...")
+        
+        # 在后台执行推荐任务
+        from threading import Thread
+        thread = Thread(
+            target=_run_recommendation_task,
+            args=(
+                task_id,
+                request.profile_name,
+                request.debug_mode,
+                getattr(request, "target_date", None),
+                service
+            )
         )
-        return result
-    except (KeyError, ValueError) as e:
-        # 推荐流程中的提示词模板错误（摘要、详细、简要分析或系统消息）
-        logger.error(f"运行推荐系统失败（模板错误）: {str(e)}")
-        detail = _classify_prompt_error(e)
-        # 给前端一个可能相关的模板ID集合，便于定位
-        detail.setdefault("details", {})
-        detail["details"]["candidate_prompts"] = [
-            "summary_report",
-            "detailed_analysis",
-            "brief_analysis",
-            "scoring_system_message",
-        ]
-        raise HTTPException(status_code=400, detail=_decorate_error_detail(detail))
+        thread.daemon = True
+        thread.start()
+        
+        # 立即返回task_id
+        return {
+            "success": True,
+            "data": {
+                "task_id": task_id,
+                "message": "推荐任务已启动，请使用task_id查询进度"
+            }
+        }
+        
     except Exception as e:
-        logger.error(f"运行推荐系统失败: {str(e)}")
+        logger.error(f"启动推荐系统失败: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/recent-reports")
 async def get_recent_reports(
+    username: Optional[str] = Query(None, description="可选的用户名筛选"),
     service: ArxivRecommenderService = Depends(get_arxiv_service)
 ):
     """获取最近报告"""
-    logger.info("API调用: 获取最近报告")
+    logger.info(f"API调用: 获取最近报告 - 用户名筛选: {username}")
     try:
-        result = await service.get_recent_reports()
+        result = await service.get_recent_reports(username=username)
         return result
     except Exception as e:
         logger.error(f"获取最近报告失败: {str(e)}")
@@ -688,29 +741,81 @@ async def optimize_description(
         logger.error(f"优化研究描述失败: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+def _run_category_matching_task(
+    task_id: str,
+    user_input: str,
+    username: str,
+    top_n: int,
+    service
+):
+    """在后台线程中运行分类匹配任务"""
+    from fastapi_services.progress_manager import get_progress_manager
+    
+    progress_manager = get_progress_manager()
+    
+    try:
+        # 执行匹配
+        results, token_usage = service.execute_matching(user_input, username, top_n, task_id=task_id)
+        
+        # 保存结果
+        progress_manager.update_progress(
+            task_id,
+            step="保存匹配结果...",
+            percentage=98,
+            log_message="正在保存匹配结果到数据库"
+        )
+        service.save_matching_results(username, user_input, results)
+        
+        # 完成
+        progress_manager.complete_task(task_id, f"分类匹配完成，共匹配到 {len(results)} 个分类")
+        
+    except (KeyError, ValueError) as e:
+        error_msg = f"模板错误: {str(e)}"
+        logger.error(f"执行分类匹配失败（模板错误）: {error_msg}")
+        progress_manager.fail_task(task_id, error_msg)
+    except Exception as e:
+        error_msg = f"分类匹配失败: {str(e)}"
+        logger.error(error_msg)
+        progress_manager.fail_task(task_id, error_msg)
+
 @app.post("/api/matcher/run")
 async def run_category_matching(
     request: MatchRequest,
     service = Depends(get_category_matcher_service)
 ):
-    """执行分类匹配，并保存结果"""
+    """执行分类匹配（异步模式，立即返回task_id）"""
     logger.info(f"API调用: 执行分类匹配 - 用户: {request.username}, Top {request.top_n}")
     try:
-        results, token_usage = service.execute_matching(request.user_input, request.username, request.top_n)
-        # 保存结果
-        service.save_matching_results(request.username, request.user_input, results)
-        return {"success": True, "data": {"results": results, "token_usage": token_usage}}
-    except (KeyError, ValueError) as e:
-        # 分类匹配提示词模板错误：区分基础与增强模板ID
-        logger.error(f"执行分类匹配失败（模板错误）: {str(e)}")
-        detail = _classify_prompt_error(e)
-        detail.setdefault("details", {})
-        detail["details"]["candidate_prompts"] = [
-            "category_evaluation",
-        ]
-        raise HTTPException(status_code=400, detail=_decorate_error_detail(detail))
+        # 创建任务
+        progress_manager = get_progress_manager()
+        task_id = progress_manager.create_task("初始化分类匹配器...")
+        
+        # 在后台执行匹配任务
+        from threading import Thread
+        thread = Thread(
+            target=_run_category_matching_task,
+            args=(
+                task_id,
+                request.user_input,
+                request.username,
+                request.top_n,
+                service
+            )
+        )
+        thread.daemon = True
+        thread.start()
+        
+        # 立即返回task_id
+        return {
+            "success": True,
+            "data": {
+                "task_id": task_id,
+                "message": "分类匹配任务已启动，请使用task_id查询进度"
+            }
+        }
+        
     except Exception as e:
-        logger.error(f"执行分类匹配失败: {str(e)}")
+        logger.error(f"启动分类匹配失败: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.put("/api/matcher/record")
@@ -826,6 +931,76 @@ async def delete_score_file(
         raise
     except Exception as e:
         logger.error(f"删除评分文件失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# =====================
+# 进度管理相关 API
+# =====================
+
+@app.get("/api/tasks/{task_id}/progress")
+async def get_task_progress(task_id: str):
+    """获取任务进度（轮询接口）
+    
+    Args:
+        task_id: 任务ID
+        
+    Returns:
+        任务进度数据
+    """
+    logger.debug(f"API调用: 获取任务进度 - {task_id}")
+    try:
+        progress_manager = get_progress_manager()
+        progress = progress_manager.get_progress(task_id)
+        
+        if progress is None:
+            raise HTTPException(status_code=404, detail="任务不存在或已过期")
+        
+        return {"success": True, "data": progress}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"获取任务进度失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/tasks/{task_id}")
+async def delete_task(task_id: str):
+    """删除任务
+    
+    Args:
+        task_id: 任务ID
+        
+    Returns:
+        删除结果
+    """
+    logger.debug(f"API调用: 删除任务 - {task_id}")
+    try:
+        progress_manager = get_progress_manager()
+        success = progress_manager.delete_task(task_id)
+        
+        if not success:
+            raise HTTPException(status_code=404, detail="任务不存在")
+        
+        return {"success": True, "message": "任务已删除"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"删除任务失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/tasks/cleanup")
+async def cleanup_expired_tasks():
+    """清理过期任务（管理接口）
+    
+    Returns:
+        清理的任务数量
+    """
+    logger.info("API调用: 清理过期任务")
+    try:
+        progress_manager = get_progress_manager()
+        count = progress_manager.cleanup_expired_tasks()
+        return {"success": True, "data": {"cleaned": count}}
+    except Exception as e:
+        logger.error(f"清理过期任务失败: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.exception_handler(Exception)
