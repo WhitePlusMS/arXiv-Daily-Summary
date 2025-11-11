@@ -24,10 +24,10 @@ class TemplateRenderer:
         logger.info("TemplateRenderer初始化开始")
         
         if template_dir is None:
-            # 获取当前文件的目录，然后找到templates目录
-            # 当前文件在 core/ 下，templates在项目根目录下
+            # 获取当前文件的目录，然后找到config/templates目录
+            # 当前文件在 core/ 下，config/templates在项目根目录下
             current_dir = Path(__file__).parent
-            template_dir = current_dir.parent / "templates"
+            template_dir = current_dir.parent / "config" / "templates"
         
         self.template_dir = Path(template_dir)
         logger.debug(f"模板目录: {self.template_dir}")

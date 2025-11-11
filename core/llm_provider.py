@@ -109,28 +109,7 @@ class LLMProvider:
         """
         return self._model_name
     
-    def _build_messages(self, prompt: str) -> list:
-        """构建OpenAI API的消息结构。
-        
-        Args:
-            prompt: 用户提示文本
-            
-        Returns:
-            消息列表
-        """
-        return [
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": prompt,
-                    }
-                ]
-            }
-        ]
-    
-    def _call_api_with_retry(
+    def chat_with_retry(
         self,
         messages: list,
         temperature: float = None,
@@ -156,18 +135,34 @@ class LLMProvider:
         wait_time: int = 1,
         return_raw: bool = False,
     ) -> str:
-        """使用重试机制调用OpenAI API。
+        """公共聊天接口，支持重试与可选原始响应返回。
         
         Args:
-            messages: 消息列表
+            messages: OpenAI兼容消息列表
             temperature: 生成温度，如果为None则使用默认值
             top_p: top_p参数，如果为None则使用默认值
             max_tokens: 最大token数，如果为None则使用默认值
+            top_k: top_k参数
+            repetition_penalty: 重复惩罚参数
+            seed: 随机种子
+            stop: 停止序列
+            tools: 工具列表
+            tool_choice: 工具选择策略
+            response_format: 响应格式
+            enable_thinking: 是否启用思考模式
+            logprobs: 是否返回对数概率
+            top_logprobs: top对数概率数量
+            presence_penalty: 存在惩罚
+            frequency_penalty: 频率惩罚
+            enable_search: 是否启用搜索
+            thinking_budget: 思考预算
+            incremental_output: 是否增量输出
             max_retries: 最大重试次数
             wait_time: 重试等待时间（秒）
+            return_raw: 是否返回原始响应对象
             
         Returns:
-            API响应内容
+            字符串内容或原始响应对象（取决于 return_raw）
             
         Raises:
             Exception: API调用失败时抛出异常
@@ -209,28 +204,36 @@ class LLMProvider:
         if incremental_output is None:
             incremental_output = self.default_incremental_output
             
+        # 当温度为0时，top_p不应设置（让API使用默认行为），否则按默认策略填充
+        if temperature == 0:
+            top_p_effective = None
+        else:
+            top_p_effective = top_p if top_p is not None else self.default_top_p
+
         logger.debug(
-            f"API调用开始 - 模型: {self._model_name}, 温度: {temperature}, top_p: {top_p}, max_tokens: {max_tokens}, "
+            f"API调用开始 - 模型: {self._model_name}, 温度: {temperature}, top_p: {top_p_effective}, max_tokens: {max_tokens}, "
             f"top_k: {top_k}, repetition_penalty: {repetition_penalty}, seed: {seed}, stop: {stop}, "
             f"tool_choice: {tool_choice}, response_format: {response_format}, enable_thinking: {enable_thinking}, "
             f"logprobs: {logprobs}, top_logprobs: {top_logprobs}, presence_penalty: {presence_penalty}, frequency_penalty: {frequency_penalty}, "
             f"enable_search: {enable_search}, thinking_budget: {thinking_budget}, incremental_output: {incremental_output}, 最大重试: {max_retries}"
         )
-        logger.debug(f"API配置 - 客户端: {self._client}, 基础URL: {self._client.base_url}")
+        # logger.debug(f"API配置 - 客户端: {self._client}, 基础URL: {self._client.base_url}")
         
         for attempt in range(max_retries):
             try:
                 # 全局并发限流
                 self._rate_limiter.acquire()
-                logger.debug(f"第 {attempt + 1} 次API调用尝试")
+                # logger.debug(f"第 {attempt + 1} 次API调用尝试")
                 # 组织标准参数
                 request_kwargs: Dict[str, Any] = {
                     "model": self._model_name,
                     "messages": messages,
                     "temperature": temperature,
-                    "top_p": top_p,
                     "max_tokens": max_tokens,
                 }
+                # 仅当 top_p 有效时才传递给API（温度为0则不设置）
+                if top_p_effective is not None:
+                    request_kwargs["top_p"] = top_p_effective
                 if stop is not None:
                     request_kwargs["stop"] = stop
                 if tools is not None:
@@ -332,85 +335,31 @@ class LLMProvider:
                 except Exception:
                     pass
 
-    def generate_response(self, prompt: str, temperature: float = None, top_p: float = None, max_tokens: int = None) -> str:
+    def generate_response(self, prompt: str, temperature: float = 0, top_p: float = None, max_tokens: int = None) -> str:
         """使用OpenAI API生成响应。
         
         Args:
             prompt: 用户提示文本
-            temperature: 生成温度，控制输出的随机性，如果为None则使用默认值
+            temperature: 生成温度，控制输出的随机性，默认值为0
             top_p: top_p参数，如果为None则使用默认值
             max_tokens: 最大token数，如果为None则使用默认值
             
         Returns:
             生成的响应文本
         """
-        messages = self._build_messages(prompt)
-        return self._call_api_with_retry(messages, temperature, top_p, max_tokens)
+        messages = [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": prompt,
+                    }
+                ]
+            }
+        ]
+        return self.chat_with_retry(messages, temperature, top_p, max_tokens)
 
-    def chat_with_retry(
-        self,
-        messages: list,
-        temperature: float = None,
-        top_p: float = None,
-        max_tokens: int = None,
-        # 扩展参数
-        top_k: Optional[int] = None,
-        repetition_penalty: Optional[float] = None,
-        seed: Optional[int] = None,
-        stop: Optional[Union[str, List[str]]] = None,
-        tools: Optional[List[Dict[str, Any]]] = None,
-        tool_choice: Optional[str] = None,
-        response_format: Optional[Union[str, Dict[str, Any]]] = None,
-        enable_thinking: Optional[bool] = None,
-        logprobs: Optional[bool] = None,
-        top_logprobs: Optional[int] = None,
-        presence_penalty: Optional[float] = None,
-        frequency_penalty: Optional[float] = None,
-        enable_search: Optional[bool] = None,
-        thinking_budget: Optional[int] = None,
-        incremental_output: Optional[bool] = None,
-        max_retries: int = 2,
-        wait_time: int = 1,
-        return_raw: bool = False,
-    ):
-        """公共聊天接口，支持重试与可选原始响应返回。
-
-        Args:
-            messages: OpenAI兼容消息列表
-            temperature: 采样温度
-            top_p: top_p 参数
-            max_tokens: 最大token数
-            max_retries: 最大重试次数
-            wait_time: 重试等待秒数
-            return_raw: 是否返回原始响应对象
-
-        Returns:
-            字符串内容或原始响应对象（取决于 return_raw）
-        """
-        return self._call_api_with_retry(
-            messages=messages,
-            temperature=temperature,
-            top_p=top_p,
-            max_tokens=max_tokens,
-            top_k=top_k,
-            repetition_penalty=repetition_penalty,
-            seed=seed,
-            stop=stop,
-            tools=tools,
-            tool_choice=tool_choice,
-            response_format=response_format,
-            enable_thinking=enable_thinking,
-            logprobs=logprobs,
-            top_logprobs=top_logprobs,
-            presence_penalty=presence_penalty,
-            frequency_penalty=frequency_penalty,
-            enable_search=enable_search,
-            thinking_budget=thinking_budget,
-            incremental_output=incremental_output,
-            max_retries=max_retries,
-            wait_time=wait_time,
-            return_raw=return_raw,
-        )
 
     # =========================
     # 统一提示词构建方法（集中管理）
@@ -673,7 +622,7 @@ class LLMProvider:
 #     "tldr": "<用一段话总结论文的核心贡献>"
 # }}
 
-    def evaluate_paper_relevance(self, paper: Dict[str, Any], description: Union[str, Dict[str, str]], temperature: float = None) -> Dict[str, Any]:
+    def evaluate_paper_relevance(self, paper: Dict[str, Any], description: Union[str, Dict[str, str]], temperature: float = 0) -> Dict[str, Any]:
         """评估单篇论文的相关性。
         
         Args:
@@ -696,7 +645,8 @@ class LLMProvider:
         prompt = self.build_paper_evaluation_prompt(paper, description)
         
         try:
-            response = self.generate_response(prompt, temperature)
+            # 评分参数固定：温度为0、最大tokens固定，避免受外部配置影响
+            response = self.generate_response(prompt, temperature=temperature, max_tokens=50)
             # 尝试解析JSON响应
             evaluation = json.loads(response)
             

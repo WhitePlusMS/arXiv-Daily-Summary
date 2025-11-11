@@ -31,7 +31,7 @@ class CategoryService:
                 return self.categories_data
             
             # 加载原始分类数据
-            original_file = self.base_path / "data" / "users" / "arxiv_categories.json"
+            original_file = self.base_path / "config" / "arxiv_categories.json"
             if not original_file.exists():
                 error_msg = f"错误：找不到原始分类文件 {original_file}"
                 print(error_msg)
@@ -45,7 +45,7 @@ class CategoryService:
             categories_data = original_data['arxiv_categories']['categories']
             
             # 加载翻译数据
-            translated_file = self.base_path / "data" / "users" / "arxiv_categories_cn.json"
+            translated_file = self.base_path / "config" / "arxiv_categories_cn.json"
             translated_data = {}
             
             if translated_file.exists():

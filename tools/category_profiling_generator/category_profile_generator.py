@@ -96,7 +96,7 @@ def main():
     print("开始生成 ArXiv 分类画像...")
     
     # 定义文件路径
-    categories_file = project_root / "data" / "users" / "arxiv_categories_cn.json"
+    categories_file = project_root / "config" / "arxiv_categories_cn.json"
     
     # 加载分类
     categories = load_categories(categories_file)
@@ -187,7 +187,7 @@ def main():
     print("\n--- 所有分类处理完成 ---")
     
     # 保存分类评估数据
-    output_file_path = project_root / "data" / "users" / "arxiv_categories_enhanced.json"
+    output_file_path = project_root / "config" / "arxiv_categories_enhanced.json"
     save_enhanced_categories(categories, output_file_path)
 
     # 保存 Token 使用统计数据

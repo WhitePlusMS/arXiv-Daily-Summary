@@ -134,8 +134,7 @@ class CategoryMatcher:
         project_root = os.path.dirname(os.path.dirname(__file__))
         categories_file = os.path.join(
             project_root,
-            'data', 
-            'users',
+            'config',
             'arxiv_categories.json'
         )
         
@@ -164,8 +163,7 @@ class CategoryMatcher:
         project_root = os.path.dirname(os.path.dirname(__file__))
         enhanced_categories_file = os.path.join(
             project_root,
-            'data', 
-            'users',
+            'config',
             'arxiv_categories_enhanced.json'
         )
         
@@ -183,15 +181,6 @@ class CategoryMatcher:
             logger.error(f"加载分类评估数据失败: {e}，将使用原始分类数据")
             return self.categories
     
-    def _print_token_usage(self):
-        """输出token使用统计和费用计算（委托LLMProvider统一实现）。"""
-        try:
-            self.llm.log_usage_and_cost()
-        except Exception:
-            pass
-    
-
-
     def _call_llm(self, prompt: str) -> int:
         """调用LLM获取评分，带重试与稳健解析
         
@@ -339,7 +328,10 @@ class CategoryMatcher:
             self.save_detailed_scores(username, user_description, results)
         
         # 输出token统计和费用计算
-        self._print_token_usage()
+        try:
+            self.llm.log_usage_and_cost()
+        except Exception:
+            pass
         
         logger.success(f"分类匹配完成 - 返回前 {top_n} 个结果")
         return results[:top_n]

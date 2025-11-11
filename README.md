@@ -248,7 +248,7 @@ QWEN_MODEL_TOP_LOGPROBS=0
 
 3. **开始匹配**：点击“开始匹配”按钮。
 4. **自动匹配与保存**：
-    - 系统后台会调用大语言模型，将您输入的自然语言描述与 `data/users/arxiv_categories.json` 中定义的官方 ArXiv 分类进行语义相似度计算。
+    - 系统后台会调用大语言模型，将您输入的自然语言描述与 `config/arxiv_categories.json` 中定义的官方 ArXiv 分类进行语义相似度计算。
     - 系统会返回一个按匹配评分从高到低排序的分类列表。
     - 这些评分最高的分类结果将自动保存到 `data/users/user_categories.json` 文件中，与您的用户名关联，完成用户画像的创建。
 

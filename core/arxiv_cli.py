@@ -663,7 +663,7 @@ class ArxivRecommenderCLI:
             
             # 初始化输出管理器
             logger.debug("初始化输出管理器")
-            template_dir = project_root / 'templates'
+            template_dir = project_root / 'config' / 'templates'
             self.output_manager = OutputManager(str(template_dir))
             logger.debug("输出管理器初始化完成")
             

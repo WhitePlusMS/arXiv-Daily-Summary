@@ -142,7 +142,7 @@ class ArxivRecommenderService:
             self.cli_app.setup_realtime_logging()
             
             # 初始化输出管理器（用于配置显示）
-            template_dir = project_root / 'templates'
+            template_dir = project_root / 'config' / 'templates'
             self.output_manager = OutputManager(str(template_dir))
             
             return True, "系统组件初始化成功"

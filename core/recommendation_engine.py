@@ -164,9 +164,10 @@ class RecommendationEngine:
                 # 添加请求间隔，避免API限流
                 time.sleep(0.1)  # 每篇论文评估前等待0.5秒
                 
-                # 直接调用轻量模型进行相关性评估（内联，去除额外间接层）
+                # 直接调用轻量模型进行相关性评估
+                # 必须要设置 temperature=0 才能得到稳定的结果
                 evaluation = self.light_llm_provider.evaluate_paper_relevance(
-                    paper, self.description, temperature=None
+                    paper, self.description, temperature=0
                 )
                 
                 # 合并论文信息和评估结果

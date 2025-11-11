@@ -141,7 +141,7 @@ The core of "User Creation" is to establish a precise ArXiv category profile for
 
 3. **Start Matching**: Click the "Start Matching" button.
 4. **Automatic Matching & Saving**:
-    - The system backend calls large language models to calculate semantic similarity between your natural language description and official ArXiv categories defined in `data/users/arxiv_categories.json`.
+    - The system backend calls large language models to calculate semantic similarity between your natural language description and official ArXiv categories defined in `config/arxiv_categories.json`.
     - The system returns a category list sorted by matching scores from high to low.
     - These highest-scoring category results are automatically saved to the `data/users/user_categories.json` file, associated with your username, completing user profile creation.
 

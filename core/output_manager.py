@@ -31,11 +31,11 @@ class OutputManager:
             template_dir: 模板目录路径，如果为None则使用默认路径
         """
         logger.info("OutputManager初始化开始")
-        # 如果没有指定模板目录，使用项目根目录下的templates
+        # 如果没有指定模板目录，使用项目根目录下的config/templates
         if template_dir is None:
             from pathlib import Path
             current_dir = Path(__file__).parent
-            template_dir = str(current_dir.parent / "templates")
+            template_dir = str(current_dir.parent / "config" / "templates")
         self.template_renderer = TemplateRenderer(template_dir)
         # 解耦后的邮件发送器
         self.email_sender = EmailSender()
