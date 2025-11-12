@@ -5,6 +5,7 @@
   <img src="https://img.shields.io/badge/FastAPI-0.100%2B-green?logo=fastapi" alt="FastAPI">
   <img src="https://img.shields.io/badge/Vue.js-3.5%2B-green?logo=vue.js" alt="Vue.js">
   <img src="https://img.shields.io/badge/License-Apache--2.0-blue" alt="License">
+  <a href="https://deepwiki.com/WhitePlusMS/arXiv-Daily-Summary"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
 </p>
 
 <p align="center">

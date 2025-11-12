@@ -96,3 +96,5 @@ docker/push_images.ps1
 docker/push_images.sh
 docker/PUSH_TO_DOCKERHUB.md
 docker/docker-compose.build.yml
+
+docs/
