@@ -66,7 +66,7 @@
             <ul class="changes-list">
               <li v-for="k in changedKeys" :key="k">
                 <strong>{{ k }}</strong
-                >：文件=`{{ truncate(loadedConfig[k]) }}` → 界面=`{{ truncate(configChanges[k]) }}`
+                >：文件=`{{ truncate(loadedConfig[k] || "") }}` → 界面=`{{ truncate(configChanges[k] || "") }}`
               </li>
             </ul>
           </div>
@@ -455,7 +455,7 @@
             </div>
             <div class="form-item">
               <label>模板内容</label>
-              <textarea v-model="edits[p.id].template" @input="clearPromptError(p.id)" class="streamlit-textarea template-textarea" rows="18" />
+              <textarea v-model="edits[p.id]!.template" @input="clearPromptError(p.id)" class="streamlit-textarea template-textarea" rows="18" />
             </div>
             <div v-if="promptErrors[p.id]" class="streamlit-error" style="margin-bottom: 8px;">
               ❌ {{ promptErrors[p.id] }}
@@ -537,6 +537,9 @@ const lightProviderLabel = computed(
 const heavyProviderLabel = computed(
   () => String(configChanges.value?.HEAVY_MODEL_PROVIDER || "").trim() || "未设置"
 );
+const debugEnabled = computed(
+  () => String(configChanges.value?.LOG_LEVEL || "").trim().toUpperCase() === "DEBUG"
+);
 
 // 计算总体日志大小（MB）
 const totalLogSize = computed({
@@ -610,13 +613,13 @@ const handleBeforeUnload = (e: BeforeUnloadEvent) => {
   }
 };
 
-const normalizeConfig = (cfg: Record<string, string>) => {
+const normalizeConfig = (cfg: Record<string, unknown>) => {
   // 将布尔/数值保持字符串形式以与 .env 一致
   const out: Record<string, string> = {};
   Object.entries(cfg || {}).forEach(([k, v]) => {
-    if (v === "true") out[k] = "true";
-    else if (v === "false") out[k] = "false";
-    else out[k] = v;
+    if (v === "true" || v === true) out[k] = "true";
+    else if (v === "false" || v === false) out[k] = "false";
+    else out[k] = String(v ?? "");
   });
   return out;
 };
@@ -783,10 +786,12 @@ const extractPlaceholders = (tpl: string): string[] => {
   let match: RegExpExecArray | null;
   const re = /\{([^{}]+)\}/g;
   while ((match = re.exec(tpl)) !== null) {
-    tokens.push(match[1]);
+    if (match[1]) {
+      tokens.push(match[1]);
+    }
   }
   const names = tokens
-    .map((t) => t.split(/[!:\.\[]/)[0].trim())
+    .map((t: string) => (t || "").split(/[!:\.\[]/)[0]?.trim() || "")
     .filter((x) => !!x);
   return Array.from(new Set(names));
 };
@@ -794,7 +799,8 @@ const extractPlaceholders = (tpl: string): string[] => {
 // 校验：占位符是否都在允许的变量列表中
 const validateTemplateBeforeSave = (id: string): { valid: boolean; unknown: string[]; allowed: string[] } => {
   const idx = prompts.value.findIndex((x) => x.id === id);
-  const allowed = (idx >= 0 && Array.isArray(prompts.value[idx].variables)) ? (prompts.value[idx].variables as string[]) : [];
+  const prompt = idx >= 0 ? prompts.value[idx] : undefined;
+  const allowed = (prompt && Array.isArray(prompt.variables)) ? (prompt.variables as string[]) : [];
   const tpl = edits.value[id]?.template || "";
   const used = extractPlaceholders(tpl);
   const unknown = used.filter((x) => !allowed.includes(x));
@@ -816,6 +822,7 @@ const savePrompt = async (id: string) => {
       return;
     }
     const payload = edits.value[id];
+    if (!payload) return;
     const res = await api.updatePrompt(id, payload);
     if (res.success && res.data) {
       // 更新当前列表项
@@ -945,9 +952,11 @@ const sectionFields: Record<string, string[]> = {
 };
 
 const resetSectionChanges = () => {
-  const fields = sectionFields[selectedSection.value] || [];
-  fields.forEach((k) => {
-    configChanges.value[k] = loadedConfig.value[k];
+  const section = selectedSection.value;
+  if (!section) return;
+  const fields = sectionFields[section] || [];
+  fields.forEach((k: string) => {
+    configChanges.value[k] = loadedConfig.value[k] || "";
   });
 };
 

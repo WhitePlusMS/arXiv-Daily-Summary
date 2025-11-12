@@ -9,8 +9,10 @@ import type {
   TemplateErrorDetail,
 } from "@/types";
 
-// 从环境变量读取后端 API 地址，避免硬编码
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const metaEnv = (import.meta as unknown as { env: { VITE_API_BASE_URL?: string } }).env;
+const BASE_URL = (metaEnv.VITE_API_BASE_URL !== undefined)
+  ? (metaEnv.VITE_API_BASE_URL || "")
+  : "http://localhost:8000";
 
 // 管理未完成请求的 AbortController，用于取消与路由切换/重复请求
 const pendingControllers = new Map<string, AbortController>();

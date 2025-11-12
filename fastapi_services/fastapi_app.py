@@ -287,6 +287,11 @@ async def root():
     """根路径"""
     return {"message": "ArXiv推荐系统API", "version": "1.0.0"}
 
+@app.get("/api/health")
+async def health_check():
+    """健康检查端点"""
+    return {"status": "healthy", "service": "arxiv-recommender-backend"}
+
 @app.post("/api/initialize")
 async def initialize_service(
     service: ArxivRecommenderService = Depends(get_arxiv_service)

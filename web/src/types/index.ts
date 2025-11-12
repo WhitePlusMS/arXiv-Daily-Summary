@@ -21,6 +21,9 @@ export interface RecommendationResult {
   warning?: string
   show_weekend_tip?: boolean
   traceback?: string
+  message?: string
+  report_path?: string
+  execution_time?: number
 }
 
 // API响应接口

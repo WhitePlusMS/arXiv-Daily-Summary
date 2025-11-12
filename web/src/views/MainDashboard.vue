@@ -18,10 +18,6 @@
       </div>
     </div>
 
-    <!-- 错误提示 -->
-    <div v-if="error" class="streamlit-error">
-      {{ error }}
-    </div>
 
     <!-- 主要内容区域 - 单栏布局，按逻辑顺序排列 -->
     <div class="dashboard-content">
@@ -387,9 +383,12 @@ const updateDates = () => {
   const prev = new Date(today);
   prev.setDate(today.getDate() - 2);
 
-  todayStr.value = today.toISOString().split("T")[0];
-  yesterdayStr.value = yesterday.toISOString().split("T")[0];
-  prevStr.value = prev.toISOString().split("T")[0];
+  const todayISO = today.toISOString().split("T")[0];
+  const yesterdayISO = yesterday.toISOString().split("T")[0];
+  const prevISO = prev.toISOString().split("T")[0];
+  todayStr.value = todayISO || "";
+  yesterdayStr.value = yesterdayISO || "";
+  prevStr.value = prevISO || "";
   selectedDate.value = yesterdayStr.value;
 };
 
@@ -482,7 +481,7 @@ const runMainRecommendation = async () => {
         async (progress) => {
           // 任务完成
           console.log("推荐任务完成", progress);
-          showProgress.value = false;
+          // 不自动关闭进度窗口，让用户手动关闭
           isRunning.value = false;
           
           // 清除localStorage中的task_id
@@ -501,7 +500,7 @@ const runMainRecommendation = async () => {
         (error) => {
           // 任务失败
           console.error("推荐任务失败", error);
-          showProgress.value = false;
+          // 不自动关闭进度窗口，让用户手动关闭
           isRunning.value = false;
           
           // 清除localStorage中的task_id
@@ -554,7 +553,7 @@ const runMainRecommendation = async () => {
     store.setError(getMsg(err));
     console.error("执行推荐错误:", err);
     isRunning.value = false;
-    showProgress.value = false;
+    // 不自动关闭进度窗口，让用户手动关闭
   } finally {
     runningMessage.value = "";
   }
@@ -608,7 +607,7 @@ const runSpecificDateRecommendation = async () => {
         async (progress) => {
           // 任务完成
           console.log("推荐任务完成", progress);
-          showProgress.value = false;
+          // 不自动关闭进度窗口，让用户手动关闭
           isRunning.value = false;
           
           // 清除localStorage中的task_id
@@ -627,7 +626,7 @@ const runSpecificDateRecommendation = async () => {
         (error) => {
           // 任务失败
           console.error("推荐任务失败", error);
-          showProgress.value = false;
+          // 不自动关闭进度窗口，让用户手动关闭
           isRunning.value = false;
           
           // 清除localStorage中的task_id
@@ -679,7 +678,7 @@ const runSpecificDateRecommendation = async () => {
     store.setError(getMsg(err));
     console.error("执行推荐错误:", err);
     isRunning.value = false;
-    showProgress.value = false;
+    // 不自动关闭进度窗口，让用户手动关闭
   } finally {
     runningMessage.value = "";
   }
@@ -831,7 +830,7 @@ const restoreRunningTask = async () => {
           async (finalProgress) => {
             // 任务完成
             console.log("恢复的任务已完成", finalProgress);
-            showProgress.value = false;
+            // 不自动关闭进度窗口，让用户手动关闭
             isRunning.value = false;
             localStorage.removeItem(RUNNING_TASK_KEY);
             await loadRecentReports();
@@ -840,7 +839,7 @@ const restoreRunningTask = async () => {
           (error) => {
             // 任务失败
             console.error("恢复的任务失败", error);
-            showProgress.value = false;
+            // 不自动关闭进度窗口，让用户手动关闭
             isRunning.value = false;
             localStorage.removeItem(RUNNING_TASK_KEY);
             store.setError(error);
@@ -911,3 +910,4 @@ onMounted(async () => {
   }
 });
 </script>
+

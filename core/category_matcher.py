@@ -236,6 +236,26 @@ class CategoryMatcher(ProgressTracker):
                     raise ValueError(f"无法从模型输出中解析整数评分，输出内容片段: {content[:80]}")
 
             except Exception as e:
+                error_str = str(e).lower()
+                error_type = type(e).__name__
+                
+                # 检查是否是认证错误（API密钥错误）
+                is_auth_error = (
+                    any(keyword in error_str for keyword in ['unauthorized', '401', 'api_key', 'authentication', 'invalid_api_key']) or
+                    'AuthenticationError' in error_type
+                )
+                
+                if is_auth_error:
+                    # 认证错误，立即抛出，不重试
+                    logger.error(f"API认证错误，终止分类匹配任务: {e}")
+                    self._update_progress(
+                        step="API认证失败",
+                        percentage=0,
+                        log_message=f"API认证错误，请检查API密钥配置: {e}",
+                        log_level="error"
+                    )
+                    raise Exception(f"API认证错误，请检查API密钥配置: {e}")
+                
                 last_error = e
                 logger.warning(f"LLM调用失败(第{attempt+1}次): {e}")
                 # 指数退避等待，适应云端API限流与瞬时波动

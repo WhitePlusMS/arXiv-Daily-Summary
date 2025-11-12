@@ -3,8 +3,9 @@ import { createRouter, createWebHistory } from "vue-router";
 // 同时集成请求取消机制，在路由切换时取消未完成的请求
 import { cancelAllRequests } from "@/services/api";
 
+const metaEnv = (import.meta as unknown as { env: { BASE_URL?: string } }).env;
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(metaEnv.BASE_URL),
   routes: [
     {
       path: "/",

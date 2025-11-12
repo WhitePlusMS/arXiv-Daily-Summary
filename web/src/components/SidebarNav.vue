@@ -4,7 +4,7 @@
       <button
         class="toggle-btn"
         @click="collapsed = !collapsed"
-        :aria-expanded="(!collapsed).toString()"
+        :aria-expanded="!collapsed"
       >
         {{ collapsed ? "☰" : "☰ 导航" }}
       </button>

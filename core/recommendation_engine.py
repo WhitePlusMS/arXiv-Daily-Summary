@@ -186,6 +186,20 @@ class RecommendationEngine(ProgressTracker):
                 return result
                 
             except Exception as e:
+                error_str = str(e).lower()
+                error_type = type(e).__name__
+                
+                # 检查是否是认证错误（API密钥错误）
+                is_auth_error = (
+                    any(keyword in error_str for keyword in ['unauthorized', '401', 'api_key', 'authentication', 'invalid_api_key']) or
+                    'AuthenticationError' in error_type
+                )
+                
+                if is_auth_error:
+                    # 认证错误，立即抛出，不重试
+                    logger.error(f"API认证错误，终止任务 - {title_short}: {e}")
+                    raise Exception(f"API认证错误，请检查API密钥配置: {e}")
+                
                 logger.warning(f"论文评估失败 ({attempt + 1}/{max_retries}) - {title_short}: {e}")
                 if attempt == max_retries - 1:
                     logger.error(f"论文评估彻底失败，跳过 - {title_short}")
@@ -239,11 +253,37 @@ class RecommendationEngine(ProgressTracker):
                         if result.get("__api_failed"):
                             api_failure_count += 1
                             if api_failure_count >= max_failures:
-                                logger.error(f"检测到API调用失败达到上限({max_failures})，终止评估流程")
-                                raise Exception("API调用失败，终止流程")
+                                error_msg = f"API调用失败达到上限({max_failures})，终止评估流程"
+                                logger.error(error_msg)
+                                self._update_progress(
+                                    step="评估失败",
+                                    percentage=0,
+                                    log_message=error_msg,
+                                    log_level="error"
+                                )
+                                raise Exception(error_msg)
                         else:
                             recommended_papers.append(result)
                 except Exception as exc:
+                    error_str = str(exc).lower()
+                    # 检查是否是认证错误
+                    is_auth_error = (
+                        any(keyword in error_str for keyword in ['unauthorized', '401', 'api_key', 'authentication', 'invalid_api_key', 'api认证错误']) or
+                        'AuthenticationError' in type(exc).__name__
+                    )
+                    
+                    if is_auth_error:
+                        # 认证错误，立即终止任务并更新进度
+                        error_msg = f"API认证错误，请检查API密钥配置: {exc}"
+                        logger.error(error_msg)
+                        self._update_progress(
+                            step="API认证失败",
+                            percentage=0,
+                            log_message=error_msg,
+                            log_level="error"
+                        )
+                        raise Exception(error_msg)
+                    
                     title_short = paper['title'][:50] + '...' if len(paper['title']) > 50 else paper['title']
                     logger.error(f"论文处理异常 - {title_short}: {exc}")
                     if "API调用失败" in str(exc):
@@ -436,7 +476,36 @@ class RecommendationEngine(ProgressTracker):
         )
 
         # 2. 获取推荐
-        recommended_papers = self.get_recommendations(papers)
+        try:
+            recommended_papers = self.get_recommendations(papers)
+        except Exception as e:
+            # 检查是否是认证错误
+            error_str = str(e).lower()
+            is_auth_error = any(keyword in error_str for keyword in ['unauthorized', '401', 'api_key', 'authentication', 'invalid_api_key', 'api认证错误'])
+            
+            if is_auth_error:
+                # 认证错误，更新进度并重新抛出
+                error_msg = f"API认证错误，请检查API密钥配置: {e}"
+                logger.error(error_msg)
+                self._update_progress(
+                    step="API认证失败",
+                    percentage=0,
+                    log_message=error_msg,
+                    log_level="error"
+                )
+                raise Exception(error_msg)
+            else:
+                # 其他错误，也更新进度并重新抛出
+                error_msg = f"获取推荐失败: {e}"
+                logger.error(error_msg)
+                self._update_progress(
+                    step="推荐失败",
+                    percentage=0,
+                    log_message=error_msg,
+                    log_level="error"
+                )
+                raise
+        
         if not recommended_papers:
             logger.warning("推荐生成失败 - 未找到相关论文，流程终止")
             self._update_progress(

@@ -12,11 +12,6 @@
       </div>
     </div>
 
-    <!-- 错误提示 -->
-    <div v-if="error" class="streamlit-error">
-      {{ error }}
-    </div>
-
     <!-- 主要内容区域 - 单栏布局 -->
     <div class="dashboard-content">
       <!-- 研究信息输入和匹配 -->
@@ -262,7 +257,7 @@
                         <input
                           type="text"
                           class="streamlit-input"
-                          v-model="editDrafts[i].username"
+                          v-model="editDrafts[i]!.username"
                         />
                       </div>
                       <div class="edit-field">
@@ -270,21 +265,21 @@
                         <input
                           type="text"
                           class="streamlit-input"
-                          v-model="editDrafts[i].category_id"
+                          v-model="editDrafts[i]!.category_id"
                         />
                       </div>
                       <div class="edit-field">
                         <label>研究内容描述（感兴趣的方向）</label>
                         <textarea
                           class="streamlit-textarea"
-                          v-model="editDrafts[i].user_input"
+                          v-model="editDrafts[i]!.user_input"
                         ></textarea>
                       </div>
                       <div class="edit-field">
                         <label>不感兴趣的方向（可选）</label>
                         <textarea
                           class="streamlit-textarea"
-                          v-model="editDrafts[i].negative_query"
+                          v-model="editDrafts[i]!.negative_query"
                         ></textarea>
                       </div>
                     </div>
@@ -494,7 +489,7 @@ const startMatching = async () => {
         async (progress) => {
           // 任务完成
           console.log("分类匹配完成", progress);
-          showProgress.value = false;
+          // 不自动关闭进度窗口，让用户手动关闭
           isMatching.value = false;
           matchCompleted.value = true;
           
@@ -514,7 +509,7 @@ const startMatching = async () => {
         (error) => {
           // 任务失败
           console.error("分类匹配失败", error);
-          showProgress.value = false;
+          // 不自动关闭进度窗口，让用户手动关闭
           isMatching.value = false;
           
           // 清除localStorage中的task_id
@@ -565,7 +560,7 @@ const startMatching = async () => {
     store.setError("执行匹配时发生错误");
     console.error("匹配错误:", err);
     isMatching.value = false;
-    showProgress.value = false;
+    // 不自动关闭进度窗口，让用户手动关闭
   } finally {
     runningMessage.value = "";
   }
@@ -585,9 +580,10 @@ const toggleSelection = (i: number, ev: Event) => {
 const batchDelete = () => {
   if (selectedIndices.value.size === 0) return;
   // 将筛选列表索引映射回原始 userProfiles 索引
-  const indices = Array.from(selectedIndices.value).map((i) =>
-    userProfiles.value.indexOf(filteredProfiles.value[i])
-  );
+  const indices = Array.from(selectedIndices.value).map((i) => {
+    const item = filteredProfiles.value[i];
+    return item ? userProfiles.value.indexOf(item) : -1;
+  });
   const valid = indices.filter((i) => i >= 0);
   if (valid.length === 0) return;
   store.setLoading(true);
@@ -630,6 +626,7 @@ const toggleEdit = (i: number) => {
     const originalIndex = userProfiles.value.indexOf(item);
     if (originalIndex < 0) return;
     const draft = editDrafts.value[i];
+    if (!draft) return;
     store.setLoading(true);
     api
       .updateMatcherRecord({
@@ -723,7 +720,7 @@ const restoreRunningTask = async () => {
           async (finalProgress) => {
             // 任务完成
             console.log("恢复的匹配任务已完成", finalProgress);
-            showProgress.value = false;
+            // 不自动关闭进度窗口，让用户手动关闭
             isMatching.value = false;
             matchCompleted.value = true;
             localStorage.removeItem(RUNNING_TASK_KEY);
@@ -733,7 +730,7 @@ const restoreRunningTask = async () => {
           (error) => {
             // 任务失败
             console.error("恢复的匹配任务失败", error);
-            showProgress.value = false;
+            // 不自动关闭进度窗口，让用户手动关闭
             isMatching.value = false;
             localStorage.removeItem(RUNNING_TASK_KEY);
             store.setError(error);
@@ -774,3 +771,4 @@ onMounted(async () => {
   await restoreRunningTask();
 });
 </script>
+
