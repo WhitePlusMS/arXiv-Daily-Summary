@@ -81,9 +81,9 @@ class EnvConfigManager:
             # 重新加载配置以验证
             self.load_config()
             
-            # 强制重新加载环境变量到当前进程
-            from dotenv import load_dotenv
-            load_dotenv(self.env_file, override=True)
+            # 强制重新加载环境变量到当前进程（通过 env_config 模块）
+            from core.env_config import reload
+            reload()
             
             # 清除Streamlit缓存以确保其他页面重新加载
             if hasattr(st, 'cache_data'):

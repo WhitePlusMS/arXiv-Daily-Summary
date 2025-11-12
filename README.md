@@ -192,6 +192,59 @@ python start.py
 
 系统会自动处理环境配置、依赖安装和服务启动。
 
+### Docker 一键部署（推荐生产环境）
+
+使用 Docker Compose 可以快速部署整个系统，无需手动配置环境：
+
+```bash
+# 1. 克隆项目到本地
+git clone https://github.com/WhitePlusMS/arXiv-Daily-Summary.git
+cd arXiv-Daily-Summary
+
+# 2. 进入 docker 目录
+cd docker
+
+# 3. 启动服务（首次启动会从 Docker Hub 拉取镜像）
+docker compose up -d
+
+# 4. 查看服务状态
+docker compose ps
+
+# 5. 访问应用
+#    前端界面: http://localhost:5173
+#    后端 API: http://localhost:8000
+#    API 文档: http://localhost:8000/docs
+```
+
+**配置 API 密钥：**
+
+1. 首次启动后，系统会自动从 `.env.example` 创建 `.env` 文件
+2. 访问前端界面：http://localhost:5173
+3. 在左侧导航栏点击"环境配置"
+4. 在"🤖 模型与API配置"分组中，填入您的 `DASHSCOPE_API_KEY`
+5. 点击"💾 保存配置"按钮
+
+**停止服务：**
+
+```bash
+# 停止服务
+docker compose down
+
+# 停止服务并删除数据卷（谨慎使用）
+docker compose down -v
+```
+
+**数据持久化：**
+
+所有数据（包括 `.env` 配置、历史记录、用户数据、日志）都保存在 Docker Volume 中，即使删除容器也不会丢失数据。
+
+**注意事项：**
+
+- 首次启动会从 Docker Hub 拉取镜像，可能需要几分钟时间（取决于网络速度）
+- 默认端口：前端 5173，后端 8000
+- 确保配置的端口未被占用
+- 修改端口后，访问地址会相应变化（例如：http://localhost:8080）
+
 ## 💻 界面预览
 
 **主界面 - 论文推荐和摘要生成**

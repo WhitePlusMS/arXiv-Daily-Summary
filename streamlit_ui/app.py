@@ -14,9 +14,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-
-from dotenv import load_dotenv
-load_dotenv(os.path.join(project_root, '.env'), override=True)
+# env_config 会自动加载 .env 文件，无需手动调用 load_dotenv
 
 def main():
     """主应用入口"""

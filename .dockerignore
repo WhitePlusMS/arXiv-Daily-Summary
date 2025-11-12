@@ -1,0 +1,73 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+.env
+*.log
+logs/
+arxiv_history/
+data/users/detailed_scores/
+
+# Node.js (前端)
+web/node_modules/
+web/dist/
+web/.vite/
+
+# Git
+.git/
+.gitignore
+
+# Docker
+docker-compose.override.yml
+*.md
+!README.md
+
+# 测试和临时文件
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# 其他
+*.bak
+*.tmp
+.cache/
+

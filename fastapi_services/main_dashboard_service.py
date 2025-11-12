@@ -16,11 +16,7 @@ from typing import List, Dict, Any, Optional, Tuple
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-# 加载环境变量
-from dotenv import load_dotenv
-load_dotenv(os.path.join(project_root, '.env'), override=True)
-
-# 导入核心模块
+# 导入核心模块（env_config 会自动加载 .env 文件）
 from core.arxiv_cli import ArxivRecommenderCLI
 from core.output_manager import OutputManager
 from .base_service import BaseService, ServiceResponse

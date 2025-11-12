@@ -45,9 +45,10 @@ app = FastAPI(
 )
 
 # 添加CORS中间件
+# 允许本地和内网访问（支持 localhost、127.0.0.1、192.168.x.x、10.x.x.x 等内网IP）
 app.add_middleware(
     CORSMiddleware,
-    # 开发环境允许所有本地端口的来源（localhost/127.0.0.1），避免前端端口变化导致通信中断
+    # 允许的来源：本地和内网IP
     allow_origins=[
         "http://localhost:3000",
         "http://localhost:5173",
@@ -56,7 +57,9 @@ app.add_middleware(
         "http://127.0.0.1:5173",
         "http://127.0.0.1:5174",
     ],
-    allow_origin_regex=r"http://(localhost|127\.0\.0\.1):\d+",
+    # 使用正则表达式允许所有本地和内网IP访问
+    # 支持：localhost、127.0.0.1、192.168.x.x、10.x.x.x、172.16-31.x.x 等内网IP段
+    allow_origin_regex=r"http://(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2[0-9]|3[0-1])\.\d+\.\d+):\d+",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

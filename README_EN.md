@@ -192,6 +192,59 @@ python start.py
 
 The system will automatically handle environment configuration, dependency installation, and service startup.
 
+### Docker One-Click Deployment (Recommended for Production)
+
+Using Docker Compose allows you to quickly deploy the entire system without manual environment configuration:
+
+```bash
+# 1. Clone the project locally
+git clone https://github.com/WhitePlusMS/arXiv-Daily-Summary.git
+cd arXiv-Daily-Summary
+
+# 2. Enter docker directory
+cd docker
+
+# 3. Start services (first startup will pull images from Docker Hub)
+docker compose up -d
+
+# 4. Check service status
+docker compose ps
+
+# 5. Access application
+#    Frontend: http://localhost:5173
+#    Backend API: http://localhost:8000
+#    API Documentation: http://localhost:8000/docs
+```
+
+**Configure API Key:**
+
+1. After first startup, the system will automatically create `.env` file from `.env.example`
+2. Access frontend interface: http://localhost:5173
+3. Click "Environment Configuration" in the left navigation bar
+4. In the "🤖 Model & API Configuration" section, fill in your `DASHSCOPE_API_KEY`
+5. Click the "💾 Save Configuration" button
+
+**Stop Services:**
+
+```bash
+# Stop services
+docker compose down
+
+# Stop services and remove data volumes (use with caution)
+docker compose down -v
+```
+
+**Data Persistence:**
+
+All data (including `.env` configuration, history records, user data, logs) is saved in Docker Volumes, so data will not be lost even if containers are deleted.
+
+**Notes:**
+
+- First startup will pull images from Docker Hub, which may take a few minutes (depending on network speed)
+- Default ports: Frontend 5173, Backend 8000
+- Ensure configured ports are not occupied
+- After modifying ports, access addresses will change accordingly (e.g., http://localhost:8080)
+
 ## 💻 Interface Preview
 
 **Main Interface - Paper Recommendation and Summary Generation**

@@ -9,18 +9,29 @@ import pytz
 import xml.etree.ElementTree as ET
 import urllib.parse
 from core.common_utils import run_with_retries, write_json, make_on_retry_logger
+from core.env_config import get_int, get_str
 
 class ArxivFetcher:
-    def __init__(self, base_url: str = "http://export.arxiv.org/api/query", retries: int = 3, delay: int = 5):
+    def __init__(self, base_url: Optional[str] = None, retries: Optional[int] = None, delay: Optional[int] = None):
+        """初始化ArXiv获取器
+        
+        Args:
+            base_url: ArXiv API基础URL，如果为None则从环境变量ARXIV_BASE_URL读取，默认值为"http://export.arxiv.org/api/query"
+            retries: 重试次数，如果为None则从环境变量ARXIV_RETRIES读取，默认值为3
+            delay: 请求延迟（秒），如果为None则从环境变量ARXIV_DELAY读取，默认值为5
+        """
         logger.info(f"ArxivFetcher初始化开始")
-        self.base_url = base_url
-        self.retries = retries
-        self.delay = delay
+        
+        # 从环境变量读取配置，如果参数传入则优先使用参数值
+        self.base_url = base_url or get_str('ARXIV_BASE_URL', 'http://export.arxiv.org/api/query')
+        self.retries = retries if retries is not None else get_int('ARXIV_RETRIES', 3)
+        self.delay = delay if delay is not None else get_int('ARXIV_DELAY', 5)
+        
         self.session = requests.Session()
         self.session.headers.update({
             'User-Agent': 'ArXiv-Daily-Recommender/2.0'
         })
-        logger.success(f"ArxivFetcher初始化完成 - URL: {base_url}, 重试: {retries}次, 延迟: {delay}秒")
+        logger.success(f"ArxivFetcher初始化完成 - URL: {self.base_url}, 重试: {self.retries}次, 延迟: {self.delay}秒")
 
     
 
@@ -181,6 +192,9 @@ class ArxivFetcher:
         logger.debug(f"API查询范围 - UTC: {start_date_str} ~ {end_date_str}")
         
         all_papers = []
+        consecutive_failures = 0  # 连续失败计数
+        max_consecutive_failures = 2  # 最大连续失败次数，超过则提前停止
+        
         for page in range(max_pages):
             # 如果已达到或超过目标数量，提前结束
             if max_total is not None and len(all_papers) >= max_total:
@@ -200,11 +214,20 @@ class ArxivFetcher:
             logger.debug(f"获取第 {page+1} 页 - 起始位置: {start}，本页请求数量: {req_per_page}")
             logger.debug(f"查询条件: {query}")
             
-            # 使用指数退避重试机制处理每一页的请求
-            page_papers = self._fetch_page_with_retry(url, page + 1, category)
+            # 使用指数退避重试机制处理每一页的请求（使用实例配置的重试次数）
+            page_papers = self._fetch_page_with_retry(url, page + 1, category, max_retries=self.retries)
             if page_papers is None:
-                logger.warning(f"第 {page+1} 页获取失败，跳过该页继续处理")
+                consecutive_failures += 1
+                logger.warning(f"第 {page+1} 页获取失败，连续失败次数: {consecutive_failures}/{max_consecutive_failures}")
+                
+                # 如果第一页就失败，或者连续失败次数超过阈值，提前停止
+                if page == 0 or consecutive_failures >= max_consecutive_failures:
+                    logger.error(f"分页获取提前终止 - 连续 {consecutive_failures} 页失败，已获取: {len(all_papers)} 篇")
+                    break
                 continue
+            
+            # 成功获取到数据，重置连续失败计数
+            consecutive_failures = 0
             
             if not page_papers:
                 logger.info(f"分页结束 - 第 {page+1} 页无更多条目")
@@ -234,13 +257,23 @@ class ArxivFetcher:
         logger.success(f"分页获取完成 - {category}: 总计 {len(all_papers)} 篇论文")
         return all_papers
     
-    def _fetch_page_with_retry(self, url: str, page_num: int, category: str = None, max_retries: int = 5) -> Optional[List[Dict[str, Any]]]:
-        """使用指数退避重试机制获取单页数据"""
+    def _fetch_page_with_retry(self, url: str, page_num: int, category: str = None, max_retries: Optional[int] = None) -> Optional[List[Dict[str, Any]]]:
+        """使用指数退避重试机制获取单页数据
+        
+        Args:
+            url: 请求URL
+            page_num: 页码
+            category: 分类（可选）
+            max_retries: 最大重试次数，如果为None则使用实例的retries属性
+        """
+        # 如果没有传入max_retries，使用实例的retries属性
+        if max_retries is None:
+            max_retries = self.retries
         for attempt in range(max_retries):
             try:
-                # 指数退避延迟：1, 2, 4, 8, 16秒
+                # 指数退避延迟：1, 2, 4秒（减少等待时间）
                 if attempt > 0:
-                    delay = min(2 ** (attempt - 1), 30)  # 最大延迟30秒
+                    delay = min(2 ** (attempt - 1), 10)  # 最大延迟10秒
                     logger.info(f"第 {page_num} 页重试 ({attempt + 1}/{max_retries}) - 等待 {delay} 秒")
                     time.sleep(delay)
                 
@@ -257,8 +290,11 @@ class ArxivFetcher:
                     logger.warning(f"第 {page_num} 页服务器临时错误 - 状态码: {resp.status_code}, 尝试重试")
                     continue
                 elif resp.status_code == 429:  # 请求过于频繁
-                    logger.warning(f"第 {page_num} 页请求频率限制 - 状态码: {resp.status_code}, 延长等待时间")
-                    time.sleep(10)  # 额外等待10秒
+                    # 对于429错误，增加等待时间，但如果是最后一次尝试则直接返回None
+                    wait_time = 20 if attempt < max_retries - 1 else 0
+                    logger.warning(f"第 {page_num} 页请求频率限制 - 状态码: {resp.status_code}, 等待 {wait_time} 秒")
+                    if wait_time > 0:
+                        time.sleep(wait_time)
                     continue
                 else:
                     logger.error(f"第 {page_num} 页请求失败 - 状态码: {resp.status_code}, 响应: {resp.text[:200]}")
@@ -270,10 +306,12 @@ class ArxivFetcher:
                 logger.warning(f"第 {page_num} 页连接错误 ({attempt + 1}/{max_retries}): {e}")
             except requests.exceptions.HTTPError as e:
                 logger.error(f"第 {page_num} 页HTTP错误 ({attempt + 1}/{max_retries}): {e}")
-                # 对于4xx错误，不进行重试
-                if 400 <= resp.status_code < 500 and resp.status_code not in [429]:
-                    logger.error(f"第 {page_num} 页客户端错误，停止重试 - 状态码: {resp.status_code}")
-                    break
+                # 对于4xx错误，不进行重试（从响应对象获取状态码）
+                if hasattr(e, 'response') and e.response is not None:
+                    status_code = e.response.status_code
+                    if 400 <= status_code < 500 and status_code not in [429]:
+                        logger.error(f"第 {page_num} 页客户端错误，停止重试 - 状态码: {status_code}")
+                        break
             except Exception as e:
                 logger.error(f"第 {page_num} 页未知错误 ({attempt + 1}/{max_retries}): {e}")
         

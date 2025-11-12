@@ -80,7 +80,6 @@ dist/
 # 允许保留空目录（可选）
 !.gitkeep
 
-/docker
 data/users/detailed_scores
 PPT.md
 
@@ -89,3 +88,11 @@ PPT.md
 第二页_智能分类匹配器.html
 第三页_自动化论文推荐系统.html
 第一页_从信息过载到智能筛选.html
+
+.cursor/plans/
+
+# Docker 内部工具文件（不对外提供）
+docker/push_images.ps1
+docker/push_images.sh
+docker/PUSH_TO_DOCKERHUB.md
+docker/docker-compose.build.yml

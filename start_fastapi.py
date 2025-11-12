@@ -441,7 +441,7 @@ def build_argparser() -> argparse.ArgumentParser:
     parser.add_argument("--reload", action="store_true", help="启用后端热重载")
     parser.add_argument("--backend-log", default="info", help="后端日志级别")
     parser.add_argument("--no-web", action="store_true", help="仅启动后端，跳过前端")
-    parser.add_argument("--web-host", default="localhost", help="前端绑定地址（Vite --host）")
+    parser.add_argument("--web-host", default="0.0.0.0", help="前端绑定地址（Vite --host）")
     parser.add_argument("--web-port", type=int, default=5173, help="前端端口（Vite --port）")
     parser.add_argument("--auto-install-web", action="store_true", help="自动安装前端依赖")
     parser.add_argument("--check-venv", action="store_true", help="启用 NV 虚拟环境检查")

@@ -1,0 +1,41 @@
+# ArXiv 每日论文推荐系统 - 前端 Docker 镜像
+# 基于 Node.js 构建 Vue3 前端应用
+
+# 构建阶段
+FROM node:20-alpine AS builder
+
+# 设置工作目录
+WORKDIR /app
+
+# 复制前端项目文件
+COPY web/package*.json ./
+COPY web/tsconfig*.json ./
+COPY web/vite.config.ts ./
+COPY web/index.html ./
+COPY web/src ./src
+COPY web/public ./public
+
+# 安装依赖（使用阿里云镜像加速）
+RUN npm config set registry https://registry.npmmirror.com && \
+    npm install
+
+# 构建生产版本
+# 设置 VITE_API_BASE_URL 为空，使用相对路径（通过 Nginx 代理）
+ENV VITE_API_BASE_URL=
+RUN npm run build
+
+# 生产阶段 - 使用 Nginx 提供静态文件服务
+FROM nginx:alpine
+
+# 复制构建产物到 Nginx 目录
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# 复制 Nginx 配置文件
+COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+
+# 暴露端口
+EXPOSE 80
+
+# 启动 Nginx
+CMD ["nginx", "-g", "daemon off;"]
+
