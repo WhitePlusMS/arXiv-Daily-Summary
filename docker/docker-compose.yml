@@ -19,7 +19,7 @@ services:
   # 后端服务 - FastAPI
   backend:
     # 从 Docker Hub 拉取镜像
-    image: WhitePlusMS/arxiv_daily_summary-backend:v0.3.3
+    image: whiteplusms/arxiv_daily_summary-backend:v0.3.3
     container_name: arxiv-daily-summary-backend
     ports:
       - "${BACKEND_PORT:-8000}:8000"
@@ -48,7 +48,7 @@ services:
   # 前端服务 - Vue3 + Nginx
   frontend:
     # 从 Docker Hub 拉取镜像
-    image: WhitePlusMS/arxiv_daily_summary-frontend:v0.3.3
+    image: whiteplusms/arxiv_daily_summary-frontend:v0.3.3
     container_name: arxiv-daily-summary-frontend
     ports:
       - "${FRONTEND_PORT:-5173}:80"
