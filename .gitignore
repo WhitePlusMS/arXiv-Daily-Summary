@@ -98,3 +98,4 @@ docker/PUSH_TO_DOCKERHUB.md
 docker/docker-compose.build.yml
 
 docs/
+CLAUDE.md

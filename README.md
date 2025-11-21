@@ -179,20 +179,6 @@ python start_fastapi.py
 # enjoy it!
 ```
 
-### 传统 Streamlit 界面
-
-如果您更喜欢使用 Streamlit 界面：
-
-```bash
-# 进入 streamlit_ui 目录
-cd streamlit_ui
-
-# 启动 Streamlit 应用
-python start.py
-```
-
-系统会自动处理环境配置、依赖安装和服务启动。
-
 ### Docker 一键部署（推荐生产环境）
 
 使用 Docker Compose 可以快速部署整个系统，无需手动配置环境：

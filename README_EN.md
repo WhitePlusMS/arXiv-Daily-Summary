@@ -179,20 +179,6 @@ python start_fastapi.py
 # enjoy it!
 ```
 
-### Traditional Streamlit Interface
-
-If you prefer using the Streamlit interface:
-
-```bash
-# Enter streamlit_ui directory
-cd streamlit_ui
-
-# Start Streamlit application
-python start.py
-```
-
-The system will automatically handle environment configuration, dependency installation, and service startup.
-
 ### Docker One-Click Deployment (Recommended for Production)
 
 Using Docker Compose allows you to quickly deploy the entire system without manual environment configuration:

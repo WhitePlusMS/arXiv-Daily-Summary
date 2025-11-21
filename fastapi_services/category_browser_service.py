@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-分类服务 - 处理ArXiv分类数据的加载和管理
+分类服务 - 处理ArXiv分类数据的加载和管理（无Streamlit依赖版本）
 """
 
 import json
 from pathlib import Path
 from typing import List, Dict, Any, Optional
-import streamlit as st
+from loguru import logger
 
 
 class CategoryService:
-    """ArXiv分类数据服务类"""
+    """ArXiv分类数据服务类（无Streamlit依赖）"""
     
     def __init__(self):
         """初始化分类服务"""
-        self.base_path = Path(__file__).parent.parent.parent
+        self.base_path = Path(__file__).parent.parent
         self.categories_data = None
     
     def load_categories_data(self) -> Optional[List[Dict[str, Any]]]:
@@ -34,8 +34,7 @@ class CategoryService:
             original_file = self.base_path / "config" / "arxiv_categories.json"
             if not original_file.exists():
                 error_msg = f"错误：找不到原始分类文件 {original_file}"
-                print(error_msg)
-                st.error(error_msg)
+                logger.error(error_msg)
                 return None
             
             with open(original_file, 'r', encoding='utf-8') as f:
@@ -62,9 +61,9 @@ class CategoryService:
                                 'description_cn': sub_cat.get('description_cn', '')
                             }
                 except Exception as e:
-                    print(f"警告：加载翻译文件失败 {e}，将使用原始数据")
+                    logger.warning(f"加载翻译文件失败 {e}，将使用原始数据")
             else:
-                print(f"警告：找不到翻译文件 {translated_file}，将使用原始数据")
+                logger.warning(f"找不到翻译文件 {translated_file}，将使用原始数据")
             
             # 合并数据
             merged_categories = self._merge_category_data(categories_data, translated_data)
@@ -76,8 +75,7 @@ class CategoryService:
             
         except Exception as e:
             error_msg = f"加载分类数据时发生错误: {e}"
-            print(error_msg)
-            st.error(error_msg)
+            logger.error(error_msg)
             return None
     
     def _merge_category_data(self, original_data: List[Dict], translated_data: Dict) -> List[Dict[str, Any]]:
@@ -218,3 +216,4 @@ class CategoryService:
                     results.append(subcat)
         
         return results
+

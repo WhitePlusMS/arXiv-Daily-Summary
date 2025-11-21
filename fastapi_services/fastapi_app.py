@@ -35,7 +35,7 @@ from .service_container import (
 from .main_dashboard_service import ArxivRecommenderService
 from .environment_config_service import EnvConfigService
 from .progress_manager import get_progress_manager
-from streamlit_ui.services.category_browser_service import CategoryService
+from .category_browser_service import CategoryService
 
 # 创建FastAPI应用
 app = FastAPI(

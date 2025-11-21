@@ -40,7 +40,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 复制项目文件（排除前端和不需要的文件）
 COPY core ./core
 COPY fastapi_services ./fastapi_services
-COPY streamlit_ui ./streamlit_ui
 COPY config ./config
 COPY data ./data
 COPY templates ./templates
