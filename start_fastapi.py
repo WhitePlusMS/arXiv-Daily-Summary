@@ -210,9 +210,23 @@ class FastAPIWebLauncher:
             Logger.error(f"nv create 执行失败: {e}")
             return False
 
-    def check_env_file(self):
+    def check_environment(self) -> bool:
+        """检查关键环境配置"""
         if not self.env_file.exists():
-            Logger.warning(".env 配置文件不存在（可选）")
+            Logger.warning(f"未找到环境配置文件: {self.env_file}")
+            Logger.info("系统将使用默认配置或在运行时生成 .env 文件")
+            return True
+
+        # 简单的配置检查
+        try:
+            content = self.env_file.read_text(encoding='utf-8')
+            if "YOUR_DASHSCOPE_API_KEY" in content and "DEBUG_MODE=true" not in content:
+                 Logger.warning("检测到使用默认 API Key (YOUR_DASHSCOPE_API_KEY)")
+                 Logger.warning("请修改 .env 文件中的 DASHSCOPE_API_KEY，否则 LLM 功能将无法使用")
+        except Exception as e:
+            Logger.error(f"读取环境配置文件失败: {e}")
+            
+        return True
 
     # ===== 后端（FastAPI）检查与启动 =====
     def check_backend_entry(self) -> bool:
@@ -340,7 +354,7 @@ class FastAPIWebLauncher:
         if not self.assert_running_in_venv():
             return False
 
-        self.check_env_file()
+        self.check_environment()
 
         # 后端文件检查
         if not self.check_backend_entry():

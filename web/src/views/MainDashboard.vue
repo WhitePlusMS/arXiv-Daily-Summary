@@ -18,7 +18,6 @@
       </div>
     </div>
 
-
     <!-- 主要内容区域 - 单栏布局，按逻辑顺序排列 -->
     <div class="dashboard-content">
       <!-- 用户配置区域 -->
@@ -33,7 +32,11 @@
             class="streamlit-select"
           >
             <option value="自定义">自定义</option>
-            <option v-for="profile in userProfiles" :key="profile.username" :value="profile.username">
+            <option
+              v-for="profile in userProfiles"
+              :key="profile.username"
+              :value="profile.username"
+            >
               {{ profile.username }}
             </option>
           </select>
@@ -55,8 +58,8 @@
       <!-- 研究兴趣区域 -->
       <div class="streamlit-section">
         <h2 class="streamlit-subheader">🎯 研究兴趣</h2>
-        <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-          <div class="streamlit-text-area" style="flex: 1; min-width: 300px;">
+        <div style="display: flex; gap: 16px; flex-wrap: wrap">
+          <div class="streamlit-text-area" style="flex: 1; min-width: 300px">
             <label>（A）感兴趣的研究方向：</label>
             <textarea
               v-model="interestsText"
@@ -65,7 +68,7 @@
               class="streamlit-textarea"
             ></textarea>
           </div>
-          <div class="streamlit-text-area" style="flex: 1; min-width: 300px;">
+          <div class="streamlit-text-area" style="flex: 1; min-width: 300px">
             <label>（B）不感兴趣的研究方向（可选）：</label>
             <textarea
               v-model="negativeInterestsText"
@@ -80,7 +83,6 @@
       <!-- 推荐系统区域 -->
       <div class="streamlit-section">
         <h2 class="streamlit-subheader">🚀 运行推荐系统</h2>
-
 
         <!-- 主推荐按钮 -->
         <div class="button-group">
@@ -170,7 +172,7 @@
         :class="{ expanded: showHistorySection }"
       >
         <span class="expander-icon">{{ showHistorySection ? "▼" : "▶" }}</span>
-        <h2 class="streamlit-subheader" style="margin: 0; flex: 1;">📁 历史报告管理</h2>
+        <h2 class="streamlit-subheader" style="margin: 0; flex: 1">📁 历史报告管理</h2>
       </div>
       <div v-show="showHistorySection" class="streamlit-expander-content">
         <!-- 筛选和搜索控制区域 -->
@@ -184,7 +186,11 @@
               class="streamlit-select"
             >
               <option value="">全部</option>
-              <option v-for="profile in userProfiles" :key="profile.username" :value="profile.username">
+              <option
+                v-for="profile in userProfiles"
+                :key="profile.username"
+                :value="profile.username"
+              >
                 {{ profile.username }}
               </option>
             </select>
@@ -200,7 +206,11 @@
             />
           </div>
           <div class="history-refresh-button">
-            <button @click="loadRecentReports" :disabled="isLoading" class="streamlit-button streamlit-button-small">
+            <button
+              @click="loadRecentReports"
+              :disabled="isLoading"
+              class="streamlit-button streamlit-button-small"
+            >
               {{ isLoading ? "加载中..." : "🔄 刷新" }}
             </button>
           </div>
@@ -275,7 +285,7 @@ import { ref, onMounted, watch, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { useArxivStore } from "@/stores/arxiv";
 import * as api from "@/services/api";
-import type { ReportItem, ProgressData } from "@/types";
+import type { ReportItem, ProgressData, TemplateErrorDetail } from "@/types";
 import { progressService } from "@/services/progress";
 import ProgressDisplay from "@/components/ProgressDisplay.vue";
 
@@ -316,14 +326,12 @@ const RUNNING_TASK_KEY = "arxiv_running_task_id";
 
 // 计算属性（使用 storeToRefs 保持响应性）
 const {
-  config,
   userProfiles,
   researchInterests,
   negativeInterests,
   selectedProfile,
   selectedProfileName,
   isLoading,
-  error,
   lastRecommendationResult,
   recentReports,
   hasValidConfig,
@@ -443,7 +451,9 @@ const runMainRecommendation = async () => {
   }
 
   if (!hasValidConfig.value) {
-    store.setError('DashScope API Key 未配置，请检查 .env 文件（或切换 正文分析与报告模型提供方）。')
+    store.setError(
+      "DashScope API Key 未配置，请检查 .env 文件（或切换 正文分析与报告模型提供方）。"
+    );
     return;
   }
 
@@ -461,18 +471,19 @@ const runMainRecommendation = async () => {
     });
 
     // 检查是否返回了task_id（新的异步模式）
-    if (response.success && response.data && (response.data as any).task_id) {
-      const taskId = (response.data as any).task_id;
+    const respData = response.data as unknown as Record<string, unknown>;
+    if (response.success && respData && typeof respData.task_id === "string") {
+      const taskId = respData.task_id;
       currentTaskId.value = taskId;
       showProgress.value = true;
-      
+
       // 保存task_id到localStorage，用于页面刷新后恢复
       try {
         localStorage.setItem(RUNNING_TASK_KEY, taskId);
       } catch (e) {
         console.warn("无法保存task_id到localStorage:", e);
       }
-      
+
       // 开始轮询进度
       progressService.startPolling(
         taskId,
@@ -485,33 +496,33 @@ const runMainRecommendation = async () => {
           console.log("推荐任务完成", progress);
           // 不自动关闭进度窗口，让用户手动关闭
           isRunning.value = false;
-          
+
           // 清除localStorage中的task_id
           try {
             localStorage.removeItem(RUNNING_TASK_KEY);
           } catch (e) {
             console.warn("无法清除localStorage:", e);
           }
-          
+
           // 刷新报告列表
           await loadRecentReports();
-          
+
           // 显示成功消息
-          store.setError("");  // 清除之前的错误
+          store.setError(""); // 清除之前的错误
         },
         (error) => {
           // 任务失败
           console.error("推荐任务失败", error);
           // 不自动关闭进度窗口，让用户手动关闭
           isRunning.value = false;
-          
+
           // 清除localStorage中的task_id
           try {
             localStorage.removeItem(RUNNING_TASK_KEY);
           } catch (e) {
             console.warn("无法清除localStorage:", e);
           }
-          
+
           store.setError(error);
         }
       );
@@ -521,15 +532,13 @@ const runMainRecommendation = async () => {
 
       if (!response.success) {
         // 模板错误友好提示（后端400）
-        const tmpl = (response as any).template_error as {
-          friendly_message?: string;
-          fix_suggestions?: string[];
-          details?: Record<string, unknown>;
-        } | undefined;
+        const tmpl = (response as unknown as { template_error?: TemplateErrorDetail })
+          .template_error;
         if (tmpl?.friendly_message) {
-          const tips = Array.isArray(tmpl.fix_suggestions) && tmpl.fix_suggestions.length
-            ? `\n修复建议：\n• ${tmpl.fix_suggestions.join("\n• ")}`
-            : "";
+          const tips =
+            Array.isArray(tmpl.fix_suggestions) && tmpl.fix_suggestions.length
+              ? `\n修复建议：\n• ${tmpl.fix_suggestions.join("\n• ")}`
+              : "";
           store.setError(`${tmpl.friendly_message}${tips}`);
         } else {
           store.setError(response.message || "推荐执行失败");
@@ -568,7 +577,9 @@ const runSpecificDateRecommendation = async () => {
   }
 
   if (!hasValidConfig.value) {
-    store.setError('DashScope API Key 未配置，请检查 .env 文件（或切换 正文分析与报告模型提供方）。')
+    store.setError(
+      "DashScope API Key 未配置，请检查 .env 文件（或切换 正文分析与报告模型提供方）。"
+    );
     return;
   }
 
@@ -587,18 +598,19 @@ const runSpecificDateRecommendation = async () => {
     });
 
     // 检查是否返回了task_id（新的异步模式）
-    if (response.success && response.data && (response.data as any).task_id) {
-      const taskId = (response.data as any).task_id;
+    const respData = response.data as unknown as Record<string, unknown>;
+    if (response.success && respData && typeof respData.task_id === "string") {
+      const taskId = respData.task_id;
       currentTaskId.value = taskId;
       showProgress.value = true;
-      
+
       // 保存task_id到localStorage，用于页面刷新后恢复
       try {
         localStorage.setItem(RUNNING_TASK_KEY, taskId);
       } catch (e) {
         console.warn("无法保存task_id到localStorage:", e);
       }
-      
+
       // 开始轮询进度
       progressService.startPolling(
         taskId,
@@ -611,33 +623,33 @@ const runSpecificDateRecommendation = async () => {
           console.log("推荐任务完成", progress);
           // 不自动关闭进度窗口，让用户手动关闭
           isRunning.value = false;
-          
+
           // 清除localStorage中的task_id
           try {
             localStorage.removeItem(RUNNING_TASK_KEY);
           } catch (e) {
             console.warn("无法清除localStorage:", e);
           }
-          
+
           // 刷新报告列表
           await loadRecentReports();
-          
+
           // 显示成功消息
-          store.setError("");  // 清除之前的错误
+          store.setError(""); // 清除之前的错误
         },
         (error) => {
           // 任务失败
           console.error("推荐任务失败", error);
           // 不自动关闭进度窗口，让用户手动关闭
           isRunning.value = false;
-          
+
           // 清除localStorage中的task_id
           try {
             localStorage.removeItem(RUNNING_TASK_KEY);
           } catch (e) {
             console.warn("无法清除localStorage:", e);
           }
-          
+
           store.setError(error);
         }
       );
@@ -646,15 +658,13 @@ const runSpecificDateRecommendation = async () => {
       store.setLastRecommendationResult(response);
 
       if (!response.success) {
-        const tmpl = (response as any).template_error as {
-          friendly_message?: string;
-          fix_suggestions?: string[];
-          details?: Record<string, unknown>;
-        } | undefined;
+        const tmpl = (response as unknown as { template_error?: TemplateErrorDetail })
+          .template_error;
         if (tmpl?.friendly_message) {
-          const tips = Array.isArray(tmpl.fix_suggestions) && tmpl.fix_suggestions.length
-            ? `\n修复建议：\n• ${tmpl.fix_suggestions.join("\n• ")}`
-            : "";
+          const tips =
+            Array.isArray(tmpl.fix_suggestions) && tmpl.fix_suggestions.length
+              ? `\n修复建议：\n• ${tmpl.fix_suggestions.join("\n• ")}`
+              : "";
           store.setError(`${tmpl.friendly_message}${tips}`);
         } else {
           store.setError(response.message || "推荐执行失败");
@@ -809,12 +819,12 @@ const restoreRunningTask = async () => {
   try {
     const savedTaskId = localStorage.getItem(RUNNING_TASK_KEY);
     if (!savedTaskId) return;
-    
+
     // 检查任务是否还在运行
     const progressResponse = await api.getTaskProgress(savedTaskId);
     if (progressResponse.success && progressResponse.data) {
       const progress = progressResponse.data as ProgressData;
-      
+
       // 如果任务还在运行，恢复进度显示
       if (progress.status === "running") {
         console.log("恢复运行中的任务:", savedTaskId);
@@ -822,7 +832,7 @@ const restoreRunningTask = async () => {
         currentProgress.value = progress;
         showProgress.value = true;
         isRunning.value = true;
-        
+
         // 继续轮询进度
         progressService.startPolling(
           savedTaskId,
@@ -901,7 +911,7 @@ onMounted(async () => {
 
     // 页面初始化完成后，加载最近报告列表
     await loadRecentReports();
-    
+
     // 恢复运行中的任务（如果有）
     await restoreRunningTask();
   } catch (err) {
@@ -912,4 +922,3 @@ onMounted(async () => {
   }
 });
 </script>
-

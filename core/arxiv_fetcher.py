@@ -86,7 +86,11 @@ class ArxivFetcher:
                 "primary_category": primary_category,  # 新增：主分类（首个标签）
             }
         except Exception as error:
-            logger.error(f"论文解析失败: {error}")
+            # 增强错误日志，记录具体失败的条目信息以便排查
+            paper_id = getattr(entry, 'id', 'unknown')
+            logger.error(f"论文解析失败 - ID: {paper_id}, Error: {error}")
+            logger.debug(f"解析失败的原始条目数据: {str(entry)[:200]}...")  # 仅记录前200字符避免日志过大
+            
             return {
                 "title": "解析错误",
                 "arXiv_id": "unknown",

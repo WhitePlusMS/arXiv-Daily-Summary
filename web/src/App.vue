@@ -2,8 +2,8 @@
 import { RouterView } from 'vue-router'
 import { onMounted, onUnmounted, ref } from 'vue'
 import SidebarNav from './components/SidebarNav.vue'
-import Footer from './components/Footer.vue'
-import Toast from './components/Toast.vue'
+import Footer from './components/AppFooter.vue'
+import Toast from './components/AppToast.vue'
 import type { ToastMessage } from '@/types'
 
 const toasts = ref<ToastMessage[]>([])

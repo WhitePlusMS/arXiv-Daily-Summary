@@ -52,6 +52,14 @@ class LLMProvider:
         """
         logger.info(f"LLMProvider初始化开始")
         self._model_name = model
+        
+        # 运行时安全检查：API Key 缺失预警
+        if not api_key:
+            # 检查是否开启了 DEBUG_MODE (通过环境变量兜底检查)
+            is_debug = os.getenv("DEBUG_MODE", "false").lower() == "true"
+            if not is_debug:
+                logger.warning(f"LLMProvider 初始化警告: 模型 {model} 未提供 API Key 且未开启 DEBUG_MODE。API 调用将失败。")
+
         self._client = OpenAI(base_url=base_url, api_key=api_key)
         self.description = description
         self.username = username

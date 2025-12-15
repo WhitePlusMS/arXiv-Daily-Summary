@@ -23,7 +23,6 @@ export type ErrorCallback = (error: string) => void;
 
 class ProgressService {
   private pollingIntervals: Map<string, number> = new Map();
-  // @ts-ignore - import.meta.env 类型由 vite/client 提供
   private BASE_URL = (import.meta.env.VITE_API_BASE_URL || "") || "http://localhost:8000";
 
   /**

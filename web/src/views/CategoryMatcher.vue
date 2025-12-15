@@ -32,8 +32,8 @@
           ⚠️ 正在进行分类匹配，请等待完成后再修改输入内容
         </div>
 
-        <div style="display: flex; gap: 16px; margin-bottom: 16px;">
-          <div class="streamlit-text-area" style="flex: 1;">
+        <div style="display: flex; gap: 16px; margin-bottom: 16px">
+          <div class="streamlit-text-area" style="flex: 1">
             <label>研究内容描述（感兴趣的方向）</label>
             <textarea
               v-model="researchDescription"
@@ -44,7 +44,7 @@
             <div class="streamlit-help">支持Markdown格式，请尽可能详细地描述您的研究方向</div>
           </div>
 
-          <div class="streamlit-text-area" style="flex: 1;">
+          <div class="streamlit-text-area" style="flex: 1">
             <label>不感兴趣的方向（可选）</label>
             <textarea
               v-model="negativeDescription"
@@ -66,17 +66,17 @@
               {{ isOptimizing ? "正在优化中…" : "✨ AI优化描述（感兴趣方向）" }}
             </button>
           </div>
-          
+
           <div class="match-config">
             <div class="streamlit-text-input">
               <label>返回结果数量</label>
-              <input 
-                type="number" 
-                min="1" 
-                max="10" 
-                v-model.number="topN" 
+              <input
+                type="number"
+                min="1"
+                max="10"
+                v-model.number="topN"
                 class="streamlit-input"
-                style="width: 100px;"
+                style="width: 100px"
               />
             </div>
             <button
@@ -97,7 +97,10 @@
     </div>
 
     <!-- 运行状态和结果区域（兼容旧模式） -->
-    <div v-if="(isMatching && !showProgress) || matchCompleted || results.length > 0" class="dashboard-results">
+    <div
+      v-if="(isMatching && !showProgress) || matchCompleted || results.length > 0"
+      class="dashboard-results"
+    >
       <!-- 运行状态 -->
       <div v-if="isMatching && !showProgress" class="streamlit-section">
         <h2 class="streamlit-subheader">📋 运行状态</h2>
@@ -158,14 +161,20 @@
               <span class="stat-badge-value">{{ stats.unique_users || 0 }}</span>
             </div>
           </div>
-          <button class="streamlit-button streamlit-button-small" :disabled="isLoading" @click="refreshData">
+          <button
+            class="streamlit-button streamlit-button-small"
+            :disabled="isLoading"
+            @click="refreshData"
+          >
             🔄 刷新数据
           </button>
         </div>
 
         <!-- Token使用统计（如果有） -->
         <div v-if="tokenUsage.total_tokens > 0" class="token-usage-section">
-          <div class="streamlit-help" style="margin-bottom: 8px;">📊 最近一次匹配的Token使用情况：</div>
+          <div class="streamlit-help" style="margin-bottom: 8px">
+            📊 最近一次匹配的Token使用情况：
+          </div>
           <div class="token-grid-compact">
             <div class="token-item-compact">
               <span class="token-label-compact">输入：</span>
@@ -213,91 +222,87 @@
         </div>
 
         <div class="records-list" v-if="filteredProfiles.length > 0">
-          <h3 class="streamlit-subheader" style="margin-bottom:8px;">📄 用户记录</h3>
+          <h3 class="streamlit-subheader" style="margin-bottom: 8px">📄 用户记录</h3>
           <div v-for="(item, i) in filteredProfiles" :key="i" class="record-item">
-                <div class="record-header">
-                  <label>
+            <div class="record-header">
+              <label>
+                <input
+                  type="checkbox"
+                  :disabled="isMatching"
+                  :checked="selectedIndices.has(i)"
+                  @change="toggleSelection(i, $event)"
+                />
+                记录 {{ i + 1 }}: {{ item.username || "Unknown" }}
+              </label>
+              <div class="record-actions">
+                <button
+                  class="streamlit-button streamlit-button-small"
+                  :disabled="isMatching"
+                  @click="toggleEdit(i)"
+                >
+                  {{ editModes.has(i) ? "💾 保存" : "✏️ 编辑" }}
+                </button>
+                <button
+                  class="streamlit-button streamlit-button-small"
+                  :disabled="isMatching || !editModes.has(i)"
+                  @click="cancelEdit(i)"
+                >
+                  ❌ 取消
+                </button>
+                <button
+                  class="streamlit-button streamlit-button-small streamlit-button-danger"
+                  :disabled="isMatching"
+                  @click="deleteRecord(i)"
+                >
+                  🗑️ 删除
+                </button>
+              </div>
+            </div>
+            <div class="record-body">
+              <template v-if="editModes.has(i)">
+                <div class="record-edit-grid">
+                  <div class="edit-field">
+                    <label>用户名</label>
+                    <input type="text" class="streamlit-input" v-model="editDrafts[i]!.username" />
+                  </div>
+                  <div class="edit-field">
+                    <label>分类ID</label>
                     <input
-                      type="checkbox"
-                      :disabled="isMatching"
-                      :checked="selectedIndices.has(i)"
-                      @change="toggleSelection(i, $event)"
+                      type="text"
+                      class="streamlit-input"
+                      v-model="editDrafts[i]!.category_id"
                     />
-                    记录 {{ i + 1 }}: {{ item.username || "Unknown" }}
-                  </label>
-                  <div class="record-actions">
-                    <button
-                      class="streamlit-button streamlit-button-small"
-                      :disabled="isMatching"
-                      @click="toggleEdit(i)"
-                    >
-                      {{ editModes.has(i) ? "💾 保存" : "✏️ 编辑" }}
-                    </button>
-                    <button
-                      class="streamlit-button streamlit-button-small"
-                      :disabled="isMatching || !editModes.has(i)"
-                      @click="cancelEdit(i)"
-                    >
-                      ❌ 取消
-                    </button>
-                    <button
-                      class="streamlit-button streamlit-button-small streamlit-button-danger"
-                      :disabled="isMatching"
-                      @click="deleteRecord(i)"
-                    >
-                      🗑️ 删除
-                    </button>
+                  </div>
+                  <div class="edit-field">
+                    <label>研究内容描述（感兴趣的方向）</label>
+                    <textarea
+                      class="streamlit-textarea"
+                      v-model="editDrafts[i]!.user_input"
+                    ></textarea>
+                  </div>
+                  <div class="edit-field">
+                    <label>不感兴趣的方向（可选）</label>
+                    <textarea
+                      class="streamlit-textarea"
+                      v-model="editDrafts[i]!.negative_query"
+                    ></textarea>
                   </div>
                 </div>
-                <div class="record-body">
-                  <template v-if="editModes.has(i)">
-                    <div class="record-edit-grid">
-                      <div class="edit-field">
-                        <label>用户名</label>
-                        <input
-                          type="text"
-                          class="streamlit-input"
-                          v-model="editDrafts[i]!.username"
-                        />
-                      </div>
-                      <div class="edit-field">
-                        <label>分类ID</label>
-                        <input
-                          type="text"
-                          class="streamlit-input"
-                          v-model="editDrafts[i]!.category_id"
-                        />
-                      </div>
-                      <div class="edit-field">
-                        <label>研究内容描述（感兴趣的方向）</label>
-                        <textarea
-                          class="streamlit-textarea"
-                          v-model="editDrafts[i]!.user_input"
-                        ></textarea>
-                      </div>
-                      <div class="edit-field">
-                        <label>不感兴趣的方向（可选）</label>
-                        <textarea
-                          class="streamlit-textarea"
-                          v-model="editDrafts[i]!.negative_query"
-                        ></textarea>
-                      </div>
-                    </div>
-                  </template>
-                  <template v-else>
-                    <div class="record-field">
-                      <strong>分类标签：</strong><code>{{ item.category_id || "未设置" }}</code>
-                    </div>
-                    <div class="record-field">
-                      <strong>研究兴趣（感兴趣的方向）：</strong>
-                      <pre class="research-interests-code">{{ item.user_input || "未设置" }}</pre>
-                    </div>
-                    <div class="record-field" v-if="item.negative_query">
-                      <strong>不感兴趣的方向：</strong>
-                      <pre class="research-interests-code">{{ item.negative_query }}</pre>
-                    </div>
-                  </template>
+              </template>
+              <template v-else>
+                <div class="record-field">
+                  <strong>分类标签：</strong><code>{{ item.category_id || "未设置" }}</code>
                 </div>
+                <div class="record-field">
+                  <strong>研究兴趣（感兴趣的方向）：</strong>
+                  <pre class="research-interests-code">{{ item.user_input || "未设置" }}</pre>
+                </div>
+                <div class="record-field" v-if="item.negative_query">
+                  <strong>不感兴趣的方向：</strong>
+                  <pre class="research-interests-code">{{ item.negative_query }}</pre>
+                </div>
+              </template>
+            </div>
           </div>
         </div>
         <div v-else class="streamlit-info">
@@ -313,13 +318,13 @@ import { ref, computed, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useArxivStore } from "@/stores/arxiv";
 import * as api from "@/services/api";
-import type { UserProfile, ProgressData } from "@/types";
+import type { UserProfile, ProgressData, TemplateErrorDetail } from "@/types";
 import { progressService } from "@/services/progress";
 import ProgressDisplay from "@/components/ProgressDisplay.vue";
 
 // Store
 const store = useArxivStore();
-const { isLoading, error, userProfiles } = storeToRefs(store);
+const { isLoading, userProfiles } = storeToRefs(store);
 
 // 本地状态
 const username = ref("");
@@ -336,14 +341,7 @@ const stats = ref<{ total_records?: number; unique_users?: number } | null>(null
 // 用户记录列表不再使用内部折叠，保持主面板简洁
 
 // 可折叠分区：配置与统计、用户数据管理
-const statsCollapsed = ref(false);
 const managementCollapsed = ref(false);
-const toggleStatsCollapse = () => {
-  statsCollapsed.value = !statsCollapsed.value;
-  try {
-    localStorage.setItem("matcher_stats_collapsed", statsCollapsed.value ? "1" : "0");
-  } catch {}
-};
 const toggleManagementCollapse = () => {
   managementCollapsed.value = !managementCollapsed.value;
   try {
@@ -364,7 +362,10 @@ const searchTerm = ref("");
 const selectedIndices = ref<Set<number>>(new Set());
 const editModes = ref<Set<number>>(new Set());
 const editDrafts = ref<
-  Record<number, { username: string; category_id: string; user_input: string; negative_query: string }>
+  Record<
+    number,
+    { username: string; category_id: string; user_input: string; negative_query: string }
+  >
 >({});
 const filteredProfiles = computed(() => {
   const term = searchTerm.value.trim().toLowerCase();
@@ -420,13 +421,7 @@ const optimizeDescription = async () => {
       researchDescription.value = resp.data.optimized;
     } else {
       // 模板错误友好提示
-      const tmpl = (resp as any).template_error as
-        | {
-            friendly_message?: string;
-            fix_suggestions?: string[];
-            details?: Record<string, unknown>;
-          }
-        | undefined;
+      const tmpl = (resp as unknown as { template_error?: TemplateErrorDetail }).template_error;
       if (tmpl?.friendly_message) {
         const tips =
           Array.isArray(tmpl.fix_suggestions) && tmpl.fix_suggestions.length
@@ -465,20 +460,21 @@ const startMatching = async () => {
       username: username.value.trim(),
       top_n: topN.value,
     });
-    
+
     // 检查是否返回了task_id（新的异步模式）
-    if (resp.success && resp.data && (resp.data as any).task_id) {
-      const taskId = (resp.data as any).task_id;
+    const respData = resp.data as Record<string, unknown>;
+    if (resp.success && respData && typeof respData.task_id === "string") {
+      const taskId = respData.task_id;
       currentTaskId.value = taskId;
       showProgress.value = true;
-      
+
       // 保存task_id到localStorage，用于页面刷新后恢复
       try {
         localStorage.setItem(RUNNING_TASK_KEY, taskId);
       } catch (e) {
         console.warn("无法保存task_id到localStorage:", e);
       }
-      
+
       // 开始轮询进度
       progressService.startPolling(
         taskId,
@@ -492,17 +488,17 @@ const startMatching = async () => {
           // 不自动关闭进度窗口，让用户手动关闭
           isMatching.value = false;
           matchCompleted.value = true;
-          
+
           // 清除localStorage中的task_id
           try {
             localStorage.removeItem(RUNNING_TASK_KEY);
           } catch (e) {
             console.warn("无法清除localStorage:", e);
           }
-          
+
           // 刷新数据列表
           await refreshData();
-          
+
           // 清除错误
           store.setError("");
         },
@@ -511,39 +507,37 @@ const startMatching = async () => {
           console.error("分类匹配失败", error);
           // 不自动关闭进度窗口，让用户手动关闭
           isMatching.value = false;
-          
+
           // 清除localStorage中的task_id
           try {
             localStorage.removeItem(RUNNING_TASK_KEY);
           } catch (e) {
             console.warn("无法清除localStorage:", e);
           }
-          
+
           store.setError(error);
         }
       );
     } else {
       // 兼容旧的同步模式或错误响应
       if (resp.success && resp.data) {
-        const resList = Array.isArray(resp.data.results) ? resp.data.results : [];
+        const resList = (Array.isArray(resp.data.results) ? resp.data.results : []) as Array<{
+          id: string;
+          name: string;
+          score: number;
+        }>;
         results.value = resList.map((r) => ({ id: r.id, name: r.name, score: r.score }));
-        const tuRaw = resp.data.token_usage || {};
-        const input_tokens = (tuRaw as any).input_tokens ?? 0;
-        const output_tokens = (tuRaw as any).output_tokens ?? 0;
-        const total_tokens = (tuRaw as any).total_tokens ?? 0;
+        const tuRaw = (resp.data.token_usage || {}) as Record<string, number>;
+        const input_tokens = tuRaw.input_tokens ?? 0;
+        const output_tokens = tuRaw.output_tokens ?? 0;
+        const total_tokens = tuRaw.total_tokens ?? 0;
         tokenUsage.value = { input_tokens, output_tokens, total_tokens };
         matchCompleted.value = true;
         // 匹配成功后刷新数据列表
         await refreshData();
       } else {
         // 模板错误友好提示
-        const tmpl = (resp as any).template_error as
-          | {
-              friendly_message?: string;
-              fix_suggestions?: string[];
-              details?: Record<string, unknown>;
-            }
-          | undefined;
+        const tmpl = (resp as unknown as { template_error?: TemplateErrorDetail }).template_error;
         if (tmpl?.friendly_message) {
           const tips =
             Array.isArray(tmpl.fix_suggestions) && tmpl.fix_suggestions.length
@@ -697,12 +691,12 @@ const restoreRunningTask = async () => {
   try {
     const savedTaskId = localStorage.getItem(RUNNING_TASK_KEY);
     if (!savedTaskId) return;
-    
+
     // 检查任务是否还在运行
     const progressResponse = await api.getTaskProgress(savedTaskId);
     if (progressResponse.success && progressResponse.data) {
       const progress = progressResponse.data as ProgressData;
-      
+
       // 如果任务还在运行，恢复进度显示
       if (progress.status === "running") {
         console.log("恢复运行中的匹配任务:", savedTaskId);
@@ -710,7 +704,7 @@ const restoreRunningTask = async () => {
         currentProgress.value = progress;
         showProgress.value = true;
         isMatching.value = true;
-        
+
         // 继续轮询进度
         progressService.startPolling(
           savedTaskId,
@@ -753,9 +747,6 @@ const restoreRunningTask = async () => {
 onMounted(async () => {
   // 读取折叠状态持久化
   try {
-    const s1 = localStorage.getItem("matcher_stats_collapsed");
-    if (s1 === "1") statsCollapsed.value = true;
-    else if (s1 === "0") statsCollapsed.value = false;
     const s2 = localStorage.getItem("matcher_management_collapsed");
     if (s2 === "1") managementCollapsed.value = true;
     else if (s2 === "0") managementCollapsed.value = false;
@@ -766,9 +757,8 @@ onMounted(async () => {
     await api.initializeService();
   } catch {}
   await refreshData();
-  
+
   // 恢复运行中的任务（如果有）
   await restoreRunningTask();
 });
 </script>
-

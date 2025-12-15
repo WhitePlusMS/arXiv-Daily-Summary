@@ -1,4 +1,5 @@
 <div align="center">
+  <img src="assets/LOGO.png" alt="Logo" width="160">
   <h1>arXiv Daily Article Summary</h1>
   <p>
     <img src="https://img.shields.io/badge/Python-3.10%2B-blue?logo=python" alt="Python Version">
