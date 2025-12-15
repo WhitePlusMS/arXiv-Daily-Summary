@@ -715,7 +715,8 @@
 }
 
 /* Form Group Input Auto-styling */
-.ui-form-group input:not([type="checkbox"]):not([type="range"]):not([type="radio"]):not(.ui-switch input),
+.ui-form-group
+  input:not([type="checkbox"]):not([type="range"]):not([type="radio"]):not(.ui-switch input),
 .ui-form-group select,
 .ui-form-group textarea {
   width: 100%;
@@ -1111,7 +1112,6 @@ code {
   height: 24px;
   font-size: 0.8rem;
   color: var(--color-text-soft);
-}
   padding: 4px 0;
 }
 .ui-checkbox-label {

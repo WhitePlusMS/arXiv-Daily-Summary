@@ -52,13 +52,13 @@ import { ref, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useArxivStore } from "@/stores/arxiv";
 
-const props = defineProps<{
-  isRunning: boolean;
-}>();
-
 const emit = defineEmits<{
   (e: "runMain"): void;
   (e: "runDate", date: string): void;
+}>();
+
+defineProps<{
+  isRunning: boolean;
 }>();
 
 const store = useArxivStore();

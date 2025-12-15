@@ -48,7 +48,11 @@ export function useRecommendation() {
     }
   };
 
-  const handleRecommendationResponse = async (response: any) => {
+  const handleRecommendationResponse = async (response: {
+    success: boolean;
+    data?: unknown;
+    message?: string;
+  }) => {
     // 检查是否返回了task_id（新的异步模式）
     const respData = response.data as unknown as Record<string, unknown>;
     if (response.success && respData && typeof respData.task_id === "string") {

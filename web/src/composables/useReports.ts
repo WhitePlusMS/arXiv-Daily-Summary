@@ -6,7 +6,7 @@ import type { ReportItem } from "@/types";
 
 export function useReports() {
   const store = useArxivStore();
-  const { recentReports, isLoading } = storeToRefs(store);
+  const { recentReports } = storeToRefs(store);
 
   // 历史报告筛选
   const selectedReportFilter = ref("");

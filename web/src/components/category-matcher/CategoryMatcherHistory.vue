@@ -207,8 +207,8 @@
 import { defineProps, defineEmits } from "vue";
 
 interface Stats {
-  total_records: number;
-  unique_users: number;
+  total_records?: number;
+  unique_users?: number;
 }
 interface TokenUsage {
   input_tokens: number;
@@ -217,15 +217,18 @@ interface TokenUsage {
 }
 interface Profile {
   username: string;
-  [key: string]: any;
+  category_id?: string;
+  user_input?: string;
+  negative_query?: string;
+  [key: string]: unknown;
 }
 
-const props = defineProps<{
+defineProps<{
   stats: Stats | null;
   managementCollapsed: boolean;
   searchTerm: string;
   selectedIndices: Set<number>;
-  editModes: Record<number, boolean>;
+  editModes: Set<number>;
   editDrafts: Record<number, Profile>;
   filteredProfiles: Profile[];
   isLoading: boolean;
