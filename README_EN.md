@@ -1,215 +1,258 @@
-<h1 align="center">arXiv Daily Article Summary</h1>
+<div align="center">
+  <h1>arXiv Daily Article Summary</h1>
+  <p>
+    <img src="https://img.shields.io/badge/Python-3.10%2B-blue?logo=python" alt="Python Version">
+    <img src="https://img.shields.io/badge/FastAPI-0.100%2B-green?logo=fastapi" alt="FastAPI">
+    <img src="https://img.shields.io/badge/Vue.js-3.5%2B-green?logo=vue.js" alt="Vue.js">
+    <img src="https://img.shields.io/badge/License-Apache--2.0-blue" alt="License">
+    <a href="https://deepwiki.com/WhitePlusMS/arXiv-Daily-Summary"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
+  </p>
+  <p>
+    <a href="./README.md">中文</a> | <a href="./README_EN.md">English</a>
+  </p>
+</div>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.10%2B-blue?logo=python" alt="Python Version">
-  <img src="https://img.shields.io/badge/FastAPI-0.100%2B-green?logo=fastapi" alt="FastAPI">
-  <img src="https://img.shields.io/badge/Vue.js-3.5%2B-green?logo=vue.js" alt="Vue.js">
-  <img src="https://img.shields.io/badge/License-Apache--2.0-blue" alt="License">
-  <a href="https://deepwiki.com/WhitePlusMS/arXiv-Daily-Summary"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
-</p>
-
-<p align="center">
-  An intelligent arXiv paper summarization tool that automatically filters, summarizes, and recommends the latest papers matching your research interests daily.
-</p>
-
-<p align="center">
-  <a href="./README.md">🇨🇳 中文</a> | <a href="./README_EN.md">🇺🇸 English</a>
-</p>
+> 🎯 **Project Introduction**
+>
+> **An intelligent arXiv paper summary tool that automatically filters, summarizes, and recommends the latest papers tailored to your research interests daily.**
+>
+> **Core Highlights:**
+> *   **Personalized Matching**: Precise paper filtering based on your research interests and keywords.
+> *   **AI Deep Analysis**: Paper abstracts and core insights extraction powered by the Qwen model.
+> *   **Multi-dimensional Evaluation**: Comprehensive scoring based on relevance, innovation, and practicality.
+> *   **All-platform Support**: Modern Web interface + Daily email delivery.
 
 ---
 
 ## 📚 Table of Contents
 
-- [🏗️ System Architecture](#️-system-architecture) - Understand the project's technical architecture
-- [✨ Core Features](#-core-features) - Understand the core problems this project solves
-- [⚡ Quick Start](#-quick-start) - One-click startup for quick experience
-- [💻 Interface Preview](#-interface-preview) - View system interface screenshots
-- [⚙️ Usage Guide](#️-usage-guide) - Detailed operation instructions
+- [💻 Interface Preview](#-interface-preview) - View system screenshots
+- [🏗️ System Architecture](#️-system-architecture) - Understand technical architecture
+- [✨ Core Features](#-core-features) - Understand core problems solved
+- [⚡ Quick Start](#-quick-start) - One-click start, quick experience
+- [⚙️ Usage Guide](#️-usage-guide) - Detailed operation guide
 - [🔧 Troubleshooting](#-troubleshooting) - Common issues and solutions
-- [🤝 Contributing & Support](#-contributing--support) - How to participate in the project
+- [🤝 Contribution & Support](#-contribution--support) - How to participate
+
+---
+
+## 💻 Interface Preview
+
+|       **Main Interface - Paper Recommendation & Summary**       |               **Category Matcher - Configure Interests**                |
+| :-------------------------------------------------------------: | :---------------------------------------------------------------------: |
+| <img src="assets/主界面.png" width="100%" alt="Main Interface"> | <img src="assets/分类匹配界面.png" width="100%" alt="Category Matcher"> |
+
+|                 **Environment Config - System Settings**                  |               **Appendix Interface - Category Browser**               |
+| :-----------------------------------------------------------------------: | :-------------------------------------------------------------------: |
+| <img src="assets/环境配置界面.png" width="100%" alt="Environment Config"> | <img src="assets/附录界面.png" width="100%" alt="Appendix Interface"> |
+
+**Report Generation Effect:**
+
+|                                                                              **Markdown Report**                                                                              |                                                                          **HTML Online Report**                                                                           |
+| :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| <a href="./arxiv_history/2025-08-23_ARXIV_summary.md"><img src="https://img.shields.io/badge/Read-Markdown-blue?style=for-the-badge&logo=markdown" alt="Markdown Report"></a> | <a href="./arxiv_history/2025-08-23_ARXIV_summary.html"><img src="https://img.shields.io/badge/Preview-HTML-orange?style=for-the-badge&logo=html5" alt="HTML Report"></a> |
 
 ---
 
 ## 🏗️ System Architecture
 
-### Tech Stack
+### 🛠️ Tech Stack
 
-- **Backend**: FastAPI + Python 3.10+
-- **Frontend**: Vue 3 + TypeScript + Vite
-- **AI Model**: Qwen (DashScope API)
-- **Data Storage**: JSON files + local file system
-- **Deployment**: Supports local development and production deployment
+| Module         | Technology Stack              | Description                                      |
+| :------------- | :---------------------------- | :----------------------------------------------- |
+| **Backend**    | **FastAPI** + Python 3.10+    | High-performance asynchronous API service        |
+| **Frontend**   | **Vue 3** + TypeScript + Vite | Modern reactive Web interface                    |
+| **AI Model**   | **Qwen** (DashScope API)      | Powerful long-text understanding & summarization |
+| **Storage**    | JSON Files + Local FS         | Lightweight local storage, no DB config needed   |
+| **Deployment** | Docker / Local                | Supports local dev and production deployment     |
 
-### Architecture Design
+### 📐 Architecture Design
+
+```mermaid
+graph LR
+    User[User] --> Web[Vue3 Frontend]
+    Web <--> API[FastAPI Backend]
+    API <--> Core[Core Service Layer]
+    
+    subgraph CoreServices [Core Services]
+        Fetcher[ArXiv Fetcher]
+        Matcher[Intelligent Matcher]
+        LLM[LLM Analysis Service]
+        Reporter[Report Generator]
+    end
+    
+    Core --> Fetcher
+    Core --> Matcher
+    Core --> LLM
+    Core --> Reporter
+    
+    Fetcher -- Fetch Papers --> ArXiv[ArXiv API]
+    LLM -- Intelligent Analysis --> DashScope[Qwen API]
+    Matcher -- Semantic Matching --> DashScope
+    Reporter -- Generate Report --> FileSys[Local File System]
+```
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Vue3 Frontend │    │  FastAPI Backend │    │  Core Services │
+│  Vue3 Frontend  │    │ FastAPI Backend │    │  Core Services  │
 │                 │    │                 │    │                 │
-│ • User Interface│◄──►│ • RESTful API   │◄──►│ • Paper Fetch   │
-│ • State Mgmt    │    │ • Data Validation│    │ • Smart Match   │
+│ • User Interface│◄──►│ • RESTful API   │◄──►│ • Paper Fetching│
+│ • State Mgmt    │    │ • Data Valid    │    │ • Intel Matching│
 │ • Route Mgmt    │    │ • Business Logic│    │ • AI Analysis   │
 │ • Components    │    │ • Async Process │    │ • Report Gen    │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-### Module Organization
+### 📂 Module Organization
 
-- **`fastapi_services/`**: FastAPI backend services
-  - `fastapi_app.py`: Main application entry and API routes
+- **`fastapi_services/`**: FastAPI Backend Services
+  - `fastapi_app.py`: Main app entry and API routes
   - `models.py`: Data model definitions
   - `service_container.py`: Dependency injection container
   - Various business service modules
 
-- **`web/`**: Vue3 frontend application
+- **`web/`**: Vue3 Frontend Application
   - Built with Vite
   - TypeScript support
   - Component-based development
 
-- **`core/`**: Core business logic
+- **`core/`**: Core Business Logic
   - `arxiv_fetcher.py`: ArXiv paper fetcher
-  - `recommendation_engine.py`: Recommendation engine (paper filtering, scoring, analysis)
-  - `category_matcher.py`: Category matcher (matches research interests with ArXiv categories)
-  - `llm_provider.py`: LLM model provider (supports Qwen, OpenAI-compatible interfaces)
+  - `recommendation_engine.py`: Recommendation engine (filter, score, analyze)
+  - `category_matcher.py`: Category matcher (interests to ArXiv categories)
+  - `llm_provider.py`: LLM provider (supports Qwen, OpenAI compatible interfaces)
   - `pdf_text_extractor.py`: PDF text extractor
-  - `prompt_manager.py`: Prompt manager (unified management of AI prompt templates)
+  - `prompt_manager.py`: Prompt manager (unified AI prompt templates)
   - `output_manager.py`: Output manager (report generation, email sending)
   - `email_sender.py`: Email sender (supports SMTP/SSL/TLS)
-  - `template_renderer.py`: Template renderer (Jinja2 template engine)
+  - `template_renderer.py`: Template renderer (Jinja2 engine)
 
-- **`config/`**: Configuration directory
+- **`config/`**: Configuration Directory
   - `prompts.default.json`: Default prompt templates
-  - `prompts.json`: User custom prompts (overrides default values)
+  - `prompts.json`: User custom prompts (overrides defaults)
   - `arxiv_categories.json`: ArXiv category definitions
   - `templates/`: Jinja2 report templates
 
+---
+
 ## ✨ Core Features
 
-### Intelligent Recommendation Engine
+### 🧠 Intelligent Recommendation Engine
 
-- **Personalized Matching**: Precise paper filtering based on your research interests and keywords
-- **AI Deep Analysis**: Paper abstracts and key insights extraction powered by Qwen models
-- **Multi-dimensional Evaluation**: Comprehensive scoring from relevance, innovation, and practicality perspectives
+- **Personalized Matching**: Precise paper filtering based on your research interests and keywords.
+- **AI Deep Analysis**: Paper abstracts and core insights extraction powered by the Qwen model.
+- **Multi-dimensional Evaluation**: Comprehensive scoring based on relevance, innovation, and practicality.
 
-### Modern Web Interface
+### 🎨 Modern Web Interface
 
-- **Responsive Design**: Modern user interface based on Vue3
-- **Real-time Interaction**: High-performance API support provided by FastAPI
-- **Component-based Development**: Reusable UI components and clear code structure
+- **Responsive Design**: Modern UI based on Vue3.
+- **Real-time Interaction**: High-performance API support via FastAPI.
+- **Component-based**: Reusable UI components and clear code structure.
 
-### Diverse Output
+### 📤 Diverse Outputs
 
-- **Real-time Recommendations**: View recommendation results in real-time through web interface
-- **Historical Archive**: Automatically save daily recommendation records to `arxiv_history` directory
-- **Rich Formats**: Support multiple output formats including Markdown, HTML, etc.
+- **Real-time Recommendation**: View results instantly on the Web interface.
+- **History Archive**: Automatically save daily records to `arxiv_history` directory.
+- **Rich Formats**: Supports Markdown, HTML, and other output formats.
 
-### Intelligent Prompt Management
+### 📝 Intelligent Prompt Management
 
-- **Template-based Design**: All AI prompts use template-based design with variable substitution support
-- **Flexible Customization**: Customize prompts in web interface or configuration files, overriding default values
-- **Version Management**: Separate management of default prompts and user custom prompts, with one-click reset support
+- **Template Design**: All AI prompts use template design, supporting variable substitution.
+- **Flexible Customization**: Customize prompts in Web UI or config files to override defaults.
+- **Version Management**: Separate management for default and user prompts, supports one-click reset.
 
-### Dual Model Strategy
+### 🤖 Dual Model Strategy
 
-- **Heavy Model**: Used for detailed analysis and deep understanding, such as `qwen-plus`
-- **Light Model**: Used for quick filtering and preliminary evaluation, such as `qwen-turbo`
-- **Smart Scheduling**: System automatically selects appropriate model based on task complexity, balancing speed and quality
+- **Heavy Model**: For detailed analysis and deep understanding, e.g., `qwen-plus`.
+- **Light Model**: For rapid screening and preliminary evaluation, e.g., `qwen-turbo`.
+- **Smart Scheduling**: Automatically selects the appropriate model based on task complexity to balance speed and quality.
 
-### Progress Tracking & Real-time Feedback
+### 📊 Progress Tracking & Real-time Feedback
 
-- **Task Progress**: Support real-time progress tracking for long-running tasks
-- **WebSocket Support**: Frontend can get real-time backend task execution status
-- **Detailed Logging**: Complete runtime log records for easy troubleshooting
+- **Task Progress**: Real-time tracking for long-running tasks.
+- **WebSocket Support**: Frontend can get real-time backend task status.
+- **Detailed Logs**: Complete run logs for easy troubleshooting.
 
-### Report Generation Results
-
-<p align="left">
-  <a href="./arxiv_history/2025-08-23_ARXIV_summary.md">
-    <img src="https://img.shields.io/badge/Read%20Report-Markdown-blue?style=for-the-badge&logo=markdown" alt="Markdown Report">
-  </a>
-  <a href="./arxiv_history/2025-08-23_ARXIV_summary.html">
-    <img src="https://img.shields.io/badge/Online%20Preview-HTML-orange?style=for-the-badge&logo=html5" alt="HTML Report">
-  </a>
-</p>
+---
 
 ## ⚡ Quick Start
 
-### Environment Requirements
+### Requirements
 
 - **Python**: 3.10 or higher
 - **Node.js**: 20.19.0 or higher
 - **Package Managers**: Recommended to use uv (Python) and npm (Node.js)
 
-### One-click Startup (Recommended)
+### 🚀 One-click Start (Recommended)
 
 ```bash
-# 1. Clone the project locally
+# 1. Clone project locally
 git clone https://github.com/WhitePlusMS/arXiv-Daily-Summary.git
 
 # 2. Enter project directory
 cd arXiv-Daily-Summary
 
-# 3. Recommended to use uv for dependency installation (if not installed yet)
+# 3. Recommend using uv to install dependencies (if not installed)
 pip install uv
 
-# 4. Create virtual environment using uv
+# 4. Create virtual environment with uv
 uv venv
 
 # 5. Activate virtual environment (Windows)
 .venv\Scripts\activate
 
-# 6. Install project dependencies using uv (with uv environment activated)
+# 6. Install project dependencies with uv (while venv is active)
 pip install -r requirements.txt
 
-# 7. Copy environment variable configuration file
+# 7. Copy environment configuration file
 copy .env.example .env
 
-# 8. Edit .env file and fill in your API key (Important!)
+# 8. Edit .env file, fill in your API Key (Important!)
 #    Please manually open .env file and fill in DASHSCOPE_API_KEY
-#    You can get API key from Qwen: https://console.aliyun.com/dashscope
+#    You can get API Key from DashScope: https://console.aliyun.com/dashscope
 
-# 9. Start FastAPI + Vue3 application!
+# 9. Start FastAPI + Vue3 Application!
 python start_fastapi.py
 
-# 10. Access application
-#     Frontend: http://localhost:5173
-#     Backend API: http://localhost:8000
-#     API Documentation: http://localhost:8000/docs
+# 10. Access Application
+#    Frontend: http://localhost:5173
+#    Backend API: http://localhost:8000
+#    API Docs: http://localhost:8000/docs
 
 # enjoy it!
 ```
 
-### Docker One-Click Deployment (Recommended for Production)
+### 🐳 Docker Deployment (Recommended for Production)
 
-Using Docker Compose allows you to quickly deploy the entire system without manual environment configuration:
+Use Docker Compose to quickly deploy the entire system without manual environment configuration:
 
 ```bash
-# 1. Clone the project locally
+# 1. Clone project locally
 git clone https://github.com/WhitePlusMS/arXiv-Daily-Summary.git
 cd arXiv-Daily-Summary
 
 # 2. Enter docker directory
 cd docker
 
-# 3. Start services (first startup will pull images from Docker Hub)
+# 3. Start services (First time will pull images from Docker Hub)
 docker compose up -d
 
 # 4. Check service status
 docker compose ps
 
-# 5. Access application
+# 5. Access Application
 #    Frontend: http://localhost:5173
 #    Backend API: http://localhost:8000
-#    API Documentation: http://localhost:8000/docs
+#    API Docs: http://localhost:8000/docs
 ```
 
 **Configure API Key:**
 
-1. After first startup, the system will automatically create `.env` file from `.env.example`
-2. Access frontend interface: http://localhost:5173
-3. Click "Environment Configuration" in the left navigation bar
-4. In the "🤖 Model & API Configuration" section, fill in your `DASHSCOPE_API_KEY`
-5. Click the "💾 Save Configuration" button
+1. After first start, the system automatically creates `.env` from `.env.example`.
+2. Access Frontend: http://localhost:5173
+3. Click "Environment Config" in the left sidebar.
+4. In "🤖 Model & API Config" group, fill in your `DASHSCOPE_API_KEY`.
+5. Click "💾 Save Config" button.
 
 **Stop Services:**
 
@@ -217,199 +260,135 @@ docker compose ps
 # Stop services
 docker compose down
 
-# Stop services and remove data volumes (use with caution)
+# Stop services and remove volumes (Use with caution)
 docker compose down -v
 ```
 
 **Data Persistence:**
 
-All data (including `.env` configuration, history records, user data, logs) is saved in Docker Volumes, so data will not be lost even if containers are deleted.
+All data (including `.env` config, history, user data, logs) are saved in Docker Volumes, so data is safe even if containers are removed.
 
 **Notes:**
 
-- First startup will pull images from Docker Hub, which may take a few minutes (depending on network speed)
-- Default ports: Frontend 5173, Backend 8000
-- Ensure configured ports are not occupied
-- After modifying ports, access addresses will change accordingly (e.g., http://localhost:8080)
+- First start pulls images from Docker Hub, which may take a few minutes.
+- Default ports: Frontend 5173, Backend 8000.
+- Ensure configured ports are not in use.
+- If ports are modified, access addresses change accordingly (e.g., http://localhost:8080).
 
-## 💻 Interface Preview
-
-**Main Interface - Paper Recommendation and Summary Generation**
-
-<img src="assets/主界面.png" alt="Main Interface" width="800">
-
-**Category Matcher Interface - Configure Research Interests**
-
-<img src="assets/分类匹配界面.png" alt="Category Matcher Interface" width="800">
-
-**Environment Configuration Interface - System Settings**
-
-<img src="assets/环境配置界面.png" alt="Environment Configuration Interface" width="800">
-
-**Appendix Interface - Category Browser**
-
-<img src="assets/附录界面.png" alt="Appendix Interface" width="800">
-
-### Workflow
-
-1. **Paper Retrieval**: Fetch latest papers from arXiv API for specified categories
-2. **Intelligent Filtering**: Relevance matching based on user interests
-3. **AI Analysis**: Generate paper summaries and scores using Qwen models
-4. **Result Display**: Show recommendation results in web interface
-5. **Historical Archive**: Automatically save recommendation records to local files
-
-### Model Parameter Configuration (Qwen/OpenAI Compatible)
-
-- **Location**: Edit the Qwen parameter section in the `.env` file in the project root directory.
-- **Supported Parameters**:
-  - Basic Sampling: `QWEN_MODEL_TEMPERATURE`, `QWEN_MODEL_TOP_P`, `QWEN_MODEL_MAX_TOKENS`
-  - Sampling Enhancement: `QWEN_MODEL_TOP_K`
-  - Repetition Penalty: `QWEN_MODEL_REPETITION_PENALTY`
-  - Random Seed: `QWEN_MODEL_SEED`
-  - Stop Words: `QWEN_MODEL_STOPS` (JSON array or separated by `||`)
-  - Tool Choice: `QWEN_MODEL_TOOL_CHOICE` (`auto`/`none`/`required`)
-  - Response Format: `QWEN_MODEL_RESPONSE_FORMAT` (`text`/`json_object`)
-  - Thinking Process: `QWEN_MODEL_ENABLE_THINKING` (Qwen3 exclusive)
-  - Probability Output: `QWEN_MODEL_LOGPROBS`, `QWEN_MODEL_TOP_LOGPROBS`
-  - Other Penalties: `QWEN_MODEL_PRESENCE_PENALTY`, `QWEN_MODEL_FREQUENCY_PENALTY`
-  - DashScope Features: `QWEN_MODEL_ENABLE_SEARCH`, `QWEN_MODEL_THINKING_BUDGET`, `QWEN_MODEL_INCREMENTAL_OUTPUT`
-
-Example (.env):
-
-```
-QWEN_MODEL=qwen-plus
-DASHSCOPE_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
-DASHSCOPE_API_KEY=YOUR_KEY
-QWEN_MODEL_TEMPERATURE=0.7
-QWEN_MODEL_TOP_P=0.9
-QWEN_MODEL_MAX_TOKENS=4000
-QWEN_MODEL_TOP_K=50
-QWEN_MODEL_REPETITION_PENALTY=1.05
-QWEN_MODEL_SEED=42
-QWEN_MODEL_STOPS=["END"]
-QWEN_MODEL_TOOL_CHOICE=auto
-QWEN_MODEL_RESPONSE_FORMAT=json_object
-QWEN_MODEL_ENABLE_THINKING=false
-QWEN_MODEL_LOGPROBS=false
-QWEN_MODEL_TOP_LOGPROBS=0
-```
-
-Notes:
-- Unfilled parameters will use reasonable defaults from code or remain disabled (None).
-- Light models (`QWEN_MODEL_LIGHT_*`) support the same parameter naming (listed in `.env.example`).
-- All extended parameters are called through OpenAI-compatible interface; DashScope-specific parameters are passed through `extra_body` for compatibility.
+---
 
 ## ⚙️ Usage Guide
 
-### 1. User Creation
+### 1. 👤 User Creation
 
-The core of "User Creation" is to establish a precise ArXiv category profile for each user through the **Category Matcher** interface. It allows users to describe their research interests in natural language, and the system automatically matches them with official ArXiv categories, saving the most relevant categories to the user's configuration.
+The core of "User Creation" is establishing a precise ArXiv category profile for each user via the **Category Matcher** interface. It allows users to describe their research interests in natural language, and the system automatically matches them with official ArXiv categories.
 
-**Operation Process:**
+**Operation Flow:**
 
-1. **Access Category Matcher**: Click "Category Matcher" in the left navigation bar.
+1. **Access Category Matcher**: Click "Category Matcher" in the left sidebar.
 2. **Input Information**:
-    - **Username**: Enter your username for unique identification and saving your matching results.
-    - **Research Content Description**: Describe your research directions, interest areas, keywords, etc. in detail in the text box. For example:
+    - **Username**: Enter a unique username to identify and save your matches.
+    - **Research Description**: Detail your research direction, interests, keywords, etc. Example:
 
         ```
-        I mainly focus on using Large Language Models (LLM) for Retrieval-Augmented Generation (RAG) technology, especially how to optimize their performance on multimodal data.
+        I focus on Retrieval-Augmented Generation (RAG) using Large Language Models (LLM), especially optimizing performance on multi-modal data.
         ```
 
-3. **Start Matching**: Click the "Start Matching" button.
-4. **Automatic Matching & Saving**:
-    - The system backend calls large language models to calculate semantic similarity between your natural language description and official ArXiv categories defined in `config/arxiv_categories.json`.
-    - The system returns a category list sorted by matching scores from high to low.
-    - These highest-scoring category results are automatically saved to the `data/users/user_categories.json` file, associated with your username, completing user profile creation.
+3. **Start Matching**: Click "Start Matching" button.
+4. **Auto Match & Save**:
+    - The backend calls the LLM to semantically compare your description with official ArXiv categories defined in `config/arxiv_categories.json`.
+    - Returns a list of categories sorted by match score.
+    - Top-scoring categories are automatically saved to `data/users/user_categories.json` associated with your username.
 
 **Data Management:**
 
-The bottom of the page provides comprehensive management functions for created user data:
+The bottom of the page offers full management of created user data:
+- **View & Search**: Browse all user records, search by username or content.
+- **Edit**: Modify user research descriptions and re-match.
+- **Delete**: Delete single or batch user records.
+- **Export**: Export user data as JSON.
 
-- **View & Search**: Browse all user matching records and search by username or research content.
-- **Edit**: Modify user research content descriptions and re-match.
-- **Delete**: Delete individual or batch user records.
-- **Export**: Support exporting user data as JSON files.
+### 2. 📰 Daily Paper Recommendation
 
-### 2. Daily Paper Recommendation
+After creating a user profile, the **ArXiv Daily Paper Recommendation System** on the main interface provides the core recommendation function. It automatically fetches, filters, and analyzes the latest relevant papers based on the selected user profile.
 
-After creating user profiles, the main interface **ArXiv Daily Paper Recommendation System** provides core paper recommendation functionality. It automatically pulls, filters, and analyzes the latest relevant papers from ArXiv based on selected user profiles.
+**Operation Flow:**
 
-**Operation Process:**
-
-1. **Select User Configuration**: In the top dropdown menu, select a user you created in the "Category Matcher".
-    - The system automatically loads the user's configuration, including their matched **category tags** and **research interests**.
-2. **Adjust Recommendation Parameters** (Optional):
-    - **Max Papers**: Maximum number of papers to fetch per category
-    - **Detailed Analysis Count**: Number of papers requiring detailed analysis
-    - **Brief Analysis Count**: Number of papers requiring brief analysis
-    - **Relevance Threshold**: Minimum threshold for paper relevance score (0-100)
-3. **Start Recommendation**: Click the "Start Paper Recommendation" button.
+1. **Select User Config**: In the top dropdown, select a user created in "Category Matcher".
+    - System loads the user's config, including **Category Tags** and **Research Interests**.
+2. **Adjust Parameters** (Optional):
+    - **Max Papers**: Max papers to fetch per category.
+    - **Detail Analysis**: Number of papers for detailed analysis.
+    - **Brief Analysis**: Number of papers for brief analysis.
+    - **Relevance Threshold**: Minimum relevance score (0-100).
+3. **Start Recommendation**: Click "Start Recommendation" button.
 4. **Monitor & View Results**:
-    - After system startup, **real-time running logs** are displayed below, clearly showing each step's execution status, such as "Fetching Papers", "Analyzing Papers", "Generating Reports", etc.
-    - After successful execution, recommendation results are displayed in tab format, including **Summary Content**, **Detailed Analysis**, and **Brief Analysis**.
-    - Meanwhile, the system generates complete `HTML` and `Markdown` format reports that you can preview directly on the webpage or download locally.
-    - Reports are automatically saved to the `arxiv_history` directory with filename format: `YYYY-MM-DD_username_ARXIV_summary.{html|md}`
+    - **Real-time Logs** appear below, showing steps like "Fetching Papers", "Analyzing Papers", "Generating Report".
+    - Upon success, results are shown in tabs: **Abstracts**, **Detailed Analysis**, **Brief Analysis**.
+    - Complete `HTML` and `Markdown` reports are generated for preview or download.
+    - Reports are saved to `arxiv_history` directory, named `YYYY-MM-DD_Username_ARXIV_summary.{html|md}`.
 
-### 3. Environment Configuration Management
+### 3. 🛠️ Environment Configuration
 
-The **Environment Configuration Interface** provides centralized management of system parameters, including:
+The **Environment Configuration Interface** provides centralized management of system parameters:
 
-**Model & API Configuration:**
-- Main model and light model selection
-- API key and base URL configuration
-- Model parameter tuning (temperature, top_p, max tokens, etc.)
+**Model & API Config:**
+- Main and Light model selection.
+- API Key and Base URL configuration.
+- Model parameter tuning (Temperature, top_p, max tokens).
 
-**ArXiv Configuration:**
-- ArXiv API base URL and retry strategy
-- Paper fetching quantity limits
-- Relevance filtering threshold
+**ArXiv Config:**
+- ArXiv API Base URL and retry strategy.
+- Paper fetch limits.
+- Relevance filter thresholds.
 
-**Email Configuration:**
-- Enable/disable email sending functionality
-- SMTP server configuration (supports SSL/TLS)
-- Sender and receiver settings
+**Email Config:**
+- Enable/Disable email sending.
+- SMTP server config (SSL/TLS supported).
+- Sender and Receiver settings.
 
-**Timezone & Logging Configuration:**
-- Timezone settings (affects time display in reports)
-- Log output level and file management
+**Timezone & Log Config:**
+- Timezone setting (affects report time).
+- Log level and file management.
 
 **Operation Instructions:**
-1. Click "Environment Configuration" in the left navigation bar
-2. Select the configuration group to modify
-3. Modify configuration values and click "Save Changes"
-4. Supports group reset and global reset functionality
+1. Click "Environment Config" in left sidebar.
+2. Select the config group to modify.
+3. Modify values and click "Save Changes".
+4. Supports group reset and global reset.
 
-### 4. Prompt Management
+### 4. ✍️ Prompt Management
 
-The system supports custom AI prompt templates, allowing you to adjust the style and depth of paper analysis as needed.
+The system supports custom AI prompt templates to adjust analysis style and depth.
 
 **Prompt Types:**
-- **Category Matching Prompt**: Used to match user research interests to ArXiv categories
-- **Relevance Evaluation Prompt**: Used to evaluate the relevance between papers and user interests
-- **Detailed Analysis Prompt**: Used to generate detailed analysis reports for papers
-- **Brief Analysis Prompt**: Used to generate brief analysis reports for papers
+- **Category Match Prompt**: Matches user interests to ArXiv categories.
+- **Relevance Eval Prompt**: Evaluates paper relevance to user interests.
+- **Detail Analysis Prompt**: Generates detailed paper analysis reports.
+- **Brief Analysis Prompt**: Generates brief paper analysis reports.
 
 **Operation Instructions:**
-1. Find the "Prompt Management" section in the "Environment Configuration" interface
-2. Select the prompt template to modify
-3. Edit prompt content (supports variable placeholders, such as `{description}`, `{paper_title}`, etc.)
-4. Click "Save" to apply changes
-5. Supports "Reset to Default" functionality to restore default prompts with one click
+1. Find "Prompt Management" in "Environment Config".
+2. Select prompt template to modify.
+3. Edit content (supports variable placeholders like `{description}`, `{paper_title}`).
+4. Click "Save" to apply.
+5. "Reset to Default" supported.
 
-**Prompt Variable Description:**
+**Prompt Variables:**
 - `{description}`: User research interest description
 - `{paper_title}`: Paper title
 - `{paper_abstract}`: Paper abstract
-- `{paper_authors}`: Paper author list
-- `{paper_categories}`: Paper category tags
-- More variables please refer to comments in prompt templates
+- `{paper_authors}`: Paper authors
+- `{paper_categories}`: Paper categories
+- See prompt template comments for more.
+
+---
 
 ## 🔧 Troubleshooting
 
 ### Common Issues
 
-**1. Startup Failure: Virtual Environment Not Activated**
+**1. Start Failed: Virtual Environment Not Activated**
 
 ```
 Error: VIRTUAL_ENV environment variable not set!
@@ -418,34 +397,34 @@ Windows: .venv\Scripts\activate
 Linux/Mac: source .venv/bin/activate
 ```
 
-**2. API Call Failure: 401 or 403 Error**
+**2. API Call Failed: 401 or 403 Error**
 
 ```
-Error: API authentication failed
+Error: API Authentication Failed
 Solution:
-1. Check if DASHSCOPE_API_KEY in .env file is correct
-2. Confirm if API key is valid and not expired
-3. Check if the account corresponding to API key has sufficient balance
+1. Check if DASHSCOPE_API_KEY in .env is correct
+2. Confirm API Key is valid and not expired
+3. Check if account has sufficient balance
 ```
 
 **3. Frontend Cannot Connect to Backend**
 
 ```
-Error: CORS error or connection failure
+Error: CORS Error or Connection Failed
 Solution:
-1. Confirm backend service is started (http://localhost:8000)
-2. Check if frontend port matches backend CORS configuration
-3. Check browser console error messages
+1. Confirm backend service is running (http://localhost:8000)
+2. Check if frontend port matches backend CORS config
+3. Check browser console for errors
 ```
 
-**4. Paper Fetching Failure: Network Timeout**
+**4. Paper Fetch Failed: Network Timeout**
 
 ```
-Error: ArXiv API request timeout
+Error: ArXiv API Request Timeout
 Solution:
 1. Check network connection
-2. Increase ARXIV_RETRIES (retry count) in environment configuration
-3. Increase ARXIV_DELAY (request interval to avoid excessive frequency)
+2. Increase ARXIV_RETRIES in config
+3. Increase ARXIV_DELAY (request interval)
 ```
 
 **5. Prompt Template Error**
@@ -453,15 +432,15 @@ Solution:
 ```
 Error: Template variable missing or format error
 Solution:
-1. Check if variable names in prompts are correct
-2. Confirm variable placeholder format is {variable_name}
-3. Check detailed error messages in logs
+1. Check if variable names in prompt are correct
+2. Confirm placeholder format is {variable_name}
+3. Check logs for detailed error info
 4. Try resetting to default prompts
 ```
 
-### Log Viewing
+### View Logs
 
-System logs are saved in the `logs/` directory:
+System logs are saved in `logs/` directory:
 
 ```bash
 # View latest logs
@@ -471,46 +450,48 @@ tail -f logs/fastapi.log
 grep ERROR logs/fastapi.log
 ```
 
-## 🤝 Contributing & Support
+---
 
-**Contributing Code**
+## 🤝 Contribution & Support
+
+**Contribute Code**
 
 ```bash
-# 1. Fork this project
-Click the "Fork" button on the GitHub page to copy the project to your account
+# 1. Fork Project
+Click "Fork" button on GitHub page
 
 # 2. Clone locally
 git clone https://github.com/YOUR_USERNAME/arXiv-Daily-Summary.git
 cd arXiv-Daily-Summary
 
-# 3. Create feature branch
+# 3. Create Feature Branch
 git checkout -b feature/your-feature
 
-# 4. Develop and commit changes
+# 4. Commit Changes
 git add .
-git commit -m "feat: add new feature description"
+git commit -m "feat: Add new feature description"
 
-# 5. Push to remote
+# 5. Push to Remote
 git push origin feature/your-feature
 
 # 6. Create Pull Request
-Create PR on GitHub page with detailed description of your changes
+Create PR on GitHub, describing your changes
 ```
 
-**Issue Feedback**
+**Feedback**
 
-- Found a Bug? Please submit an [Issue](https://github.com/your-repo/issues)
-- Have new ideas? Welcome discussions and suggestions
-- Find it useful? Please give the project a Star
+- Found a Bug? Submit an [Issue](https://github.com/your-repo/issues)
+- Have an idea? Discussions and suggestions welcome
+- Find it useful? Please Star the project
 
 ## 📄 License
 
 This project is licensed under the [Apache 2.0 License](LICENSE)
 
-## 🙏 Acknowledgments
+## 🙏 Acknowledgements
 
-- Thanks to the authors of [arxiv Python package](https://pypi.org/project/arxiv/) for providing very convenient paper download functionality.
-- This project is inspired by the following excellent open source projects, thanks to their authors:
+- Thanks to the author of [arxiv Python package](https://pypi.org/project/arxiv/) for convenient paper downloading.
+- Inspired by these excellent open source projects:
   - [TideDra/zotero-arxiv-daily](https://github.com/TideDra/zotero-arxiv-daily)
   - [Vincentqyw/cv-arxiv-daily](https://github.com/Vincentqyw/cv-arxiv-daily)
   - [AutoLLM/ArxivDigest](https://github.com/AutoLLM/ArxivDigest)

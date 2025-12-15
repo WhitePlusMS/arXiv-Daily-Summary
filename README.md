@@ -1,46 +1,96 @@
-<h1 align="center">arXiv Daily Article Summary</h1>
+<div align="center">
+  <h1>arXiv Daily Article Summary</h1>
+  <p>
+    <img src="https://img.shields.io/badge/Python-3.10%2B-blue?logo=python" alt="Python Version">
+    <img src="https://img.shields.io/badge/FastAPI-0.100%2B-green?logo=fastapi" alt="FastAPI">
+    <img src="https://img.shields.io/badge/Vue.js-3.5%2B-green?logo=vue.js" alt="Vue.js">
+    <img src="https://img.shields.io/badge/License-Apache--2.0-blue" alt="License">
+    <a href="https://deepwiki.com/WhitePlusMS/arXiv-Daily-Summary"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
+  </p>
+  <p>
+    <a href="./README.md">中文</a> | <a href="./README_EN.md">English</a>
+  </p>
+</div>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.10%2B-blue?logo=python" alt="Python Version">
-  <img src="https://img.shields.io/badge/FastAPI-0.100%2B-green?logo=fastapi" alt="FastAPI">
-  <img src="https://img.shields.io/badge/Vue.js-3.5%2B-green?logo=vue.js" alt="Vue.js">
-  <img src="https://img.shields.io/badge/License-Apache--2.0-blue" alt="License">
-  <a href="https://deepwiki.com/WhitePlusMS/arXiv-Daily-Summary"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
-</p>
-
-<p align="center">
-  一个智能的 arXiv 论文总结工具，每日自动为您筛选、总结和推荐符合您研究兴趣的最新论文。
-</p>
-
-<p align="center">
-  <a href="./README.md">中文</a> | <a href="./README_EN.md">English</a>
-</p>
+> 🎯 **项目简介**
+>
+> **一个智能的 arXiv 论文总结工具，每日自动为您筛选、总结和推荐符合您研究兴趣的最新论文。**
+>
+> **核心亮点：**
+> *   **个性化匹配**：基于您的研究兴趣和关键词进行精准论文筛选。
+> *   **AI 深度分析**：通义千问模型驱动的论文摘要和核心观点提取。
+> *   **多维度评估**：从相关性、创新性、实用性等角度综合评分。
+> *   **全平台支持**：现代化的 Web 界面 + 每日邮件推送。
 
 ---
 
 ## 📚 目录导航
 
+- [💻 界面预览](#-界面预览) - 查看系统界面截图
 - [🏗️ 系统架构](#️-系统架构) - 了解项目技术架构
 - [✨ 核心功能](#-核心功能) - 了解项目解决的核心问题
 - [⚡ 快速开始](#-快速开始) - 一键启动，快速体验
-- [💻 界面预览](#-界面预览) - 查看系统界面截图
 - [⚙️ 使用方法](#️-使用方法) - 详细操作指南
 - [🔧 故障排查](#-故障排查) - 常见问题与解决方案
 - [🤝 贡献与支持](#-贡献与支持) - 如何参与项目
 
 ---
 
+## 💻 界面预览
+
+|             **主界面 - 论文推荐和摘要生成**             |                   **分类匹配界面 - 配置研究兴趣**                   |
+| :-----------------------------------------------------: | :-----------------------------------------------------------------: |
+| <img src="assets/主界面.png" width="100%" alt="主界面"> | <img src="assets/分类匹配界面.png" width="100%" alt="分类匹配界面"> |
+
+|                     **环境配置界面 - 系统设置**                     |                  **附录界面 - 分类浏览器**                  |
+| :-----------------------------------------------------------------: | :---------------------------------------------------------: |
+| <img src="assets/环境配置界面.png" width="100%" alt="环境配置界面"> | <img src="assets/附录界面.png" width="100%" alt="附录界面"> |
+
+**报告生成效果：**
+
+|                                                                                 **Markdown 报告**                                                                                 |                                                                             **HTML 在线报告**                                                                              |
+| :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| <a href="./arxiv_history/2025-08-23_ARXIV_summary.md"><img src="https://img.shields.io/badge/阅读报告-Markdown-blue?style=for-the-badge&logo=markdown" alt="Markdown Report"></a> | <a href="./arxiv_history/2025-08-23_ARXIV_summary.html"><img src="https://img.shields.io/badge/在线预览-HTML-orange?style=for-the-badge&logo=html5" alt="HTML Report"></a> |
+
+---
+
 ## 🏗️ 系统架构
 
-### 技术栈
+### 🛠️ 技术栈
 
-- **后端**: FastAPI + Python 3.10+
-- **前端**: Vue 3 + TypeScript + Vite
-- **AI 模型**: 通义千问 (DashScope API)
-- **数据存储**: JSON 文件 + 本地文件系统
-- **部署**: 支持本地开发和生产部署
+| 模块         | 技术选型                      | 说明                           |
+| :----------- | :---------------------------- | :----------------------------- |
+| **后端**     | **FastAPI** + Python 3.10+    | 高性能异步 API 服务            |
+| **前端**     | **Vue 3** + TypeScript + Vite | 现代化响应式 Web 界面          |
+| **AI 模型**  | **通义千问** (DashScope API)  | 强大的长文本理解与总结能力     |
+| **数据存储** | JSON 文件 + 本地文件系统      | 轻量级本地存储，无需配置数据库 |
+| **部署**     | Docker / Local                | 支持本地开发和生产部署         |
 
-### 架构设计
+### 📐 架构设计
+
+```mermaid
+graph LR
+    User[用户] --> Web[Vue3 前端]
+    Web <--> API[FastAPI 后端]
+    API <--> Core[核心服务层]
+    
+    subgraph CoreServices [核心服务]
+        Fetcher[ArXiv 获取器]
+        Matcher[智能匹配引擎]
+        LLM[LLM 分析服务]
+        Reporter[报告生成器]
+    end
+    
+    Core --> Fetcher
+    Core --> Matcher
+    Core --> LLM
+    Core --> Reporter
+    
+    Fetcher -- 获取论文 --> ArXiv[ArXiv API]
+    LLM -- 智能分析 --> DashScope[通义千问 API]
+    Matcher -- 语义匹配 --> DashScope
+    Reporter -- 生成报告 --> FileSys[本地文件系统]
+```
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -53,7 +103,7 @@
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-### 模块组织
+### 📂 模块组织
 
 - **`fastapi_services/`**: FastAPI 后端服务
   - `fastapi_app.py`: 主应用入口和 API 路由
@@ -83,54 +133,47 @@
   - `arxiv_categories.json`: ArXiv 分类定义
   - `templates/`: Jinja2 报告模板
 
+---
+
 ## ✨ 核心功能
 
-### 智能推荐引擎
+### 🧠 智能推荐引擎
 
 - **个性化匹配**：基于您的研究兴趣和关键词进行精准论文筛选
 - **AI 深度分析**：通义千问模型驱动的论文摘要和核心观点提取
 - **多维度评估**：从相关性、创新性、实用性等角度综合评分
 
-### 现代化 Web 界面
+### 🎨 现代化 Web 界面
 
 - **响应式设计**：基于 Vue3 的现代化用户界面
 - **实时交互**：FastAPI 提供的高性能 API 支持
 - **组件化开发**：可复用的 UI 组件和清晰的代码结构
 
-### 多样化输出
+### 📤 多样化输出
 
 - **实时推荐**：Web 界面实时查看推荐结果
 - **历史存档**：自动保存每日推荐记录到 `arxiv_history` 目录
 - **格式丰富**：支持 Markdown、HTML 等多种输出格式
 
-### 智能提示词管理
+### 📝 智能提示词管理
 
 - **模板化设计**：所有 AI 提示词采用模板化设计，支持变量替换
 - **灵活定制**：可在 Web 界面或配置文件中自定义提示词，覆盖默认值
 - **版本管理**：默认提示词与用户自定义提示词分离管理，支持一键重置
 
-### 双模型策略
+### 🤖 双模型策略
 
 - **主模型（Heavy Model）**：用于详细分析和深度理解，如 `qwen-plus`
 - **轻量模型（Light Model）**：用于快速筛选和初步评估，如 `qwen-turbo`
 - **智能调度**：系统根据任务复杂度自动选择合适的模型，平衡速度与质量
 
-### 进度追踪与实时反馈
+### 📊 进度追踪与实时反馈
 
 - **任务进度**：支持长时间运行任务的实时进度追踪
 - **WebSocket 支持**：前端可实时获取后端任务执行状态
 - **详细日志**：完整的运行日志记录，便于问题排查
 
-### 报告生成效果
-
-<p align="left">
-  <a href="./arxiv_history/2025-08-23_ARXIV_summary.md">
-    <img src="https://img.shields.io/badge/阅读报告-Markdown-blue?style=for-the-badge&logo=markdown" alt="Markdown Report">
-  </a>
-  <a href="./arxiv_history/2025-08-23_ARXIV_summary.html">
-    <img src="https://img.shields.io/badge/在线预览-HTML-orange?style=for-the-badge&logo=html5" alt="HTML Report">
-  </a>
-</p>
+---
 
 ## ⚡ 快速开始
 
@@ -140,7 +183,7 @@
 - **Node.js**: 20.19.0 或更高版本
 - **包管理器**: 推荐使用 uv (Python) 和 npm (Node.js)
 
-### 一键启动 (推荐)
+### 🚀 一键启动 (推荐)
 
 ```bash
 # 1. 克隆项目到本地
@@ -179,7 +222,7 @@ python start_fastapi.py
 # enjoy it!
 ```
 
-### Docker 一键部署（推荐生产环境）
+### 🐳 Docker 一键部署（推荐生产环境）
 
 使用 Docker Compose 可以快速部署整个系统，无需手动配置环境：
 
@@ -232,76 +275,11 @@ docker compose down -v
 - 确保配置的端口未被占用
 - 修改端口后，访问地址会相应变化（例如：http://localhost:8080）
 
-## 💻 界面预览
-
-**主界面 - 论文推荐和摘要生成**
-
-<img src="assets/主界面.png" alt="主界面" width="800">
-
-**分类匹配界面 - 配置研究兴趣**
-
-<img src="assets/分类匹配界面.png" alt="分类匹配界面" width="800">
-
-**环境配置界面 - 系统设置**
-
-<img src="assets/环境配置界面.png" alt="环境配置界面" width="800">
-
-**附录界面 - 分类浏览器**
-
-<img src="assets/附录界面.png" alt="附录界面" width="800">
-
-### 工作流程
-
-1. **论文获取**：从 arXiv API 获取指定分类的最新论文
-2. **智能筛选**：基于用户兴趣进行相关性匹配
-3. **AI 分析**：使用通义千问模型生成论文摘要和评分
-4. **结果展示**：在 Web 界面展示推荐结果
-5. **历史存档**：自动保存推荐记录到本地文件
-
-### 模型参数配置（Qwen/OpenAI 兼容）
-
-- 位置：编辑项目根目录下的 `.env` 文件中的 Qwen 参数段。
-- 支持参数：
-  - 基本采样：`QWEN_MODEL_TEMPERATURE`, `QWEN_MODEL_TOP_P`, `QWEN_MODEL_MAX_TOKENS`
-  - 采样增强：`QWEN_MODEL_TOP_K`
-  - 重复惩罚：`QWEN_MODEL_REPETITION_PENALTY`
-  - 随机种子：`QWEN_MODEL_SEED`
-  - 停止词：`QWEN_MODEL_STOPS`（JSON 数组或用 `||` 分隔）
-  - 工具调用：`QWEN_MODEL_TOOL_CHOICE`（`auto`/`none`/`required`）
-  - 响应格式：`QWEN_MODEL_RESPONSE_FORMAT`（`text`/`json_object`）
-  - 思考过程：`QWEN_MODEL_ENABLE_THINKING`（Qwen3 专属）
-  - 概率输出：`QWEN_MODEL_LOGPROBS`, `QWEN_MODEL_TOP_LOGPROBS`
-  - 其他罚则：`QWEN_MODEL_PRESENCE_PENALTY`, `QWEN_MODEL_FREQUENCY_PENALTY`
-  - DashScope 特性：`QWEN_MODEL_ENABLE_SEARCH`, `QWEN_MODEL_THINKING_BUDGET`, `QWEN_MODEL_INCREMENTAL_OUTPUT`
-
-示例（.env）：
-
-```
-QWEN_MODEL=qwen-plus
-DASHSCOPE_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
-DASHSCOPE_API_KEY=YOUR_KEY
-QWEN_MODEL_TEMPERATURE=0.7
-QWEN_MODEL_TOP_P=0.9
-QWEN_MODEL_MAX_TOKENS=4000
-QWEN_MODEL_TOP_K=50
-QWEN_MODEL_REPETITION_PENALTY=1.05
-QWEN_MODEL_SEED=42
-QWEN_MODEL_STOPS=["END"]
-QWEN_MODEL_TOOL_CHOICE=auto
-QWEN_MODEL_RESPONSE_FORMAT=json_object
-QWEN_MODEL_ENABLE_THINKING=false
-QWEN_MODEL_LOGPROBS=false
-QWEN_MODEL_TOP_LOGPROBS=0
-```
-
-说明：
-- 未填写的参数会使用代码中的合理默认或不启用（None）。
-- 轻量模型（`QWEN_MODEL_LIGHT_*`）支持同样的参数命名（在 `.env.example` 中已列出）。
-- 所有扩展参数通过 OpenAI 兼容接口调用；DashScope 专属参数通过 `extra_body` 传递，保持兼容。
+---
 
 ## ⚙️ 使用方法
 
-### 1. 用户创建
+### 1. 👤 用户创建
 
 “用户创建”的核心是为每个用户建立一个精准的 ArXiv 分类画像，通过 **分类匹配器** 界面完成，它允许用户通过自然语言描述自己的研究兴趣，系统会自动将其与 ArXiv 的官方分类进行匹配，并将最相关的分类保存到该用户的配置中。
 
@@ -325,13 +303,12 @@ QWEN_MODEL_TOP_LOGPROBS=0
 **数据管理：**
 
 页面下方提供了对已创建用户数据的全面管理功能：
-
 - **查看与搜索**：可以浏览所有用户的匹配记录，并按用户名或研究内容进行搜索。
 - **编辑**：可以修改用户的研究内容描述，并重新进行匹配。
 - **删除**：可以删除单个或批量的用户记录。
 - **导出**：支持将用户数据导出为 JSON 文件。
 
-### 2. 每日论文推荐
+### 2. 📰 每日论文推荐
 
 在创建完用户画像后，主界面 **ArXiv 每日论文推荐系统** 提供了核心的论文推荐功能。它会根据选定用户的画像，自动从 ArXiv 拉取、筛选并分析最新的相关论文。
 
@@ -351,7 +328,7 @@ QWEN_MODEL_TOP_LOGPROBS=0
     - 同时，系统会生成完整的 `HTML` 和 `Markdown` 格式报告，您可以直接在网页上预览或下载到本地。
     - 报告会自动保存到 `arxiv_history` 目录，文件名格式为 `YYYY-MM-DD_用户名_ARXIV_summary.{html|md}`
 
-### 3. 环境配置管理
+### 3. 🛠️ 环境配置管理
 
 **环境配置界面**提供了系统参数的集中管理功能，包括：
 
@@ -380,7 +357,7 @@ QWEN_MODEL_TOP_LOGPROBS=0
 3. 修改配置值后点击"保存更改"
 4. 支持分组重置和全局重置功能
 
-### 4. 提示词管理
+### 4. ✍️ 提示词管理
 
 系统支持自定义 AI 提示词模板，您可以根据需要调整论文分析的风格和深度。
 
@@ -404,6 +381,8 @@ QWEN_MODEL_TOP_LOGPROBS=0
 - `{paper_authors}`: 论文作者列表
 - `{paper_categories}`: 论文分类标签
 - 更多变量请参考提示词模板中的注释
+
+---
 
 ## 🔧 故障排查
 
@@ -470,6 +449,8 @@ tail -f logs/fastapi.log
 # 查看错误日志
 grep ERROR logs/fastapi.log
 ```
+
+---
 
 ## 🤝 贡献与支持
 
