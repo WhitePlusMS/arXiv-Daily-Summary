@@ -1,6 +1,6 @@
-import { globalIgnores } from 'eslint/config'
-import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
-import pluginVue from 'eslint-plugin-vue'
+import { globalIgnores } from "eslint/config";
+import { defineConfigWithVueTs, vueTsConfigs } from "@vue/eslint-config-typescript";
+import pluginVue from "eslint-plugin-vue";
 
 // To allow more languages other than `ts` in `.vue` files, uncomment the following lines:
 // import { configureVueProject } from '@vue/eslint-config-typescript'
@@ -9,12 +9,18 @@ import pluginVue from 'eslint-plugin-vue'
 
 export default defineConfigWithVueTs(
   {
-    name: 'app/files-to-lint',
-    files: ['**/*.{ts,mts,tsx,vue}'],
+    name: "app/files-to-lint",
+    files: ["**/*.{ts,mts,tsx,vue}"],
   },
 
-  globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**']),
+  globalIgnores(["**/dist/**", "**/dist-ssr/**", "**/coverage/**"]),
 
-  pluginVue.configs['flat/essential'],
+  pluginVue.configs["flat/essential"],
   vueTsConfigs.recommended,
-)
+  {
+    rules: {
+      "vue/no-v-model-argument": "off",
+      "vue/no-mutating-props": "off",
+    },
+  }
+);
