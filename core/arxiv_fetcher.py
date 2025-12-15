@@ -1,5 +1,5 @@
 import requests
-from typing import List, Dict, Any, Union, Optional
+from typing import List, Dict, Any, Union, Optional, Callable
 import feedparser
 import time
 import json
@@ -163,7 +163,7 @@ class ArxivFetcher:
             logger.error(f"复杂查询彻底失败 - '{search_query}': 所有 {self.retries} 次尝试均失败")
             return []
 
-    def fetch_papers_paged(self, category: str, date: str, per_page: int = 200, max_pages: int = 5, max_total: Optional[int] = None) -> List[Dict[str, Any]]:
+    def fetch_papers_paged(self, category: str, date: str, per_page: int = 200, max_pages: int = 5, max_total: Optional[int] = None, progress_callback: Optional[Callable[[str], None]] = None) -> List[Dict[str, Any]]:
         """分页 + 日期过滤（按北京时区）
         
         Args:
@@ -172,8 +172,12 @@ class ArxivFetcher:
             per_page: 每页请求数量
             max_pages: 最大分页页数
             max_total: 期望的最大返回数量（达到该数量后提前停止分页）
+            progress_callback: 进度回调函数，接收日志消息字符串
         """
-        logger.info(f"分页获取开始 - 分类: {category}, 日期: {date}, 每页: {per_page}, 最大页数: {max_pages}, 目标总量: {max_total}")
+        start_msg = f"分页获取开始 - 分类: {category}, 日期: {date}, 每页: {per_page}, 最大页数: {max_pages}, 目标总量: {max_total}"
+        logger.info(start_msg)
+        if progress_callback:
+            progress_callback(start_msg)
         
         # 将输入日期转换为北京时区的开始和结束时间
         beijing_tz = pytz.timezone('Asia/Shanghai')
@@ -215,7 +219,12 @@ class ArxivFetcher:
             start = page * per_page
             query = f"cat:{category}+AND+lastUpdatedDate:[{start_date_str}+TO+{end_date_str}]"
             url = f"{self.base_url}?search_query={query}&start={start}&max_results={req_per_page}&sortBy=lastUpdatedDate&sortOrder=ascending"
-            logger.debug(f"获取第 {page+1} 页 - 起始位置: {start}，本页请求数量: {req_per_page}")
+            
+            fetch_msg = f"获取第 {page+1} 页 - 起始位置: {start}，本页请求数量: {req_per_page}"
+            logger.debug(fetch_msg)
+            if progress_callback:
+                progress_callback(fetch_msg)
+                
             logger.debug(f"查询条件: {query}")
             
             # 使用指数退避重试机制处理每一页的请求（使用实例配置的重试次数）
@@ -238,7 +247,11 @@ class ArxivFetcher:
                 break
                 
             all_papers.extend(page_papers)
-            logger.debug(f"第 {page+1} 页完成 - 获取: {len(page_papers)} 篇，累计: {len(all_papers)} 篇")
+            
+            complete_msg = f"第 {page+1} 页完成 - 获取: {len(page_papers)} 篇，累计: {len(all_papers)} 篇"
+            logger.debug(complete_msg)
+            if progress_callback:
+                progress_callback(complete_msg)
 
             # 达到目标数量后立即结束（不再 sleep）
             if max_total is not None and len(all_papers) >= max_total:
@@ -258,7 +271,11 @@ class ArxivFetcher:
         if max_total is not None and len(all_papers) > max_total:
             all_papers = all_papers[:max_total]
         
-        logger.success(f"分页获取完成 - {category}: 总计 {len(all_papers)} 篇论文")
+        finish_msg = f"分页获取完成 - {category}: 总计 {len(all_papers)} 篇论文"
+        logger.success(finish_msg)
+        if progress_callback:
+            progress_callback(finish_msg)
+            
         return all_papers
     
     def _fetch_page_with_retry(self, url: str, page_num: int, category: str = None, max_retries: Optional[int] = None) -> Optional[List[Dict[str, Any]]]:

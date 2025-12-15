@@ -261,7 +261,7 @@ class ArxivRecommenderService(BaseService):
                 return self.success_response(result, "推荐系统运行成功")
             else:
                 # 检查是否是"未找到论文"的特定情况
-                no_papers_found_messages = ["未找到相关论文", "在目标日期范围内未找到相关论文"]
+                no_papers_found_messages = ["未找到相关论文", "在目标日期范围内未找到相关论文", "经评估未发现符合兴趣的论文"]
                 is_no_papers_error = any(msg in error_msg for msg in no_papers_found_messages)
 
                 if is_no_papers_error:
@@ -269,7 +269,7 @@ class ArxivRecommenderService(BaseService):
                     self.log_info("未找到论文", target_date=target_date_str)
                     
                     # 检查是否为连续两天未找到论文的情况
-                    if "在目标日期" in error_msg and "未找到相关论文" in error_msg:
+                    if "在目标日期" in error_msg and ("未找到相关论文" in error_msg or "经评估未发现符合兴趣的论文" in error_msg):
                         result = {
                             'success': False,
                             'error': error_msg,
@@ -282,6 +282,9 @@ class ArxivRecommenderService(BaseService):
                             'error': error_msg,
                             'warning': f"在 {target_date_str} 未找到论文"
                         }
+                    
+                    # 重要：更新任务状态为失败，以便前端停止轮询
+                    progress_manager.fail_task(task_id, error_msg)
                     return self.error_response(error_msg, result)
                 else:
                     self.log_error("推荐系统运行失败", error_msg)

@@ -1042,7 +1042,7 @@ class ArxivRecommenderCLI(ProgressTracker):
                 if report_result:
                     logger.success(f"在{target_date_str}找到了论文")
                 else:
-                    logger.warning(f"在{target_date_str}未找到相关论文")
+                    logger.warning(f"在{target_date_str}经评估未发现符合兴趣的论文")
             else:
                 # 智能回溯模式：尝试获取昨天和前天的论文
                 for days_back in [1, 2]:  # 先尝试昨天，再尝试前天
@@ -1058,7 +1058,7 @@ class ArxivRecommenderCLI(ProgressTracker):
                         logger.success(f"在{target_date_str}找到了论文")
                         break
                     else:
-                        logger.warning(f"在{target_date_str}未找到相关论文")
+                        logger.warning(f"在{target_date_str}经评估未发现符合兴趣的论文")
             
             if report_result:
                 logger.success("论文推荐流程完成")
@@ -1070,14 +1070,14 @@ class ArxivRecommenderCLI(ProgressTracker):
                     'target_date': target_date_str
                 }
             else:
-                logger.warning("在目标日期范围内未找到相关论文")
+                logger.warning("在目标日期范围内经评估未发现符合兴趣的论文")
                 # 根据模式确定错误信息
                 if specific_date:
-                    error_msg = f"在指定日期 {target_date_str} 未找到相关论文"
+                    error_msg = f"在指定日期 {target_date_str} 经评估未发现符合兴趣的论文"
                 else:
                     # 智能回溯模式的错误信息
                     final_target_date_str = (get_timezone_aware_now() - timedelta(days=2)).strftime('%Y-%m-%d')
-                    error_msg = f"在目标日期 {final_target_date_str} 未找到相关论文"
+                    error_msg = f"在目标日期 {final_target_date_str} 经评估未发现符合兴趣的论文"
                     target_date_str = final_target_date_str
                 
                 return {

@@ -60,6 +60,7 @@
               v-if="currentSection"
               :is="currentSection.component"
               v-bind="currentSectionProps"
+              :key="currentSection.id"
             />
           </KeepAlive>
         </div>

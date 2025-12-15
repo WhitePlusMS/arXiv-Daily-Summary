@@ -126,6 +126,12 @@ class RecommendationEngine(ProgressTracker):
         def fetch_category_papers(category: str) -> List[Dict[str, Any]]:
             """获取单个分类的论文。"""
             logger.debug(f"获取分类 {category} 的论文")
+            
+            def on_progress(msg: str):
+                self._update_progress(
+                    log_message=msg
+                )
+
             if date:
                 # 使用基于日期的分页获取
                 papers = self.arxiv_fetcher.fetch_papers_paged(
@@ -133,7 +139,8 @@ class RecommendationEngine(ProgressTracker):
                     date, 
                     per_page=min(self.max_entries, 200), 
                     max_pages=5,
-                    max_total=self.max_entries
+                    max_total=self.max_entries,
+                    progress_callback=on_progress
                 )
                 logger.debug(f"分类 {category} ({date}): {len(papers)} 篇论文")
             else:
@@ -295,10 +302,20 @@ class RecommendationEngine(ProgressTracker):
         except Exception:
             threshold_raw = 0
         threshold = max(0, min(threshold_raw, 10))
+        
+        valid_papers_count = len([p for p in recommended_papers if not p.get("__api_failed")])
         recommended_papers = [
             paper for paper in recommended_papers
             if paper.get('relevance_score', 0) >= threshold and not paper.get("__api_failed")
         ]
+        
+        logger.info(f"相关性过滤完成 - 阈值: {threshold}, 过滤前: {valid_papers_count}, 过滤后: {len(recommended_papers)}")
+        if valid_papers_count > 0 and len(recommended_papers) == 0:
+            self._update_progress(
+                step="筛选结果",
+                percentage=65,
+                log_message=f"已完成评估，{valid_papers_count} 篇候选论文均未达到相关性阈值({threshold})"
+            )
         
         # 按相关性评分排序
         recommended_papers.sort(key=lambda x: x['relevance_score'], reverse=True)
@@ -470,9 +487,9 @@ class RecommendationEngine(ProgressTracker):
             return None
 
         self._update_progress(
-            step=f"获取到 {len(papers)} 篇论文",
+            step=f"检索到 {len(papers)} 篇候选",
             percentage=25,
-            log_message=f"成功获取 {len(papers)} 篇论文"
+            log_message=f"从ArXiv检索到 {len(papers)} 篇候选论文"
         )
 
         # 2. 获取推荐
@@ -507,11 +524,11 @@ class RecommendationEngine(ProgressTracker):
                 raise
         
         if not recommended_papers:
-            logger.warning("推荐生成失败 - 未找到相关论文，流程终止")
+            logger.warning("推荐生成失败 - 经评估未发现符合兴趣的论文，流程终止")
             self._update_progress(
-                step="推荐失败",
+                step="未发现相关论文",
                 percentage=0,
-                log_message="未找到相关论文",
+                log_message="经评估未发现符合兴趣的论文",
                 log_level="warning"
             )
             return None
