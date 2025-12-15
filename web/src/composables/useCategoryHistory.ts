@@ -208,6 +208,7 @@ export function useCategoryHistory() {
 
   const updateDraftField = (index: number, field: string, value: string) => {
     if (editDrafts.value[index]) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (editDrafts.value[index] as any)[field] = value;
     }
   };

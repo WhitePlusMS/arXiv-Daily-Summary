@@ -2,20 +2,7 @@
  * 进度服务 - 用于轮询任务进度
  */
 
-export interface ProgressData {
-  task_id: string;
-  status: "running" | "completed" | "failed";
-  step: string;
-  percentage: number;
-  logs: LogEntry[];
-  error: string | null;
-}
-
-export interface LogEntry {
-  timestamp: string;
-  level: string;
-  message: string;
-}
+import type { ProgressData } from "@/types";
 
 export type ProgressCallback = (progress: ProgressData) => void;
 export type CompleteCallback = (progress: ProgressData) => void;
@@ -23,7 +10,7 @@ export type ErrorCallback = (error: string) => void;
 
 class ProgressService {
   private pollingIntervals: Map<string, number> = new Map();
-  private BASE_URL = (import.meta.env.VITE_API_BASE_URL || "") || "http://localhost:8000";
+  private BASE_URL = import.meta.env.VITE_API_BASE_URL || "" || "http://localhost:8000";
 
   /**
    * 开始轮询任务进度
@@ -167,4 +154,3 @@ export const progressService = new ProgressService();
 
 // 导出类（用于类型）
 export default ProgressService;
-

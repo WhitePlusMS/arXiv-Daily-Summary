@@ -56,7 +56,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from "vue";
-import type { ProgressData } from "@/services/progress";
+import type { ProgressData } from "@/types";
 
 interface Props {
   progress: ProgressData | null;

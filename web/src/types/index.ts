@@ -132,6 +132,7 @@ export interface ProgressData {
   percentage: number;
   logs: LogEntry[];
   error: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   result?: any;
 }
 

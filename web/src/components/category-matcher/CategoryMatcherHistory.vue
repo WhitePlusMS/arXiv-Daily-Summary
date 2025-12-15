@@ -210,9 +210,10 @@
 </template>
 
 <script setup lang="ts">
-import type { UserProfile } from "@/services/api";
+import type { UserProfile } from "@/types";
 
 defineProps<{
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   stats: any;
   managementCollapsed: boolean;
   searchTerm: string;

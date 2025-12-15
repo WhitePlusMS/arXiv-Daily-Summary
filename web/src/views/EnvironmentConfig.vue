@@ -152,6 +152,7 @@ const currentSectionLabel = computed(() => currentSection.value?.label || "é…ç½
 const currentSectionProps = computed(() => {
   const commonProps = {
     config: configChanges.value,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     "onUpdate:config": (val: any) => Object.assign(configChanges.value, val),
   };
 
@@ -162,6 +163,7 @@ const currentSectionProps = computed(() => {
       return {
         prompts: prompts.value,
         edits: edits.value,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         "onUpdate:edits": (val: any) => (edits.value = val),
         promptErrors: promptErrors.value,
         loading: promptsLoading.value,

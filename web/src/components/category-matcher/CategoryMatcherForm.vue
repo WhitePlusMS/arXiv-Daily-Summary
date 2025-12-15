@@ -90,6 +90,7 @@ defineProps<{
 }>();
 
 defineEmits<{
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (e: "update:modelValue", value: any): void;
   (e: "optimize"): void;
   (e: "match"): void;
