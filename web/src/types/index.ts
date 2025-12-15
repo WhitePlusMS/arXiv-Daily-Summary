@@ -132,6 +132,7 @@ export interface ProgressData {
   percentage: number;
   logs: LogEntry[];
   error: string | null;
+  result?: any;
 }
 
 export interface ConfigData {

@@ -776,7 +776,11 @@ def _run_category_matching_task(
         service.save_matching_results(username, user_input, results, negative_query)
         
         # 完成
-        progress_manager.complete_task(task_id, f"分类匹配完成，共匹配到 {len(results)} 个分类")
+        task_result = {
+            "results": results,
+            "token_usage": token_usage
+        }
+        progress_manager.complete_task(task_id, f"分类匹配完成，共匹配到 {len(results)} 个分类", result=task_result)
         
     except (KeyError, ValueError) as e:
         error_msg = f"模板错误: {str(e)}"

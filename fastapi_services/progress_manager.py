@@ -58,6 +58,7 @@ class ProgressManager:
                 "percentage": 0,
                 "logs": [],
                 "error": None,
+                "result": None,
                 "created_at": datetime.now(),
                 "updated_at": datetime.now()
             }
@@ -118,15 +119,16 @@ class ProgressManager:
             
         return True
     
-    def complete_task(self, task_id: str, final_message: Optional[str] = None) -> bool:
+    def complete_task(self, task_id: str, message: str = "完成", result: Any = None) -> bool:
         """标记任务为完成
         
         Args:
             task_id: 任务ID
-            final_message: 最终消息（可选）
+            message: 完成消息
+            result: 任务结果数据（可选）
             
         Returns:
-            bool: 操作是否成功
+            bool: 更新是否成功
         """
         with self.task_lock:
             if task_id not in self.tasks:
@@ -136,17 +138,21 @@ class ProgressManager:
             task = self.tasks[task_id]
             task["status"] = "completed"
             task["percentage"] = 100
+            task["step"] = message
+            if result is not None:
+                task["result"] = result
+            
+            # 添加日志
+            log_entry = {
+                "timestamp": datetime.now().isoformat(),
+                "level": "success",
+                "message": message
+            }
+            task["logs"].append(log_entry)
+            
             task["updated_at"] = datetime.now()
             
-            if final_message:
-                log_entry = {
-                    "timestamp": datetime.now().isoformat(),
-                    "level": "success",
-                    "message": final_message
-                }
-                task["logs"].append(log_entry)
-            
-        logger.debug(f"任务完成: {task_id}")
+        logger.info(f"任务完成: {task_id}")
         return True
     
     def fail_task(self, task_id: str, error_message: str) -> bool:
@@ -251,6 +257,7 @@ class ProgressManager:
                     "status": task["status"],
                     "step": task["step"],
                     "percentage": task["percentage"],
+                    "result": task.get("result"),
                     "created_at": task["created_at"].isoformat(),
                     "updated_at": task["updated_at"].isoformat()
                 }
