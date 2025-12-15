@@ -71,10 +71,10 @@ defineProps<{
 }
 
 .stat-card {
-  background: var(--surface-color);
+  background: var(--color-background);
   padding: 24px;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
+  border-radius: var(--ui-radius-lg);
+  border: 1px solid var(--color-border);
   display: flex;
   align-items: center;
   gap: 20px;
@@ -87,20 +87,20 @@ defineProps<{
 .stat-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
-  border-color: var(--primary-light);
+  border-color: var(--color-primary-border);
 }
 
 .stat-icon {
   font-size: 2rem;
-  background: linear-gradient(135deg, var(--bg-color), #fff);
+  background: linear-gradient(135deg, var(--color-background-soft), var(--color-background));
   width: 56px;
   height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
 }
 
 .stat-info {
@@ -110,7 +110,7 @@ defineProps<{
 .stat-label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--color-text-soft);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 6px;
@@ -119,7 +119,7 @@ defineProps<{
 .stat-value {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--text-main);
+  color: var(--color-text);
 }
 
 .stat-status {
@@ -128,24 +128,24 @@ defineProps<{
   right: 0;
   width: 4px;
   height: 100%;
-  background: var(--border-color);
+  background: var(--color-border);
   opacity: 0.5;
 }
 
 .stat-status.status-ok {
-  background: var(--success);
+  background: var(--color-success);
   opacity: 1;
 }
 .stat-status.status-err {
-  background: var(--danger);
+  background: var(--color-error);
   opacity: 1;
 }
 .stat-status.status-warn {
-  background: var(--warning);
+  background: var(--color-warning);
   opacity: 1;
 }
 
 .stat-card.active .stat-value {
-  color: var(--primary);
+  color: var(--color-primary);
 }
 </style>

@@ -39,8 +39,8 @@ defineEmits<{
 <style scoped>
 .config-sidebar {
   width: 280px;
-  background: var(--surface-color);
-  border-right: 1px solid var(--border-color);
+  background: var(--color-background);
+  border-right: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -62,10 +62,10 @@ defineEmits<{
   padding: 12px 16px;
   border: none;
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--color-text-soft);
   font-size: 0.95rem;
   font-weight: 500;
-  border-radius: var(--radius-md);
+  border-radius: var(--ui-radius);
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: left;
@@ -74,14 +74,14 @@ defineEmits<{
 }
 
 .nav-item:hover {
-  background-color: var(--bg-color);
-  color: var(--text-main);
+  background-color: var(--color-background-soft);
+  color: var(--color-text);
   transform: translateX(4px);
 }
 
 .nav-item.active {
-  background-color: var(--primary-light);
-  color: var(--primary);
+  background-color: var(--color-primary-bg);
+  color: var(--color-primary);
   font-weight: 600;
 }
 
@@ -93,7 +93,7 @@ defineEmits<{
   transform: translateY(-50%);
   height: 20px;
   width: 3px;
-  background-color: var(--primary);
+  background-color: var(--color-primary);
   border-radius: 0 4px 4px 0;
 }
 

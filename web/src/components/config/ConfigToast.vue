@@ -33,11 +33,11 @@ defineProps<{
 }
 
 .toast-message.success {
-  background-color: var(--success);
+  background-color: var(--color-success);
 }
 
 .toast-message.error {
-  background-color: var(--danger);
+  background-color: var(--color-error);
 }
 
 .fade-enter-active,

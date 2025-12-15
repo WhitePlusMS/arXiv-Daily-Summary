@@ -1,6 +1,6 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <template>
-  <div class="streamlit-dashboard">
+  <div class="ui-container">
     <!-- 页面头部 -->
     <CategoryMatcherHeader />
 

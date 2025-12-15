@@ -134,12 +134,12 @@ watch(
 
 <style scoped>
 .progress-display {
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--ui-radius);
   padding: 20px;
   margin: 16px 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .progress-header {
@@ -153,7 +153,7 @@ watch(
   margin: 0;
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: var(--color-heading);
 }
 
 .progress-status {
@@ -164,18 +164,18 @@ watch(
 }
 
 .status-running {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: var(--color-info-bg);
+  color: var(--color-info);
 }
 
 .status-completed {
-  background: #e8f5e9;
-  color: #388e3c;
+  background: var(--color-success-bg);
+  color: var(--color-success);
 }
 
 .status-failed {
-  background: #ffebee;
-  color: #d32f2f;
+  background: var(--color-error-bg);
+  color: var(--color-error);
 }
 
 .progress-step {
@@ -183,8 +183,8 @@ watch(
 }
 
 .step-text {
-  font-size: 14px;
-  color: #666;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-soft);
   font-weight: 500;
 }
 
@@ -198,42 +198,42 @@ watch(
 .progress-bar {
   flex: 1;
   height: 8px;
-  background: #f0f0f0;
+  background: var(--color-background-mute);
   border-radius: 4px;
   overflow: hidden;
 }
 
 .progress-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #1976d2, #42a5f5);
+  background: var(--color-info);
   transition: width 0.3s ease;
   border-radius: 4px;
 }
 
 .progress-bar-fill.progress-error {
-  background: linear-gradient(90deg, #d32f2f, #f44336);
+  background: var(--color-error);
 }
 
 .progress-percentage {
   min-width: 45px;
   text-align: right;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
-  color: #1976d2;
+  color: var(--color-info);
 }
 
 .progress-error-message {
   padding: 12px;
-  background: #ffebee;
-  border-left: 4px solid #d32f2f;
+  background: var(--color-error-bg);
+  border-left: 4px solid var(--color-error);
   border-radius: 4px;
   margin-bottom: 16px;
-  color: #d32f2f;
-  font-size: 14px;
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
 }
 
 .progress-logs {
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--color-border);
   padding-top: 16px;
 }
 
@@ -245,47 +245,47 @@ watch(
 }
 
 .logs-title {
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
-  color: #333;
+  color: var(--color-heading);
 }
 
 .logs-toggle {
   background: none;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   padding: 4px 12px;
   cursor: pointer;
-  font-size: 12px;
-  color: #666;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-soft);
   transition: all 0.2s;
 }
 
 .logs-toggle:hover {
-  background: #f5f5f5;
-  border-color: #bdbdbd;
+  background: var(--color-background-soft);
+  border-color: var(--color-border-hover);
 }
 
 .logs-content {
   max-height: 300px;
   overflow-y: auto;
-  background: #fafafa;
-  border: 1px solid #e0e0e0;
+  background: var(--color-background-soft);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   padding: 12px;
-  font-family: "Consolas", "Monaco", "Courier New", monospace;
+  font-family: var(--font-family-mono);
 }
 
 .log-entry {
   display: flex;
   gap: 8px;
   margin-bottom: 6px;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   line-height: 1.4;
 }
 
 .log-time {
-  color: #999;
+  color: var(--color-text-soft);
   min-width: 70px;
 }
 
@@ -294,25 +294,25 @@ watch(
 }
 
 .log-message {
-  color: #333;
+  color: var(--color-text);
   flex: 1;
   word-break: break-word;
 }
 
 .log-level-error .log-message {
-  color: #d32f2f;
+  color: var(--color-error);
 }
 
 .log-level-warning .log-message {
-  color: #f57c00;
+  color: var(--color-warning);
 }
 
 .log-level-success .log-message {
-  color: #388e3c;
+  color: var(--color-success);
 }
 
 .log-level-info .log-message {
-  color: #1976d2;
+  color: var(--color-info);
 }
 
 /* 滚动条样式 */
@@ -321,17 +321,16 @@ watch(
 }
 
 .logs-content::-webkit-scrollbar-track {
-  background: #f0f0f0;
+  background: var(--color-background-mute);
   border-radius: 4px;
 }
 
 .logs-content::-webkit-scrollbar-thumb {
-  background: #bdbdbd;
+  background: var(--color-border);
   border-radius: 4px;
 }
 
 .logs-content::-webkit-scrollbar-thumb:hover {
-  background: #9e9e9e;
+  background: var(--color-text-soft);
 }
 </style>
-

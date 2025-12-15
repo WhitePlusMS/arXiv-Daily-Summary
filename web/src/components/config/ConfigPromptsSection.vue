@@ -1,9 +1,9 @@
 <template>
-  <div class="form-container">
-    <div class="form-card">
-      <h3 class="card-title">提示词模板管理</h3>
+  <div class="ui-form-container">
+    <div class="ui-card">
+      <h3 class="ui-card-title">提示词模板管理</h3>
       <div class="actions-row">
-        <button class="btn-outlined" @click="$emit('resetAll')" :disabled="loading">
+        <button class="ui-button ui-button-outlined" @click="$emit('resetAll')" :disabled="loading">
           重置所有提示词
         </button>
       </div>
@@ -19,9 +19,11 @@
             <span class="prompt-id">{{ prompt.id }}</span>
           </div>
           <div class="prompt-actions">
-            <button class="btn-text" @click="$emit('reset', prompt.id)">重置默认</button>
+            <button class="ui-button ui-button-text" @click="$emit('reset', prompt.id)">
+              重置默认
+            </button>
             <button
-              class="btn-primary-small"
+              class="ui-button ui-button-primary ui-button-small"
               @click="$emit('save', prompt.id)"
               :disabled="!hasPromptChanged(prompt.id)"
             >
@@ -89,9 +91,9 @@ const hasPromptChanged = (id: string) => {
 }
 
 .prompt-card {
-  background: var(--surface-color);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--ui-radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
   transition: all 0.3s ease;
@@ -99,13 +101,13 @@ const hasPromptChanged = (id: string) => {
 
 .prompt-card:hover {
   box-shadow: var(--shadow-md);
-  border-color: var(--primary-light);
+  border-color: var(--color-primary-border);
 }
 
 .prompt-header {
   padding: 20px 24px;
-  background: #f8fafc;
-  border-bottom: 1px solid var(--border-color);
+  background: var(--color-background-soft);
+  border-bottom: 1px solid var(--color-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -115,7 +117,7 @@ const hasPromptChanged = (id: string) => {
   margin: 0;
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--text-main);
+  color: var(--color-text);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -123,9 +125,9 @@ const hasPromptChanged = (id: string) => {
 
 .prompt-id {
   font-size: 0.75rem;
-  color: var(--text-secondary);
+  color: var(--color-text-soft);
   font-family: monospace;
-  background: #e2e8f0;
+  background: var(--color-background-mute);
   padding: 4px 8px;
   border-radius: 6px;
   font-weight: 600;
@@ -144,45 +146,45 @@ const hasPromptChanged = (id: string) => {
 }
 
 .tag {
-  background: var(--primary-light);
-  color: var(--primary);
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
   padding: 4px 10px;
   border-radius: 6px;
   font-size: 0.8rem;
   font-family: monospace;
   font-weight: 600;
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  border: 1px solid var(--color-primary-border);
 }
 
 .code-editor {
   width: 100%;
   padding: 20px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--ui-radius);
   font-family: "Fira Code", "Menlo", "Monaco", monospace;
   font-size: 0.9rem;
   line-height: 1.6;
   resize: vertical;
-  background-color: #fafafa;
-  color: var(--text-main);
+  background-color: var(--color-background-soft);
+  color: var(--color-text);
   transition: all 0.2s;
 }
 
 .code-editor:focus {
-  background-color: #fff;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 4px var(--primary-light);
+  background-color: var(--color-background);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px var(--color-primary-bg);
 }
 
 .error-msg {
   margin-top: 12px;
-  color: var(--danger);
+  color: var(--color-error);
   font-size: 0.9rem;
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  background: var(--danger-bg);
+  background: var(--color-error-bg);
   border-radius: 6px;
   font-weight: 500;
 }

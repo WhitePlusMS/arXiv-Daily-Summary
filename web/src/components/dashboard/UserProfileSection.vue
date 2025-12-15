@@ -1,13 +1,13 @@
 <template>
-  <div class="streamlit-section">
-    <h2 class="streamlit-subheader">👤 用户配置</h2>
-    <div class="streamlit-selectbox">
+  <div class="ui-card">
+    <h2 class="ui-subheader">👤 用户配置</h2>
+    <div class="ui-select-container">
       <label>选择用户配置：</label>
       <select
         v-model="selectedProfileName"
         @change="handleProfileChange"
         :disabled="isLoading"
-        class="streamlit-select"
+        class="ui-select"
       >
         <option value="自定义">自定义</option>
         <option v-for="profile in userProfiles" :key="profile.username" :value="profile.username">
@@ -17,7 +17,7 @@
     </div>
 
     <!-- 用户配置成功信息 -->
-    <div v-if="selectedProfile && selectedProfileName !== '自定义'" class="streamlit-success">
+    <div v-if="selectedProfile && selectedProfileName !== '自定义'" class="ui-alert-success">
       <div class="success-content">
         <strong>✅ 已加载用户 {{ selectedProfileName }} 的配置</strong>
         <br /><br />

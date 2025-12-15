@@ -1,5 +1,5 @@
 import './assets/main.css'
-import './assets/streamlit.css'
+import './assets/common-ui.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'

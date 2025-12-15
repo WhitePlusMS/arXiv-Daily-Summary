@@ -46,7 +46,7 @@
               <h2>{{ currentSectionLabel }}</h2>
               <button
                 v-if="getSectionChanges(selectedSection) > 0"
-                class="btn-text-small"
+                class="ui-button ui-button-text ui-button-small"
                 @click="resetSectionChanges"
               >
                 重置本页更改
@@ -200,19 +200,13 @@ onBeforeUnmount(() => {
 });
 </script>
 
-<style>
-/* Global styles for config components */
-@import "../components/config/ConfigShared.css";
-</style>
-
 <style scoped>
 .config-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  background-color: var(--bg-color);
-  color: var(--text-main);
-  overflow: hidden;
+  min-height: calc(100vh - 100px); /* Adjust for header/footer */
+  background-color: var(--color-background);
+  color: var(--color-text);
   font-family: "Inter", system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
@@ -221,16 +215,14 @@ onBeforeUnmount(() => {
 .config-layout {
   display: flex;
   flex: 1;
-  overflow: hidden;
+  position: relative;
 }
 
 /* Content Area */
 .config-content {
   flex: 1;
-  overflow-y: auto;
   padding: 40px;
-  scroll-behavior: smooth;
-  background-color: var(--bg-color);
+  background-color: var(--color-background);
 }
 
 .content-panel {

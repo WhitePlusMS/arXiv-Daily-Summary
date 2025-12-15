@@ -6,7 +6,7 @@
     </div>
     <div class="header-actions">
       <button
-        class="btn-secondary danger"
+        class="ui-button ui-button-danger ui-button-outlined"
         @click="$emit('restore')"
         :disabled="isLoading"
         title="恢复默认设置"
@@ -14,7 +14,7 @@
         <span>恢复默认</span>
       </button>
       <button
-        class="btn-secondary"
+        class="ui-button ui-button-secondary"
         @click="$emit('load')"
         :disabled="isLoading"
         title="重新加载配置"
@@ -22,7 +22,7 @@
         <span>重新加载</span>
       </button>
       <button
-        class="btn-primary"
+        class="ui-button ui-button-primary"
         @click="$emit('save')"
         :disabled="isLoading || !hasChanges"
       >
@@ -53,8 +53,8 @@ defineEmits<{
   justify-content: space-between;
   align-items: center;
   padding: 16px 32px;
-  background: var(--surface-color);
-  border-bottom: 1px solid var(--border-color);
+  background: var(--color-background);
+  border-bottom: 1px solid var(--color-border);
   z-index: 10;
   backdrop-filter: blur(8px);
   background-color: rgba(255, 255, 255, 0.95);
@@ -64,7 +64,7 @@ defineEmits<{
   font-size: 1.5rem;
   font-weight: 700;
   margin: 0;
-  color: var(--text-main);
+  color: var(--color-text);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -73,7 +73,7 @@ defineEmits<{
 
 .header-subtitle {
   font-size: 0.875rem;
-  color: var(--text-muted);
+  color: var(--color-text-soft);
   font-weight: 500;
   margin-left: 4px;
   letter-spacing: 0;

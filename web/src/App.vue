@@ -1,37 +1,37 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
-import { onMounted, onUnmounted, ref } from 'vue'
-import SidebarNav from './components/SidebarNav.vue'
-import Footer from './components/AppFooter.vue'
-import Toast from './components/AppToast.vue'
-import type { ToastMessage } from '@/types'
+import { RouterView } from "vue-router";
+import { onMounted, onUnmounted, ref } from "vue";
+import SidebarNav from "./components/SidebarNav.vue";
+import Footer from "./components/AppFooter.vue";
+import Toast from "./components/AppToast.vue";
+import type { ToastMessage } from "@/types";
 
-const toasts = ref<ToastMessage[]>([])
-let nextId = 1
+const toasts = ref<ToastMessage[]>([]);
+let nextId = 1;
 
-function pushToast(type: ToastMessage['type'], text: string) {
-  const id = nextId++
-  const msg: ToastMessage = { id, type, text, createdAt: Date.now() }
-  toasts.value = [msg, ...toasts.value].slice(0, 5)
+function pushToast(type: ToastMessage["type"], text: string) {
+  const id = nextId++;
+  const msg: ToastMessage = { id, type, text, createdAt: Date.now() };
+  toasts.value = [msg, ...toasts.value].slice(0, 5);
   // 自动消失
-  setTimeout(() => dismissToast(id), 6000)
+  setTimeout(() => dismissToast(id), 6000);
 }
 
 function dismissToast(id: number) {
-  toasts.value = toasts.value.filter(t => t.id !== id)
+  toasts.value = toasts.value.filter((t) => t.id !== id);
 }
 
 function onApiError(ev: Event) {
-  const detail = (ev as CustomEvent<string>).detail || '发生未知错误'
-  pushToast('error', detail)
+  const detail = (ev as CustomEvent<string>).detail || "发生未知错误";
+  pushToast("error", detail);
 }
 
 onMounted(() => {
-  window.addEventListener('api-error', onApiError as EventListener)
-})
+  window.addEventListener("api-error", onApiError as EventListener);
+});
 onUnmounted(() => {
-  window.removeEventListener('api-error', onApiError as EventListener)
-})
+  window.removeEventListener("api-error", onApiError as EventListener);
+});
 </script>
 
 <template>
@@ -50,11 +50,13 @@ onUnmounted(() => {
   min-height: 100vh;
   display: flex;
   gap: 0;
-  background: #ffffff;
+  background: var(--color-background);
   font-family: var(--font-family-base);
 }
 .app-main {
   flex: 1;
   padding: 1rem;
+  display: flex;
+  flex-direction: column;
 }
 </style>

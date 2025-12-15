@@ -10,10 +10,10 @@
           </span>
         </div>
         <div class="banner-actions">
-          <button class="btn-text" @click="toggleChanges">
+          <button class="ui-button ui-button-text" @click="toggleChanges">
             {{ showChanges ? "收起详情" : "查看详情" }}
           </button>
-          <button class="btn-text" @click="$emit('reset')">放弃更改</button>
+          <button class="ui-button ui-button-text" @click="$emit('reset')">放弃更改</button>
         </div>
       </div>
     </transition>
@@ -69,20 +69,20 @@ const truncate = (val: unknown) => {
 }
 
 .unsaved-banner {
-  background-color: #fffbeb;
-  border-bottom: 1px solid #fcd34d;
+  background-color: var(--color-warning-bg);
+  border-bottom: 1px solid var(--color-warning-border);
   padding: 16px 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(217, 119, 6, 0.1);
 }
 
 .banner-content {
   display: flex;
   align-items: center;
   gap: 16px;
-  color: #92400e;
+  color: var(--color-warning);
   font-size: 0.95rem;
   font-weight: 500;
 }
@@ -93,8 +93,8 @@ const truncate = (val: unknown) => {
 }
 
 .changes-panel {
-  background: var(--surface-color);
-  border-bottom: 1px solid var(--border-color);
+  background: var(--color-background);
+  border-bottom: 1px solid var(--color-border);
   padding: 24px 32px;
   max-height: 300px;
   overflow-y: auto;
@@ -110,7 +110,7 @@ const truncate = (val: unknown) => {
   display: flex;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .change-item:last-child {
@@ -122,7 +122,7 @@ const truncate = (val: unknown) => {
   font-size: 0.85rem;
   font-weight: 600;
   width: 260px;
-  color: var(--text-secondary);
+  color: var(--color-text);
 }
 
 .change-values {
@@ -130,23 +130,23 @@ const truncate = (val: unknown) => {
   display: flex;
   align-items: center;
   gap: 20px;
-  color: var(--text-muted);
+  color: var(--color-text-soft);
   font-size: 0.9rem;
 }
 
 .val-old {
-  color: var(--danger);
+  color: var(--color-error);
   text-decoration: line-through;
   opacity: 0.7;
 }
 
 .arrow {
-  color: var(--text-muted);
+  color: var(--color-text-soft);
   font-weight: bold;
 }
 
 .val-new {
-  color: var(--success);
+  color: var(--color-success);
   font-weight: 600;
 }
 

@@ -1,16 +1,16 @@
 <template>
-  <div class="form-container">
-    <div class="form-card">
-      <h3 class="card-title">发送开关</h3>
-      <div class="form-group checkbox-group">
-        <label class="switch">
+  <div class="ui-form-container">
+    <div class="ui-card">
+      <h3 class="ui-card-title">发送开关</h3>
+      <div class="ui-form-group ui-checkbox-group">
+        <label class="ui-switch">
           <input
             type="checkbox"
             v-model="config.SEND_EMAIL"
             true-value="true"
             false-value="false"
           />
-          <span class="slider round"></span>
+          <span class="ui-switch-slider round"></span>
         </label>
         <span class="label-text">启用邮件发送</span>
       </div>
@@ -18,37 +18,37 @@
 
     <transition name="slide-fade">
       <div v-if="emailEnabled" class="email-settings">
-        <div class="form-card">
-          <h3 class="card-title">发件人设置</h3>
-          <div class="form-row">
-            <div class="form-group">
+        <div class="ui-card">
+          <h3 class="ui-card-title">发件人设置</h3>
+          <div class="ui-form-row">
+            <div class="ui-form-group">
               <label>SMTP 服务器</label>
               <input type="text" v-model="config.SMTP_SERVER" placeholder="smtp.example.com" />
             </div>
-            <div class="form-group">
+            <div class="ui-form-group">
               <label>端口</label>
               <input type="number" v-model="config.SMTP_PORT" placeholder="465" />
             </div>
           </div>
-          <div class="form-group">
+          <div class="ui-form-group">
             <label>发件人邮箱</label>
             <input type="email" v-model="config.SENDER_EMAIL" />
           </div>
-          <div class="form-group">
+          <div class="ui-form-group">
             <label>邮箱密码/授权码</label>
-            <div class="input-wrapper">
+            <div class="ui-input-wrapper">
               <input
                 :type="showEmailPassword ? 'text' : 'password'"
                 v-model="config.EMAIL_PASSWORD"
               />
-              <button class="icon-btn" @click="showEmailPassword = !showEmailPassword">
+              <button class="ui-icon-btn" @click="showEmailPassword = !showEmailPassword">
                 {{ showEmailPassword ? "👁️" : "🔒" }}
               </button>
             </div>
           </div>
-          <div class="form-row">
-            <div class="form-group checkbox-group">
-              <label class="checkbox-label">
+          <div class="ui-form-row">
+            <div class="ui-form-group ui-checkbox-group">
+              <label class="ui-checkbox-label">
                 <input
                   type="checkbox"
                   v-model="config.USE_SSL"
@@ -58,8 +58,8 @@
                 SSL
               </label>
             </div>
-            <div class="form-group checkbox-group">
-              <label class="checkbox-label">
+            <div class="ui-form-group ui-checkbox-group">
+              <label class="ui-checkbox-label">
                 <input
                   type="checkbox"
                   v-model="config.USE_TLS"
@@ -72,9 +72,9 @@
           </div>
         </div>
 
-        <div class="form-card">
-          <h3 class="card-title">收件人设置</h3>
-          <div class="form-group">
+        <div class="ui-card">
+          <h3 class="ui-card-title">收件人设置</h3>
+          <div class="ui-form-group">
             <label>收件人列表 (逗号分隔)</label>
             <input type="text" v-model="config.RECEIVER_EMAIL" />
           </div>

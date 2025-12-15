@@ -1,5 +1,5 @@
 <template>
-  <div class="streamlit-dashboard">
+  <div class="ui-container">
     <!-- 页面头部 -->
     <DashboardHeader />
 

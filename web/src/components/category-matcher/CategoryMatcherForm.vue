@@ -1,49 +1,49 @@
 <template>
-  <div class="streamlit-section">
-    <h2 class="streamlit-subheader">📝 输入研究信息</h2>
-    <div class="streamlit-text-input">
+  <div class="ui-card">
+    <h2 class="ui-subheader">📝 输入研究信息</h2>
+    <div class="ui-form-group">
       <label>用户名</label>
       <input
         type="text"
         v-model="modelValue.username"
         :disabled="isMatching"
-        class="streamlit-input"
+        class="ui-input"
         placeholder="请输入您的用户名"
       />
     </div>
 
-    <div v-if="isMatching" class="streamlit-warning">
+    <div v-if="isMatching" class="ui-alert-warning">
       ⚠️ 正在进行分类匹配，请等待完成后再修改输入内容
     </div>
 
-    <div style="display: flex; gap: 16px; margin-bottom: 16px">
-      <div class="streamlit-text-area" style="flex: 1">
+    <div class="ui-form-row">
+      <div class="ui-form-group">
         <label>研究内容描述（感兴趣的方向）</label>
         <textarea
           v-model="modelValue.researchDescription"
           :disabled="isMatching || isOptimizing"
-          class="streamlit-textarea"
+          class="ui-textarea"
           placeholder="请详细描述您的研究方向和兴趣领域…"
         ></textarea>
-        <div class="streamlit-help">支持Markdown格式，请尽可能详细地描述您的研究方向</div>
+        <div class="ui-help">支持Markdown格式，请尽可能详细地描述您的研究方向</div>
       </div>
 
-      <div class="streamlit-text-area" style="flex: 1">
+      <div class="ui-form-group">
         <label>不感兴趣的方向（可选）</label>
         <textarea
           v-model="modelValue.negativeDescription"
           :disabled="isMatching || isOptimizing"
-          class="streamlit-textarea"
+          class="ui-textarea"
           placeholder="请描述您不感兴趣或希望排除的研究方向…"
         ></textarea>
-        <div class="streamlit-help">支持Markdown格式，描述您希望排除的研究领域或主题</div>
+        <div class="ui-help">支持Markdown格式，描述您希望排除的研究领域或主题</div>
       </div>
     </div>
 
-    <div class="form-actions">
+    <div class="ui-form-actions">
       <div class="action-buttons">
         <button
-          class="streamlit-button"
+          class="ui-button"
           :disabled="isMatching || isOptimizing || !modelValue.researchDescription.trim()"
           @click="$emit('optimize')"
         >
@@ -52,19 +52,19 @@
       </div>
 
       <div class="match-config">
-        <div class="streamlit-text-input">
+        <div class="ui-form-group">
           <label>返回结果数量</label>
           <input
             type="number"
             min="1"
             max="10"
             v-model.number="modelValue.topN"
-            class="streamlit-input"
+            class="ui-input"
             style="width: 100px"
           />
         </div>
         <button
-          class="streamlit-button streamlit-button-primary"
+          class="ui-button ui-button-primary"
           :disabled="
             isMatching || !modelValue.username.trim() || !modelValue.researchDescription.trim()
           "

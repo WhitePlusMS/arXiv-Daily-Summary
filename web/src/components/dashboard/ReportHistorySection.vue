@@ -1,23 +1,23 @@
 <template>
-  <div class="streamlit-section dashboard-history">
+  <div class="ui-card dashboard-history">
     <div
-      class="streamlit-expander-header"
+      class="ui-expander-header"
       @click="toggleHistorySection"
       :class="{ expanded: showHistorySection }"
     >
-      <span class="expander-icon">{{ showHistorySection ? "▼" : "▶" }}</span>
-      <h2 class="streamlit-subheader" style="margin: 0; flex: 1">📁 历史报告管理</h2>
+      <span class="ui-expander-icon">{{ showHistorySection ? "▼" : "▶" }}</span>
+      <h2 class="ui-subheader" style="margin: 0; flex: 1">📁 历史报告管理</h2>
     </div>
-    <div v-show="showHistorySection" class="streamlit-expander-content">
+    <div v-show="showHistorySection" class="ui-expander-content">
       <!-- 筛选和搜索控制区域 -->
       <div class="history-controls">
-        <div class="streamlit-selectbox">
+        <div class="ui-form-group">
           <label>筛选用户：</label>
           <select
             v-model="selectedReportFilter"
             @change="loadRecentReports"
             :disabled="isLoading"
-            class="streamlit-select"
+            class="ui-select"
           >
             <option value="">全部</option>
             <option
@@ -29,21 +29,21 @@
             </option>
           </select>
         </div>
-        <div class="streamlit-text-input">
+        <div class="ui-form-group">
           <label>搜索报告：</label>
           <input
             v-model="reportSearchText"
             type="text"
             placeholder="输入关键词搜索..."
             :disabled="isLoading"
-            class="streamlit-input"
+            class="ui-input"
           />
         </div>
         <div class="history-refresh-button">
           <button
             @click="loadRecentReports"
             :disabled="isLoading"
-            class="streamlit-button streamlit-button-small"
+            class="ui-button ui-button-small"
           >
             {{ isLoading ? "加载中..." : "🔄 刷新" }}
           </button>
@@ -63,28 +63,28 @@
           <div class="report-actions">
             <button
               @click="downloadReport(report, 'md')"
-              class="streamlit-button streamlit-button-small"
+              class="ui-button ui-button-small"
               title="下载Markdown版本"
             >
               📄 MD
             </button>
             <button
               @click="downloadReport(report, 'html')"
-              class="streamlit-button streamlit-button-small"
+              class="ui-button ui-button-small"
               title="下载HTML版本"
             >
               🌐 HTML
             </button>
             <button
               @click="previewReport(report)"
-              class="streamlit-button streamlit-button-small"
+              class="ui-button ui-button-small"
               title="预览报告"
             >
               👁️ 预览
             </button>
             <button
               @click="deleteReport(report)"
-              class="streamlit-button streamlit-button-small streamlit-button-danger"
+              class="ui-button ui-button-small ui-button-danger"
               title="删除报告"
             >
               🗑️ 删除

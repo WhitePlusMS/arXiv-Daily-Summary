@@ -1,44 +1,44 @@
 <template>
-  <nav :class="['sidebar', { collapsed }]" aria-label="主导航">
-    <div class="sidebar-header">
+  <nav :class="['ui-sidebar', { collapsed }]" aria-label="主导航">
+    <div class="ui-sidebar-header">
       <button
-        class="toggle-btn"
+        class="ui-sidebar-toggle"
         @click="collapsed = !collapsed"
         :aria-expanded="!collapsed"
       >
         {{ collapsed ? "☰" : "☰ 导航" }}
       </button>
     </div>
-    <ul class="nav-list">
+    <ul class="ui-nav-list">
       <li>
-        <RouterLink to="/" class="nav-link" :class="{ active: route.name === 'dashboard' }">
-          <span class="icon">🏠</span>
+        <RouterLink to="/" class="ui-nav-link" :class="{ active: route.name === 'dashboard' }">
+          <span class="ui-nav-icon">🏠</span>
           <span v-if="!collapsed">主面板</span>
         </RouterLink>
       </li>
       <li>
-        <RouterLink to="/matcher" class="nav-link" :class="{ active: route.name === 'matcher' }">
-          <span class="icon">🎯</span>
+        <RouterLink to="/matcher" class="ui-nav-link" :class="{ active: route.name === 'matcher' }">
+          <span class="ui-nav-icon">🎯</span>
           <span v-if="!collapsed">分类匹配</span>
         </RouterLink>
       </li>
       <li>
         <RouterLink
           to="/categories"
-          class="nav-link"
+          class="ui-nav-link"
           :class="{ active: route.name === 'categories' }"
         >
-          <span class="icon">📚</span>
+          <span class="ui-nav-icon">📚</span>
           <span v-if="!collapsed">分类浏览</span>
         </RouterLink>
       </li>
       <li>
         <RouterLink
           to="/env-config"
-          class="nav-link"
+          class="ui-nav-link"
           :class="{ active: route.name === 'env-config' }"
         >
-          <span class="icon">⚙️</span>
+          <span class="ui-nav-icon">⚙️</span>
           <span v-if="!collapsed">环境配置</span>
         </RouterLink>
       </li>

@@ -1,7 +1,7 @@
 <template>
-  <div class="streamlit-header">
-    <h1 class="streamlit-title">📚 ArXiv推荐系统 - 每日论文推荐</h1>
-    <div class="streamlit-caption time-info">
+  <div class="ui-header">
+    <h1 class="ui-title">📚 ArXiv推荐系统 - 每日论文推荐</h1>
+    <div class="ui-caption time-info">
       <span class="time-item">
         <span class="time-label">当前时间</span>
         <span class="time-value">{{ localTime }}</span>
