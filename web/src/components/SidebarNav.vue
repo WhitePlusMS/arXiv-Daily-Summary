@@ -1,11 +1,7 @@
 <template>
   <nav :class="['ui-sidebar', { collapsed }]" aria-label="主导航">
     <div class="ui-sidebar-header">
-      <button
-        class="ui-sidebar-toggle"
-        @click="collapsed = !collapsed"
-        :aria-expanded="!collapsed"
-      >
+      <button class="ui-sidebar-toggle" @click="collapsed = !collapsed" :aria-expanded="!collapsed">
         {{ collapsed ? "☰" : "☰ 导航" }}
       </button>
     </div>
@@ -43,12 +39,20 @@
         </RouterLink>
       </li>
     </ul>
+
+    <div class="ui-sidebar-footer">
+      <div class="project-logo" :class="{ collapsed }">
+        <img :src="logoSrc" alt="Arxiv Daily" class="logo-image" />
+        <span v-if="!collapsed" class="logo-text">arxiv Daily</span>
+      </div>
+    </div>
   </nav>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRoute, RouterLink } from "vue-router";
+import logoSrc from "@/assets/logo.png";
 
 const collapsed = ref(false);
 const route = useRoute();

@@ -9,6 +9,8 @@
             :type="showDashscopeKey ? 'text' : 'password'"
             v-model="config.DASHSCOPE_API_KEY"
             placeholder="sk-..."
+            autocomplete="new-password"
+            name="dashscope_api_key"
           />
           <button class="ui-icon-btn" @click="showDashscopeKey = !showDashscopeKey">
             {{ showDashscopeKey ? "👁️" : "🔒" }}

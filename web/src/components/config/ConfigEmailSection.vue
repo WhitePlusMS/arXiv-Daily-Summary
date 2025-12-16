@@ -32,7 +32,12 @@
           </div>
           <div class="ui-form-group">
             <label>发件人邮箱</label>
-            <input type="email" v-model="config.SENDER_EMAIL" />
+            <input
+              type="email"
+              v-model="config.SENDER_EMAIL"
+              autocomplete="off"
+              name="sender_email"
+            />
           </div>
           <div class="ui-form-group">
             <label>邮箱密码/授权码</label>
@@ -40,6 +45,8 @@
               <input
                 :type="showEmailPassword ? 'text' : 'password'"
                 v-model="config.EMAIL_PASSWORD"
+                autocomplete="new-password"
+                name="email_password"
               />
               <button class="ui-icon-btn" @click="showEmailPassword = !showEmailPassword">
                 {{ showEmailPassword ? "👁️" : "🔒" }}

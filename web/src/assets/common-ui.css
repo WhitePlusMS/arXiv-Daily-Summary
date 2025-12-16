@@ -983,6 +983,42 @@ code {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  flex: 1;
+}
+
+.ui-sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-background-soft);
+}
+
+.project-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  color: var(--color-text);
+  font-weight: 600;
+  justify-content: center;
+}
+
+.project-logo:not(.collapsed) {
+  justify-content: flex-start;
+}
+
+.logo-image {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.logo-text {
+  font-size: 1.1rem;
+  white-space: nowrap;
+  background: linear-gradient(120deg, var(--color-primary), #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .ui-nav-link {
