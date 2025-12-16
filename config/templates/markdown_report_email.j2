@@ -326,6 +326,12 @@
     .arxiv-link:hover {
       background-color: #2980b9;
     }
+    .alphaxiv-link {
+      background-color: #8e44ad;
+    }
+    .alphaxiv-link:hover {
+      background-color: #9b59b6;
+    }
   </style>
 </head>
 <body>
@@ -415,7 +421,8 @@
           <a href="{{ paper.pdf_url }}" class="link-btn pdf-link" target="_blank">PDF</a>
           {% endif %}
           {% if paper.abstract_url %}
-          <a href="{{ paper.abstract_url }}" class="link-btn arxiv-link" target="_blank">ArXiv</a>
+          <a href="{{ paper.abstract_url }}" class="link-btn arxiv-link" target="_blank">arXiv</a>
+          <a href="{{ paper.abstract_url | replace('arxiv.org', 'www.alphaxiv.org') }}" class="link-btn alphaxiv-link" target="_blank">alphaXiv</a>
           {% endif %}
         </span>
       </li>

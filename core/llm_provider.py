@@ -855,8 +855,41 @@ class LLMProvider:
 
         try:
             analysis = self.generate_response(prompt, temperature)
+            
+            # 清洗LLM输出
+            analysis = analysis.strip()
+            
+            # 简单清洗：如果LLM还是输出了标题（以## 开头），尝试去除第一行
+            # 但更稳健的方式是直接拼接，假设Prompt生效。
+            # 为了防止LLM复述标题，我们可以检查analysis是否以标题开头
+            title = paper.get('title', '').strip()
+            if analysis.startswith(f"## {title}"):
+                lines = analysis.split('\n')
+                # 移除第一行标题
+                analysis = "\n".join(lines[1:]).strip()
+                # 继续移除可能的元数据行，直到遇到第一个 ### 标题
+                # 这里简单处理，假设Prompt有效。如果无效，会有重复信息，但不会丢失。
+            
+            # 构建标准头部（保证元数据准确，来源于前置步骤）
+            authors = ", ".join(paper.get('authors', []))
+            pdf_url = paper.get('pdf_url', '')
+            abstract_url = paper.get('abstract_url', '')
+            alphaxiv_url = abstract_url.replace("arxiv.org", "www.alphaxiv.org") if abstract_url else ""
+            relevance_score = paper.get('relevance_score', 0)
+            arxiv_id = paper.get('arXiv_id', '')
+            
+            header = (
+                f"## {title}\n"
+                f"- **相关性评分**: ({relevance_score}/10)\n"
+                f"- **ArXiv ID**: {arxiv_id}\n"
+                f"- **作者**: {authors}\n"
+                f"- **论文链接**: <a href=\"{pdf_url}\" class=\"link-btn pdf-link\" target=\"_blank\">PDF</a> <a href=\"{abstract_url}\" class=\"link-btn arxiv-link\" target=\"_blank\">arXiv</a> <a href=\"{alphaxiv_url}\" class=\"link-btn alphaxiv-link\" target=\"_blank\">alphaXiv</a>\n\n"
+            )
+            
+            full_content = header + analysis
+            
             logger.debug(f"详细分析生成完成 - {title_short}")
-            return analysis
+            return full_content
         except Exception as e:
             logger.error(f"详细分析生成失败 - {title_short}: {e}")
             return f"## {paper['title']}\n- **分析失败**: LLM调用出错: {e}\n"

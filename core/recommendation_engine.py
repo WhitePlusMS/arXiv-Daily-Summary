@@ -414,6 +414,7 @@ class RecommendationEngine(ProgressTracker):
         brief_results = ["\n\n---\n\n# 📝 简要论文列表\n"]
         
         for i, paper in enumerate(brief_papers, start=start_idx+1):
+            alphaxiv_url = paper['abstract_url'].replace("arxiv.org", "www.alphaxiv.org") if paper.get('abstract_url') else ""
             try:
                 # 使用LLM提供商生成简要总结
                 tldr = self.llm_provider.generate_brief_analysis(paper, temperature=None)
@@ -424,7 +425,7 @@ class RecommendationEngine(ProgressTracker):
 - **相关性评分**: {'⭐' * max(0, min(int(paper['relevance_score']), 10))} ({paper['relevance_score']}/10)
 - **ArXiv ID**: {paper['arXiv_id']}
 - **作者**: {', '.join(paper['authors'])}
-- **论文链接**: <a href="{paper['pdf_url']}" class="link-btn pdf-link" target="_blank">PDF</a> <a href="{paper['abstract_url']}" class="link-btn arxiv-link" target="_blank">ArXiv</a>
+- **论文链接**: <a href="{paper['pdf_url']}" class="link-btn pdf-link" target="_blank">PDF</a> <a href="{paper['abstract_url']}" class="link-btn arxiv-link" target="_blank">arXiv</a> <a href="{alphaxiv_url}" class="link-btn alphaxiv-link" target="_blank">alphaXiv</a>
 - **TLDR**: {tldr.strip()}
 """.strip()
                 
@@ -446,7 +447,7 @@ class RecommendationEngine(ProgressTracker):
 - **ArXiv ID**: {paper['arXiv_id']}
 - **作者**: {', '.join(paper['authors'])}
 - **TLDR**: 生成摘要失败
-- **论文链接**: <a href="{paper['pdf_url']}" class="link-btn pdf-link" target="_blank">PDF</a> <a href="{paper['abstract_url']}" class="link-btn arxiv-link" target="_blank">ArXiv</a>
+- **论文链接**: <a href="{paper['pdf_url']}" class="link-btn pdf-link" target="_blank">PDF</a> <a href="{paper['abstract_url']}" class="link-btn arxiv-link" target="_blank">arXiv</a> <a href="{alphaxiv_url}" class="link-btn alphaxiv-link" target="_blank">alphaXiv</a>
 """.strip()
                 brief_results.append(brief_analysis)
                 
