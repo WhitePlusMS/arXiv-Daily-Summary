@@ -11,6 +11,7 @@ WORKDIR /app
 COPY web/package*.json ./
 COPY web/tsconfig*.json ./
 COPY web/vite.config.ts ./
+COPY web/env.d.ts ./
 COPY web/index.html ./
 COPY web/src ./src
 COPY web/public ./public

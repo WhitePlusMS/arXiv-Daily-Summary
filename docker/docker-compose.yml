@@ -16,57 +16,57 @@
 #   FRONTEND_PORT=8080 BACKEND_PORT=8001 docker compose up -d
 
 services:
-  # 后端服务 - FastAPI
-  backend:
-    # 从 Docker Hub 拉取镜像
-    image: whiteplusms/arxiv_daily_summary-backend:v0.3.3
-    container_name: arxiv-daily-summary-backend
-    ports:
-      - "${BACKEND_PORT:-8000}:8000"
-    environment:
-      #禁用 Python 输出缓冲
-      - PYTHONUNBUFFERED=1
-      #禁用 Python 字节码写入
-      - PYTHONDONTWRITEBYTECODE=1
-    volumes:
-      # .env.example 作为只读模板文件（需要从项目根目录挂载）
-      - ../.env.example:/app/.env.example:ro
-      # 持久化数据目录（.env 文件将保存在 user_data 卷中）
-      - arxiv_history:/app/arxiv_history
-      - user_data:/app/data
-      - logs:/app/logs
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    networks:
-      - arxiv-network
-    restart: unless-stopped
+        # 后端服务 - FastAPI
+        backend:
+                # 从 Docker Hub 拉取镜像
+                image: whiteplusms/arxiv_daily_summary-backend:v0.4.0
+                container_name: arxiv-daily-summary-backend
+                ports:
+                        - "${BACKEND_PORT:-8000}:8000"
+                environment:
+                        #禁用 Python 输出缓冲
+                        - PYTHONUNBUFFERED=1
+                        #禁用 Python 字节码写入
+                        - PYTHONDONTWRITEBYTECODE=1
+                volumes:
+                        # .env.example 作为只读模板文件（需要从项目根目录挂载）
+                        - ../.env.example:/app/.env.example:ro
+                        # 持久化数据目录（.env 文件将保存在 user_data 卷中）
+                        - arxiv_history:/app/arxiv_history
+                        - user_data:/app/data
+                        - logs:/app/logs
+                healthcheck:
+                        test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+                        interval: 30s
+                        timeout: 10s
+                        retries: 3
+                        start_period: 40s
+                networks:
+                        - arxiv-network
+                restart: unless-stopped
 
-  # 前端服务 - Vue3 + Nginx
+        # 前端服务 - Vue3 + Nginx
   frontend:
     # 从 Docker Hub 拉取镜像
-    image: whiteplusms/arxiv_daily_summary-frontend:v0.3.3
+    image: whiteplusms/arxiv_daily_summary-frontend:v0.4.0
     container_name: arxiv-daily-summary-frontend
-    ports:
-      - "${FRONTEND_PORT:-5173}:80"
-    depends_on:
-      - backend
-    networks:
-      - arxiv-network
-    restart: unless-stopped
+                ports:
+                        - "${FRONTEND_PORT:-5173}:80"
+                depends_on:
+                        - backend
+                networks:
+                        - arxiv-network
+                restart: unless-stopped
 
 volumes:
-  # 持久化数据目录（.env 文件保存在 user_data 卷中）
-  arxiv_history:
-    driver: local
-  user_data:
-    driver: local
-  logs:
-    driver: local
+        # 持久化数据目录（.env 文件保存在 user_data 卷中）
+        arxiv_history:
+                driver: local
+        user_data:
+                driver: local
+        logs:
+                driver: local
 
 networks:
-  arxiv-network:
-    driver: bridge
+        arxiv-network:
+                driver: bridge

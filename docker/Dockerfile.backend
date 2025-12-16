@@ -5,7 +5,7 @@ FROM python:3.12.10-slim
 # 设置维护者信息
 LABEL maintainer="BMS"
 LABEL description="ArXiv Daily Paper Recommendation System - Backend API"
-LABEL version="1.0"
+LABEL version="0.4.0"
 
 # 设置环境变量
 ENV PYTHONUNBUFFERED=1 \
@@ -41,8 +41,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY core ./core
 COPY fastapi_services ./fastapi_services
 COPY config ./config
-COPY data ./data
-COPY templates ./templates
+# COPY data ./data
+# COPY templates ./templates
 COPY tools ./tools
 COPY docker ./docker
 COPY .env.example ./.env.example
