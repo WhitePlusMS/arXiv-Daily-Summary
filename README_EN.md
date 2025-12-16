@@ -19,7 +19,7 @@
 >
 > **Core Highlights:**
 > *   **Personalized Matching**: Precise paper filtering based on your research interests and keywords.
-> *   **AI Deep Analysis**: Paper abstracts and core insights extraction powered by the Qwen model.
+> *   **AI Deep Analysis**: Paper abstracts and core insights extraction powered by LLM (Ernie/Qwen/DeepSeek).
 > *   **Multi-dimensional Evaluation**: Comprehensive scoring based on relevance, innovation, and practicality.
 > *   **All-platform Support**: Modern Web interface + Daily email delivery.
 
@@ -63,7 +63,7 @@
 | :------------- | :---------------------------- | :----------------------------------------------- |
 | **Backend**    | **FastAPI** + Python 3.10+    | High-performance asynchronous API service        |
 | **Frontend**   | **Vue 3** + TypeScript + Vite | Modern reactive Web interface                    |
-| **AI Model**   | **Qwen** (DashScope API)      | Powerful long-text understanding & summarization |
+| **AI Model**   | **LLM** (Ernie/Qwen/DeepSeek) | Powerful long-text understanding & summarization |
 | **Storage**    | JSON Files + Local FS         | Lightweight local storage, no DB config needed   |
 | **Deployment** | Docker / Local                | Supports local dev and production deployment     |
 
@@ -88,7 +88,7 @@ graph LR
     Core --> Reporter
     
     Fetcher -- Fetch Papers --> ArXiv[ArXiv API]
-    LLM -- Intelligent Analysis --> DashScope[Qwen API]
+    LLM -- Intelligent Analysis --> DashScope[LLM API]
     Matcher -- Semantic Matching --> DashScope
     Reporter -- Generate Report --> FileSys[Local File System]
 ```
@@ -121,7 +121,7 @@ graph LR
   - `arxiv_fetcher.py`: ArXiv paper fetcher
   - `recommendation_engine.py`: Recommendation engine (filter, score, analyze)
   - `category_matcher.py`: Category matcher (interests to ArXiv categories)
-  - `llm_provider.py`: LLM provider (supports Qwen, OpenAI compatible interfaces)
+  - `llm_provider.py`: LLM provider (supports Ernie/Qwen/DeepSeek, OpenAI compatible interfaces)
   - `pdf_text_extractor.py`: PDF text extractor
   - `prompt_manager.py`: Prompt manager (unified AI prompt templates)
   - `output_manager.py`: Output manager (report generation, email sending)
@@ -141,7 +141,7 @@ graph LR
 ### 🧠 Intelligent Recommendation Engine
 
 - **Personalized Matching**: Precise paper filtering based on your research interests and keywords.
-- **AI Deep Analysis**: Paper abstracts and core insights extraction powered by the Qwen model.
+- **AI Deep Analysis**: Paper abstracts and core insights extraction powered by LLM (Ernie/Qwen/DeepSeek).
 - **Multi-dimensional Evaluation**: Comprehensive scoring based on relevance, innovation, and practicality.
 
 ### 🎨 Modern Web Interface
@@ -210,7 +210,7 @@ copy .env.example .env
 
 # 8. Edit .env file, fill in your API Key (Important!)
 #    Please manually open .env file and fill in DASHSCOPE_API_KEY
-#    You can get API Key from DashScope: https://console.aliyun.com/dashscope
+#    You can get API Key from LLM Provider (e.g. DashScope): https://console.aliyun.com/dashscope
 
 # 9. Start FastAPI + Vue3 Application!
 python start_fastapi.py

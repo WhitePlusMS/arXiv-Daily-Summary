@@ -19,7 +19,7 @@
 >
 > **核心亮点：**
 > *   **个性化匹配**：基于您的研究兴趣和关键词进行精准论文筛选。
-> *   **AI 深度分析**：通义千问模型驱动的论文摘要和核心观点提取。
+> *   **AI 深度分析**：LLM（文心大模型/千问/deep seek）驱动的论文摘要和核心观点提取。
 > *   **多维度评估**：从相关性、创新性、实用性等角度综合评分。
 > *   **全平台支持**：现代化的 Web 界面 + 每日邮件推送。
 
@@ -59,13 +59,13 @@
 
 ### 🛠️ 技术栈
 
-| 模块         | 技术选型                      | 说明                           |
-| :----------- | :---------------------------- | :----------------------------- |
-| **后端**     | **FastAPI** + Python 3.10+    | 高性能异步 API 服务            |
-| **前端**     | **Vue 3** + TypeScript + Vite | 现代化响应式 Web 界面          |
-| **AI 模型**  | **通义千问** (DashScope API)  | 强大的长文本理解与总结能力     |
-| **数据存储** | JSON 文件 + 本地文件系统      | 轻量级本地存储，无需配置数据库 |
-| **部署**     | Docker / Local                | 支持本地开发和生产部署         |
+| 模块         | 技术选型                            | 说明                           |
+| :----------- | :---------------------------------- | :----------------------------- |
+| **后端**     | **FastAPI** + Python 3.10+          | 高性能异步 API 服务            |
+| **前端**     | **Vue 3** + TypeScript + Vite       | 现代化响应式 Web 界面          |
+| **AI 模型**  | **LLM** (文心大模型/千问/deep seek) | 强大的长文本理解与总结能力     |
+| **数据存储** | JSON 文件 + 本地文件系统            | 轻量级本地存储，无需配置数据库 |
+| **部署**     | Docker / Local                      | 支持本地开发和生产部署         |
 
 ### 📐 架构设计
 
@@ -88,7 +88,7 @@ graph LR
     Core --> Reporter
     
     Fetcher -- 获取论文 --> ArXiv[ArXiv API]
-    LLM -- 智能分析 --> DashScope[通义千问 API]
+    LLM -- 智能分析 --> DashScope[LLM API]
     Matcher -- 语义匹配 --> DashScope
     Reporter -- 生成报告 --> FileSys[本地文件系统]
 ```
@@ -121,7 +121,7 @@ graph LR
   - `arxiv_fetcher.py`: ArXiv 论文获取器
   - `recommendation_engine.py`: 推荐引擎（论文筛选、评分、分析）
   - `category_matcher.py`: 分类匹配器（研究兴趣与 ArXiv 分类匹配）
-  - `llm_provider.py`: LLM 模型提供者（支持通义千问、OpenAI 兼容接口）
+  - `llm_provider.py`: LLM 模型提供者（支持文心大模型/千问/deep seek、OpenAI 兼容接口）
   - `pdf_text_extractor.py`: PDF 文本提取器
   - `prompt_manager.py`: 提示词管理器（统一管理 AI 提示词模板）
   - `output_manager.py`: 输出管理器（报告生成、邮件发送）
@@ -141,7 +141,7 @@ graph LR
 ### 🧠 智能推荐引擎
 
 - **个性化匹配**：基于您的研究兴趣和关键词进行精准论文筛选
-- **AI 深度分析**：通义千问模型驱动的论文摘要和核心观点提取
+- **AI 深度分析**：LLM（文心大模型/千问/deep seek）驱动的论文摘要和核心观点提取
 - **多维度评估**：从相关性、创新性、实用性等角度综合评分
 
 ### 🎨 现代化 Web 界面
@@ -210,7 +210,7 @@ copy .env.example .env
 
 # 8. 编辑 .env 文件，填入您的 API 密钥 (重要！)
 #    请手动打开 .env 文件并填入 DASHSCOPE_API_KEY
-#    您可以从通义千问获取 API 密钥：https://console.aliyun.com/dashscope
+#    您可以从 LLM 服务商获取 API 密钥（如通义千问）：https://console.aliyun.com/dashscope
 
 # 9. 启动 FastAPI + Vue3 应用程序！
 python start_fastapi.py
