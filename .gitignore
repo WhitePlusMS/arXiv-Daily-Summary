@@ -89,7 +89,7 @@ PPT.md
 第三页_自动化论文推荐系统.html
 第一页_从信息过载到智能筛选.html
 
-.cursor/plans/
+.cursor/
 
 # Docker 内部工具文件（不对外提供）
 docker/push_images.ps1
@@ -99,3 +99,13 @@ docker/docker-compose.build.yml
 
 docs/
 CLAUDE.md
+
+# Claude Code 配置
+.claude/
+AGENTS.md
+
+# 技术债务审计
+TECH_DEBT_AUDIT.md
+
+# 大型视频文件
+assets/arxiv daily.mp4
