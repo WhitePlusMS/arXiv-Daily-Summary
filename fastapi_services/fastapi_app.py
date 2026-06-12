@@ -25,6 +25,7 @@ from .models import (
     MatchRequest,
     UpdateRecordRequest,
     BatchDeleteRequest,
+    SaveEnvRequest,
 )
 from .service_container import (
     get_arxiv_service,
@@ -48,15 +49,6 @@ app = FastAPI(
 # 允许本地和内网访问（支持 localhost、127.0.0.1、192.168.x.x、10.x.x.x 等内网IP）
 app.add_middleware(
     CORSMiddleware,
-    # 允许的来源：本地和内网IP
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://localhost:5174",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:5174",
-    ],
     # 使用正则表达式允许所有本地和内网IP访问
     # 支持：localhost、127.0.0.1、192.168.x.x、10.x.x.x、172.16-31.x.x 等内网IP段
     allow_origin_regex=r"http://(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2[0-9]|3[0-1])\.\d+\.\d+):\d+",
@@ -486,7 +478,7 @@ async def get_categories():
         return {"success": True, "data": data}
     except Exception as e:
         logger.error(f"获取分类数据失败: {str(e)}")
-    raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e))
 
 # =====================
 # 环境配置相关 API
@@ -504,12 +496,11 @@ async def get_env_config(service: EnvConfigService = Depends(get_env_config_serv
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/env-config/save")
-async def save_env_config(request: dict, service: EnvConfigService = Depends(get_env_config_service)):
+async def save_env_config(request: SaveEnvRequest, service: EnvConfigService = Depends(get_env_config_service)):
     """保存 .env 配置。请求体需包含 { config: {...} }"""
     logger.info("API调用: 保存环境配置")
     try:
-        cfg = request.get("config", {}) if isinstance(request, dict) else {}
-        result = await service.save_config(cfg)
+        result = await service.save_config(request.config)
         return result
     except Exception as e:
         logger.error(f"保存环境配置失败: {str(e)}")
@@ -912,7 +903,7 @@ async def read_score_file_content(
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.delete("/api/matcher/scores")
-async def delete_score_file(
+async def delete_score_file_legacy(
     name: str = Query(..., description="评分文件名"),
     service = Depends(get_category_matcher_service)
 ):
@@ -930,7 +921,7 @@ async def delete_score_file(
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.delete("/api/matcher/scores/file")
-async def delete_score_file(
+async def delete_score_file_by_name(
     name: str = Query(..., description="评分文件名"),
     service = Depends(get_category_matcher_service)
 ):
@@ -1019,10 +1010,10 @@ async def cleanup_expired_tasks():
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
     """全局异常处理器"""
-    logger.error(f"未处理的异常: {str(exc)}")
+    logger.exception(f"未处理的异常: {str(exc)}")
     return JSONResponse(
         status_code=500,
-        content={"success": False, "message": f"服务器内部错误: {str(exc)}"}
+        content={"success": False, "message": "服务器内部错误，请稍后重试"}
     )
 
 if __name__ == "__main__":

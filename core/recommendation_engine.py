@@ -175,7 +175,7 @@ class RecommendationEngine(ProgressTracker):
         for attempt in range(max_retries):
             try:
                 # 添加请求间隔，避免API限流
-                time.sleep(0.1)  # 每篇论文评估前等待0.5秒
+                time.sleep(0.5)  # 每篇论文评估前等待0.5秒
                 
                 # 直接调用轻量模型进行相关性评估
                 # 必须要设置 temperature=0 才能得到稳定的结果
