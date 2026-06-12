@@ -1,6 +1,7 @@
 <div align="center">
   <img src="assets/LOGO.png" alt="Logo" width="160">
-  <h1>arXiv Daily Article Summary — AI 驱动的 arXiv 论文每日推荐与摘要系统</h1>
+  <h1>arXiv Daily Article Summary</h1>
+  <p>基于 LLM 的 arXiv 论文每日推荐与智能摘要系统</p>
   <p>
     <img src="https://img.shields.io/badge/Python-3.10%2B-blue?logo=python" alt="Python Version">
     <img src="https://img.shields.io/badge/FastAPI-0.100%2B-green?logo=fastapi" alt="FastAPI">
