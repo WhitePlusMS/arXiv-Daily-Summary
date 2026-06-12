@@ -1,11 +1,12 @@
 <div align="center">
   <img src="assets/LOGO.png" alt="Logo" width="160">
-  <h1>arXiv Daily Article Summary</h1>
+  <h1>arXiv Daily Article Summary — AI 驱动的 arXiv 论文每日推荐与摘要系统</h1>
   <p>
     <img src="https://img.shields.io/badge/Python-3.10%2B-blue?logo=python" alt="Python Version">
     <img src="https://img.shields.io/badge/FastAPI-0.100%2B-green?logo=fastapi" alt="FastAPI">
     <img src="https://img.shields.io/badge/Vue.js-3.5%2B-green?logo=vue.js" alt="Vue.js">
-    <img src="https://img.shields.io/badge/License-Apache--2.0-blue" alt="License">
+    <a href="./LICENSE"><img src="https://img.shields.io/badge/License-Apache--2.0-blue" alt="License"></a>
+    <img src="https://img.shields.io/badge/LLM-Qwen%20%7C%20DeepSeek%20%7C%20Ernie-purple?logo=openai" alt="LLM">
     <a href="https://deepwiki.com/WhitePlusMS/arXiv-Daily-Summary"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
   </p>
   <p>
@@ -15,13 +16,13 @@
 
 > 🎯 **项目简介**
 >
-> **一个智能的 arXiv 论文总结工具，每日自动为您筛选、总结和推荐符合您研究兴趣的最新论文。**
+> **一个基于 LLM（大语言模型）的 arXiv 论文每日推荐与智能摘要系统，自动从 arXiv 获取最新论文，通过 AI 深度分析、多维评分，为您筛选出最相关的高质量研究。**
 >
 > **核心亮点：**
-> *   **个性化匹配**：基于您的研究兴趣和关键词进行精准论文筛选。
-> *   **AI 深度分析**：LLM（文心大模型/千问/deep seek）驱动的论文摘要和核心观点提取。
-> *   **多维度评估**：从相关性、创新性、实用性等角度综合评分。
-> *   **全平台支持**：现代化的 Web 界面 + 每日邮件推送。
+> *   **AI 驱动的个性化推荐**：基于您的研究兴趣和关键词，LLM 精准筛选每日最新论文
+> *   **大模型深度分析**：支持 **通义千问 (Qwen) / DeepSeek** 等多种 LLM，自动生成论文摘要与核心观点提取
+> *   **多维度智能评分**：从相关性、创新性、实用性等角度综合评估每篇论文
+> *   **全平台交付**：现代化 Vue3 Web 界面 + Markdown/HTML 报告 + 每日邮件推送
 
 ---
 
@@ -41,11 +42,11 @@
 
 |             **主界面 - 论文推荐和摘要生成**             |                   **分类匹配界面 - 配置研究兴趣**                   |
 | :-----------------------------------------------------: | :-----------------------------------------------------------------: |
-| <img src="assets/主界面.png" width="100%" alt="主界面"> | <img src="assets/分类匹配界面.png" width="100%" alt="分类匹配界面"> |
+| <img src="assets/main-interface.png" width="100%" alt="主界面"> | <img src="assets/category-matcher.png" width="100%" alt="分类匹配界面"> |
 
 |                     **环境配置界面 - 系统设置**                     |                  **附录界面 - 分类浏览器**                  |
 | :-----------------------------------------------------------------: | :---------------------------------------------------------: |
-| <img src="assets/环境配置界面.png" width="100%" alt="环境配置界面"> | <img src="assets/附录界面.png" width="100%" alt="附录界面"> |
+| <img src="assets/environment-config.png" width="100%" alt="环境配置界面"> | <img src="assets/appendix.png" width="100%" alt="附录界面"> |
 
 **报告生成效果：**
 
@@ -481,7 +482,7 @@ git push origin feature/your-feature
 
 **问题反馈**
 
-- 发现 Bug？请提交 [Issue](https://github.com/your-repo/issues)
+- 发现 Bug？请提交 [Issue](https://github.com/WhitePlusMS/arXiv-Daily-Summary/issues)
 - 有新想法？欢迎讨论和建议
 - 觉得有用？请给项目点个 Star
 

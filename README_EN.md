@@ -1,11 +1,12 @@
 <div align="center">
   <img src="assets/LOGO.png" alt="Logo" width="160">
-  <h1>arXiv Daily Article Summary</h1>
+  <h1>arXiv Daily Article Summary — AI-Powered arXiv Paper Recommendation & Daily Digest System</h1>
   <p>
     <img src="https://img.shields.io/badge/Python-3.10%2B-blue?logo=python" alt="Python Version">
     <img src="https://img.shields.io/badge/FastAPI-0.100%2B-green?logo=fastapi" alt="FastAPI">
     <img src="https://img.shields.io/badge/Vue.js-3.5%2B-green?logo=vue.js" alt="Vue.js">
-    <img src="https://img.shields.io/badge/License-Apache--2.0-blue" alt="License">
+    <a href="./LICENSE"><img src="https://img.shields.io/badge/License-Apache--2.0-blue" alt="License"></a>
+    <img src="https://img.shields.io/badge/LLM-Qwen%20%7C%20DeepSeek%20%7C%20Ernie-purple?logo=openai" alt="LLM">
     <a href="https://deepwiki.com/WhitePlusMS/arXiv-Daily-Summary"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
   </p>
   <p>
@@ -15,13 +16,13 @@
 
 > 🎯 **Project Introduction**
 >
-> **An intelligent arXiv paper summary tool that automatically filters, summarizes, and recommends the latest papers tailored to your research interests daily.**
+> **An AI-powered arXiv paper recommendation and daily digest system that automatically fetches the latest papers from arXiv, performs LLM-based deep analysis and multi-dimensional scoring, and delivers personalized research recommendations.**
 >
 > **Core Highlights:**
-> *   **Personalized Matching**: Precise paper filtering based on your research interests and keywords.
-> *   **AI Deep Analysis**: Paper abstracts and core insights extraction powered by LLM (Ernie/Qwen/DeepSeek).
-> *   **Multi-dimensional Evaluation**: Comprehensive scoring based on relevance, innovation, and practicality.
-> *   **All-platform Support**: Modern Web interface + Daily email delivery.
+> *   **AI-Driven Personalized Recommendation**: LLM-powered precise paper filtering based on your research interests and keywords
+> *   **Multi-LLM Deep Analysis**: Supports **Qwen (Tongyi Qianwen) / Ernie / DeepSeek** and OpenAI-compatible APIs for paper summarization and key insight extraction
+> *   **Multi-dimensional Scoring**: Comprehensive evaluation on relevance, innovation, and practical impact
+> *   **Multi-Platform Delivery**: Modern Vue3 Web UI + Markdown/HTML reports + Daily email digest
 
 ---
 
@@ -41,11 +42,11 @@
 
 |       **Main Interface - Paper Recommendation & Summary**       |               **Category Matcher - Configure Interests**                |
 | :-------------------------------------------------------------: | :---------------------------------------------------------------------: |
-| <img src="assets/主界面.png" width="100%" alt="Main Interface"> | <img src="assets/分类匹配界面.png" width="100%" alt="Category Matcher"> |
+| <img src="assets/main-interface.png" width="100%" alt="Main Interface"> | <img src="assets/category-matcher.png" width="100%" alt="Category Matcher"> |
 
 |                 **Environment Config - System Settings**                  |               **Appendix Interface - Category Browser**               |
 | :-----------------------------------------------------------------------: | :-------------------------------------------------------------------: |
-| <img src="assets/环境配置界面.png" width="100%" alt="Environment Config"> | <img src="assets/附录界面.png" width="100%" alt="Appendix Interface"> |
+| <img src="assets/environment-config.png" width="100%" alt="Environment Config"> | <img src="assets/appendix.png" width="100%" alt="Appendix Interface"> |
 
 **Report Generation Effect:**
 
@@ -481,7 +482,7 @@ Create PR on GitHub, describing your changes
 
 **Feedback**
 
-- Found a Bug? Submit an [Issue](https://github.com/your-repo/issues)
+- Found a Bug? Submit an [Issue](https://github.com/WhitePlusMS/arXiv-Daily-Summary/issues)
 - Have an idea? Discussions and suggestions welcome
 - Find it useful? Please Star the project
 
