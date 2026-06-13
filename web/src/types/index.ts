@@ -32,6 +32,7 @@ export interface ApiResponse<T = unknown> {
   data?: T;
   message?: string;
   error?: string;
+  template_error?: TemplateErrorDetail;
 }
 
 // 模板错误详情（后端 400 返回 detail）
@@ -41,6 +42,27 @@ export interface TemplateErrorDetail {
   fix_suggestions?: string[];
   details?: Record<string, unknown>;
 }
+
+export interface MatcherResultItem {
+  id: string;
+  name: string;
+  score: number;
+}
+
+export interface TokenUsage {
+  input_tokens: number;
+  output_tokens: number;
+  total_tokens: number;
+}
+
+export type MatcherRunResult =
+  | {
+      task_id: string;
+    }
+  | {
+      results: MatcherResultItem[];
+      token_usage: TokenUsage;
+    };
 
 // 前端运行态配置（小写+语义化），与后端 .env 大写映射区分
 export interface FrontendConfig {
@@ -132,8 +154,7 @@ export interface ProgressData {
   percentage: number;
   logs: LogEntry[];
   error: string | null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  result?: any;
+  result?: Record<string, unknown>;
 }
 
 export interface ConfigData {

@@ -7,11 +7,11 @@ import type {
   Category,
   PromptItem,
   TemplateErrorDetail,
+  MatcherRunResult,
 } from "@/types";
 
-const metaEnv = (import.meta as unknown as { env: { VITE_API_BASE_URL?: string } }).env;
-const BASE_URL = (metaEnv.VITE_API_BASE_URL !== undefined)
-  ? (metaEnv.VITE_API_BASE_URL || "")
+const BASE_URL = (import.meta.env.VITE_API_BASE_URL !== undefined)
+  ? (import.meta.env.VITE_API_BASE_URL || "")
   : "http://localhost:8000";
 
 // 管理未完成请求的 AbortController，用于取消与路由切换/重复请求
@@ -78,12 +78,13 @@ api.interceptors.response.use(
 
 // 规范化后端 400 模板错误为统一结构
 function normalizeTemplateError(e: unknown): TemplateErrorDetail | undefined {
-  const err = e as {
-    response?: { status?: number; data?: { detail?: unknown } };
-    message?: string;
-  };
-  if (err?.response?.status === 400 && err?.response?.data?.detail) {
-    const d = err.response.data.detail as TemplateErrorDetail;
+  if (!axios.isAxiosError(e)) {
+    return undefined;
+  }
+
+  const detail = e.response?.data?.detail;
+  if (e.response?.status === 400 && detail) {
+    const d = detail as TemplateErrorDetail;
     return {
       error_type: String(d?.error_type || "template_exception"),
       friendly_message: d?.friendly_message,
@@ -369,12 +370,7 @@ export const runCategoryMatching = async (request: {
   negative_query?: string;
   username: string;
   top_n: number;
-}): Promise<
-  ApiResponse<{
-    results: { id: string; name: string; score: number }[];
-    token_usage: { input_tokens: number; output_tokens: number; total_tokens: number };
-  }>
-> => {
+}): Promise<ApiResponse<MatcherRunResult>> => {
   try {
     const response = await api.post("/api/matcher/run", request, {
       timeout: 300000,
@@ -389,10 +385,7 @@ export const runCategoryMatching = async (request: {
         error: tmpl.friendly_message || "模板错误导致分类匹配失败",
         message: tmpl.friendly_message,
         template_error: tmpl,
-      } as ApiResponse<{
-        results: { id: string; name: string; score: number }[];
-        token_usage: { input_tokens: number; output_tokens: number; total_tokens: number };
-      }>;
+      } as ApiResponse<MatcherRunResult>;
     }
     throw e;
   }

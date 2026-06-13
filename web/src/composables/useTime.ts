@@ -5,7 +5,7 @@ export function useTime() {
   const arxivTime = ref("");
   const localTimezone = ref("");
   const arxivTimezone = ref("");
-  let timer: number | null = null;
+  let timer: ReturnType<typeof setInterval> | null = null;
 
   const updateTime = () => {
     const now = new Date();
@@ -45,7 +45,7 @@ export function useTime() {
 
   onMounted(() => {
     updateTime();
-    timer = setInterval(updateTime, 1000) as unknown as number;
+    timer = setInterval(updateTime, 1000);
   });
 
   onUnmounted(() => {

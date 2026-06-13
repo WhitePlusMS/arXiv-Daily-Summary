@@ -5,6 +5,10 @@ import * as api from "@/services/api";
 import { progressService } from "@/services/progress";
 import type { ProgressData, TemplateErrorDetail } from "@/types";
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
 export function useRecommendation() {
   const store = useArxivStore();
   const { selectedProfileName, hasValidConfig, hasResearchInterests } = storeToRefs(store);
@@ -52,11 +56,12 @@ export function useRecommendation() {
     success: boolean;
     data?: unknown;
     message?: string;
+    template_error?: TemplateErrorDetail;
   }) => {
     // 检查是否返回了task_id（新的异步模式）
-    const respData = response.data as unknown as Record<string, unknown>;
-    if (response.success && respData && typeof respData.task_id === "string") {
-      const taskId = respData.task_id as string;
+    const respData = isRecord(response.data) ? response.data : undefined;
+    if (response.success && typeof respData?.task_id === "string") {
+      const taskId = respData.task_id;
       currentTaskId.value = taskId;
       showProgress.value = true;
 
@@ -97,8 +102,7 @@ export function useRecommendation() {
       store.setLastRecommendationResult(response);
 
       if (!response.success) {
-        const tmpl = (response as unknown as { template_error?: TemplateErrorDetail })
-          .template_error;
+        const tmpl = response.template_error;
         if (tmpl?.friendly_message) {
           const tips =
             Array.isArray(tmpl.fix_suggestions) && tmpl.fix_suggestions.length

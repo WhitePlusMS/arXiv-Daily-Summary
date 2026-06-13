@@ -6,6 +6,34 @@ import type { ProgressData, TemplateErrorDetail } from "@/types";
 
 const RUNNING_TASK_KEY = "arxiv_category_matcher_task_id";
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function toMatcherResults(value: unknown) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is { id: string; name: string; score: number } => {
+      return (
+        isRecord(item) &&
+        typeof item.id === "string" &&
+        typeof item.name === "string" &&
+        typeof item.score === "number"
+      );
+    })
+    .map((r) => ({ id: r.id, name: r.name, score: r.score }));
+}
+
+function toTokenUsage(value: unknown) {
+  if (!isRecord(value)) {
+    return { input_tokens: 0, output_tokens: 0, total_tokens: 0 };
+  }
+  const input_tokens = typeof value.input_tokens === "number" ? value.input_tokens : 0;
+  const output_tokens = typeof value.output_tokens === "number" ? value.output_tokens : 0;
+  const total_tokens = typeof value.total_tokens === "number" ? value.total_tokens : 0;
+  return { input_tokens, output_tokens, total_tokens };
+}
+
 export function useCategoryMatcher() {
   const store = useArxivStore();
 
@@ -44,7 +72,7 @@ export function useCategoryMatcher() {
       if (resp.success && resp.data?.optimized) {
         formState.value.researchDescription = resp.data.optimized;
       } else {
-        const tmpl = (resp as unknown as { template_error?: TemplateErrorDetail }).template_error;
+        const tmpl = resp.template_error;
         if (tmpl?.friendly_message) {
           const tips =
             Array.isArray(tmpl.fix_suggestions) && tmpl.fix_suggestions.length
@@ -83,8 +111,13 @@ export function useCategoryMatcher() {
         top_n: formState.value.topN,
       });
 
-      const respData = resp.data as Record<string, unknown>;
-      if (resp.success && respData && typeof respData.task_id === "string") {
+      const respData = isRecord(resp.data) ? resp.data : undefined;
+      if (
+        resp.success &&
+        respData &&
+        "task_id" in respData &&
+        typeof respData.task_id === "string"
+      ) {
         const taskId = respData.task_id;
         currentTaskId.value = taskId;
         showProgress.value = true;
@@ -107,22 +140,9 @@ export function useCategoryMatcher() {
 
             // 从任务结果中提取数据
             if (progress.result) {
-              const resList = (
-                Array.isArray(progress.result.results) ? progress.result.results : []
-              ) as Array<{
-                id: string;
-                name: string;
-                score: number;
-              }>;
-              results.value = resList.map((r) => ({ id: r.id, name: r.name, score: r.score }));
+              results.value = toMatcherResults(progress.result.results);
 
-              if (progress.result.token_usage) {
-                const tuRaw = progress.result.token_usage as Record<string, number>;
-                const input_tokens = tuRaw.input_tokens ?? 0;
-                const output_tokens = tuRaw.output_tokens ?? 0;
-                const total_tokens = tuRaw.total_tokens ?? 0;
-                tokenUsage.value = { input_tokens, output_tokens, total_tokens };
-              }
+              tokenUsage.value = toTokenUsage(progress.result.token_usage);
             }
 
             try {
@@ -146,22 +166,13 @@ export function useCategoryMatcher() {
           }
         );
       } else {
-        if (resp.success && resp.data) {
-          const resList = (Array.isArray(resp.data.results) ? resp.data.results : []) as Array<{
-            id: string;
-            name: string;
-            score: number;
-          }>;
-          results.value = resList.map((r) => ({ id: r.id, name: r.name, score: r.score }));
-          const tuRaw = (resp.data.token_usage || {}) as Record<string, number>;
-          const input_tokens = tuRaw.input_tokens ?? 0;
-          const output_tokens = tuRaw.output_tokens ?? 0;
-          const total_tokens = tuRaw.total_tokens ?? 0;
-          tokenUsage.value = { input_tokens, output_tokens, total_tokens };
+        if (resp.success && resp.data && "results" in resp.data) {
+          results.value = toMatcherResults(resp.data.results);
+          tokenUsage.value = toTokenUsage(resp.data.token_usage);
           matchCompleted.value = true;
           await refreshDataCallback();
         } else {
-          const tmpl = (resp as unknown as { template_error?: TemplateErrorDetail }).template_error;
+          const tmpl = resp.template_error;
           if (tmpl?.friendly_message) {
             const tips =
               Array.isArray(tmpl.fix_suggestions) && tmpl.fix_suggestions.length
@@ -211,22 +222,9 @@ export function useCategoryMatcher() {
 
               // 从任务结果中提取数据
               if (finalProgress.result) {
-                const resList = (
-                  Array.isArray(finalProgress.result.results) ? finalProgress.result.results : []
-                ) as Array<{
-                  id: string;
-                  name: string;
-                  score: number;
-                }>;
-                results.value = resList.map((r) => ({ id: r.id, name: r.name, score: r.score }));
+                results.value = toMatcherResults(finalProgress.result.results);
 
-                if (finalProgress.result.token_usage) {
-                  const tuRaw = finalProgress.result.token_usage as Record<string, number>;
-                  const input_tokens = tuRaw.input_tokens ?? 0;
-                  const output_tokens = tuRaw.output_tokens ?? 0;
-                  const total_tokens = tuRaw.total_tokens ?? 0;
-                  tokenUsage.value = { input_tokens, output_tokens, total_tokens };
-                }
+                tokenUsage.value = toTokenUsage(finalProgress.result.token_usage);
               }
 
               localStorage.removeItem(RUNNING_TASK_KEY);

@@ -10,7 +10,7 @@ export type ErrorCallback = (error: string) => void;
 
 class ProgressService {
   private pollingIntervals: Map<string, number> = new Map();
-  private BASE_URL = import.meta.env.VITE_API_BASE_URL || "" || "http://localhost:8000";
+  private BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
   /**
    * 开始轮询任务进度
