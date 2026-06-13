@@ -28,7 +28,6 @@ loguru==0.7.3
 Markdown==3.8.2
 MarkupSafe==3.0.2
 narwhals==2.0.1
-numpy==2.3.2
 openai==1.99.6
 packaging==25.0
 pandas==2.3.1
