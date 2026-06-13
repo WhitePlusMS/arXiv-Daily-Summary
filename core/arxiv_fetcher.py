@@ -1,14 +1,12 @@
 import requests
-from typing import List, Dict, Any, Union, Optional, Callable
+from typing import List, Dict, Any, Optional, Callable
 import feedparser
 import time
-import json
 from loguru import logger
 from datetime import datetime, timedelta
 import pytz
-import xml.etree.ElementTree as ET
 import urllib.parse
-from core.common_utils import run_with_retries, write_json, make_on_retry_logger
+from core.common_utils import run_with_retries, make_on_retry_logger
 from core.env_config import get_int, get_str
 
 class ArxivFetcher:
@@ -338,30 +336,3 @@ class ArxivFetcher:
         
         logger.error(f"第 {page_num} 页获取彻底失败 - 所有 {max_retries} 次尝试均失败")
         return None
-
-def save_to_json(data, filename):
-    logger.debug(f"JSON保存开始 - {filename}")
-    try:
-        # 使用统一的JSON写入工具函数，参数与原实现一致
-        write_json(filename, data, ensure_ascii=False, indent=2)
-        logger.debug(f"JSON保存完成 - {filename}")
-    except Exception as e:
-        logger.error(f"JSON保存失败 - {filename}: {e}")
-        raise
-
-
-def main2(date: str):
-    logger.info(f"main2函数启动 - 日期分页获取: {date}")
-    fetcher = ArxivFetcher()
-    papers = fetcher.fetch_papers_paged("cs.CV", date, per_page=3, max_pages=1)
-    save_to_json(papers, "papers_main2.json")
-    logger.success("main2函数执行完成")
-
-
-
-
-
-if __name__ == "__main__":
-    date = '2024-08-06'
-    main2(date)
-

@@ -14,6 +14,7 @@ from typing import Optional, Dict, Any, List, Union
 from loguru import logger
 from core.env_config import get_int, get_float, get_str
 from core.prompt_manager import get_prompt_manager
+from core.usage_tracker import UsageTracker
 
 
 class LLMProvider:
@@ -86,12 +87,11 @@ class LLMProvider:
             self.prompt_manager = get_prompt_manager()
         except Exception:
             self.prompt_manager = None
-        # Token用量统计（作为单一真源）
+        # Token用量统计（兼容旧属性，实际累加委托给 UsageTracker）
+        self.usage_tracker = UsageTracker()
         self.total_input_tokens = 0
         self.total_output_tokens = 0
         self.total_tokens = 0
-        # 用量统计锁，保证并发下的原子累加与一致读取
-        self._usage_lock = threading.Lock()
         # 并发限流（统一入口，类级共享信号量，跨实例统一限流）
         max_concurrency = get_int('LLM_MAX_CONCURRENCY', 2)
         if max_concurrency < 1:
@@ -285,10 +285,15 @@ class LLMProvider:
                 try:
                     usage = getattr(response, 'usage', None)
                     if usage:
-                        with self._usage_lock:
-                            self.total_input_tokens += getattr(usage, 'prompt_tokens', 0) or 0
-                            self.total_output_tokens += getattr(usage, 'completion_tokens', 0) or 0
-                            self.total_tokens += getattr(usage, 'total_tokens', 0) or 0
+                        self.usage_tracker.add_usage(
+                            getattr(usage, 'prompt_tokens', 0) or 0,
+                            getattr(usage, 'completion_tokens', 0) or 0,
+                            getattr(usage, 'total_tokens', 0) or 0,
+                        )
+                        stats = self.usage_tracker.snapshot()
+                        self.total_input_tokens = stats["input_tokens"]
+                        self.total_output_tokens = stats["output_tokens"]
+                        self.total_tokens = stats["total_tokens"]
                 except Exception:
                     pass
                 if return_raw:
@@ -511,28 +516,11 @@ class LLMProvider:
 
     def get_usage_stats(self) -> Dict[str, int]:
         """返回累计token用量（线程安全快照）。"""
-        with self._usage_lock:
-            return {
-                "input_tokens": self.total_input_tokens,
-                "output_tokens": self.total_output_tokens,
-                "total_tokens": self.total_tokens,
-            }
+        return self.usage_tracker.snapshot()
 
     def compute_cost_yuan(self, input_price_per_1k: float = None, output_price_per_1k: float = None) -> Dict[str, float]:
         """根据定价计算费用（人民币）。缺省按通义千问Plus：输入0.008/千token，输出0.02/千token。"""
-        default_in = get_float('PRICE_INPUT_PER_1K', 0.008)
-        default_out = get_float('PRICE_OUTPUT_PER_1K', 0.02)
-        input_price = input_price_per_1k if input_price_per_1k is not None else default_in
-        output_price = output_price_per_1k if output_price_per_1k is not None else default_out
-        stats = self.get_usage_stats()
-        input_cost = (stats["input_tokens"] / 1000.0) * input_price
-        output_cost = (stats["output_tokens"] / 1000.0) * output_price
-        total_cost = input_cost + output_cost
-        return {
-            "input_cost": input_cost,
-            "output_cost": output_cost,
-            "total_cost": total_cost,
-        }
+        return self.usage_tracker.compute_cost_yuan(input_price_per_1k, output_price_per_1k)
 
     def log_usage_and_cost(self):
         """通过logger输出当前token用量与费用估算。"""
