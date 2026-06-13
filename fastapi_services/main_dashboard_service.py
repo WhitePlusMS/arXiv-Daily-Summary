@@ -6,18 +6,16 @@ ArXiv 推荐服务 - FastAPI重构版本
 """
 
 import sys
-import os
 from pathlib import Path
-from datetime import datetime, timedelta
 import traceback
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional
 
 # 添加项目根目录到 Python 路径
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 # 导入核心模块（env_config 会自动加载 .env 文件）
-from core.arxiv_cli import ArxivRecommenderCLI
+from core.recommendation_workflow import RecommendationWorkflow
 from core.output_manager import OutputManager
 from .base_service import BaseService, ServiceResponse
 from .progress_manager import get_progress_manager
@@ -31,20 +29,20 @@ class ArxivRecommenderService(BaseService):
         self.config = None
         self.research_interests = []
         self.user_profiles = []
-        self.cli_app = None  # CLI应用实例
+        self.recommendation_workflow = None
         self.output_manager = None  # 用于配置显示
         self.log_messages = []  # 存储日志消息
         
         self.log_info("ArxivRecommenderService 初始化完成")
     
     async def load_config(self) -> ServiceResponse:
-        """加载配置（通过CLI模块）"""
+        """加载配置（通过推荐工作流）"""
         self.log_info("开始加载配置")
         try:
-            if self.cli_app is None:
-                self.cli_app = ArxivRecommenderCLI()
+            if self.recommendation_workflow is None:
+                self.recommendation_workflow = RecommendationWorkflow()
             
-            self.config = self.cli_app.get_config()
+            self.config = self.recommendation_workflow.get_config()
             self.log_info("配置加载成功", config_keys=list(self.config.keys()) if self.config else [])
             return self.success_response(self.config, "配置加载成功")
         except Exception as e:
@@ -52,15 +50,15 @@ class ArxivRecommenderService(BaseService):
             return self.error_response(f"配置加载失败: {str(e)}")
     
     async def load_research_interests(self) -> ServiceResponse:
-        """加载研究兴趣（通过CLI模块）"""
+        """加载研究兴趣（通过推荐工作流）"""
         self.log_info("开始加载研究兴趣")
         try:
-            if self.cli_app is None:
-                self.cli_app = ArxivRecommenderCLI()
+            if self.recommendation_workflow is None:
+                self.recommendation_workflow = RecommendationWorkflow()
             
-            success = self.cli_app.load_research_interests_from_file()
+            success = self.recommendation_workflow.load_research_interests_from_file()
             if success:
-                self.research_interests = self.cli_app.get_research_interests()
+                self.research_interests = self.recommendation_workflow.get_research_interests()
                 self.log_info("研究兴趣加载成功", count=len(self.research_interests))
                 return self.success_response(self.research_interests, "研究兴趣加载成功")
             else:
@@ -72,15 +70,15 @@ class ArxivRecommenderService(BaseService):
             return self.error_response(f"研究兴趣加载失败: {str(e)}")
 
     async def load_user_profiles(self) -> ServiceResponse:
-        """加载用户配置（通过CLI模块）"""
+        """加载用户配置（通过推荐工作流）"""
         self.log_info("开始加载用户配置")
         try:
-            if self.cli_app is None:
-                self.cli_app = ArxivRecommenderCLI()
+            if self.recommendation_workflow is None:
+                self.recommendation_workflow = RecommendationWorkflow()
             
-            success = self.cli_app.load_user_profiles()
+            success = self.recommendation_workflow.load_user_profiles()
             if success:
-                self.user_profiles = self.cli_app.get_user_profiles()
+                self.user_profiles = self.recommendation_workflow.get_user_profiles()
                 self.log_info("用户配置加载成功", count=len(self.user_profiles))
                 return self.success_response(self.user_profiles, "用户配置加载成功")
             else:
@@ -92,22 +90,21 @@ class ArxivRecommenderService(BaseService):
             return self.error_response(f"用户配置加载失败: {str(e)}")
     
     async def initialize_components(self, selected_username: Optional[str] = None) -> ServiceResponse:
-        """初始化系统组件（通过CLI模块）
+        """初始化系统组件（通过推荐工作流）
         
         Args:
             selected_username: 选择的用户名，如果为None或"自定义"则不传入用户名
         """
         self.log_info("开始初始化系统组件", username=selected_username)
         try:
-            # 初始化CLI应用实例，传入用户名（如果不是自定义的话）
+            # 初始化推荐工作流，传入用户名（如果不是自定义的话）
             username = selected_username if selected_username and selected_username != "自定义" else None
-            self.cli_app = ArxivRecommenderCLI(username=username)
+            self.recommendation_workflow = RecommendationWorkflow(username=username)
             
-            # 更新CLI应用的研究兴趣
-            self.cli_app.update_research_interests(self.research_interests)
+            self.recommendation_workflow.update_research_interests(self.research_interests)
             
             # 设置实时日志
-            self.cli_app.setup_realtime_logging()
+            self.recommendation_workflow.setup_realtime_logging()
             
             # 初始化输出管理器（用于配置显示）
             template_dir = project_root / 'config' / 'templates'
@@ -126,11 +123,10 @@ class ArxivRecommenderService(BaseService):
             # 创建日志容器
             self.log_messages = []
             
-            if self.cli_app is None:
-                self.cli_app = ArxivRecommenderCLI()
+            if self.recommendation_workflow is None:
+                self.recommendation_workflow = RecommendationWorkflow()
             
-            # 调用CLI模块的日志设置方法
-            log_handler = self.cli_app.setup_realtime_logging()
+            log_handler = self.recommendation_workflow.setup_realtime_logging()
             
             self.log_info("实时日志设置成功")
             return self.success_response({"handler": str(log_handler)}, "实时日志设置成功")
@@ -140,14 +136,13 @@ class ArxivRecommenderService(BaseService):
             return self.error_response(f"实时日志设置失败: {str(e)}")
     
     async def _run_debug_mode(self, profile_name: str) -> Dict[str, Any]:
-        """调试模式：通过CLI模块运行"""
+        """调试模式：通过推荐工作流运行"""
         self.log_info("开始运行调试模式", profile_name=profile_name)
         try:
-            if self.cli_app is None:
-                self.cli_app = ArxivRecommenderCLI()
+            if self.recommendation_workflow is None:
+                self.recommendation_workflow = RecommendationWorkflow()
             
-            # 调用CLI模块的调试模式
-            success, result_data, error_msg = self.cli_app.run_debug_mode(None)
+            success, result_data, error_msg = self.recommendation_workflow.run_debug_mode(None)
             
             if success:
                 self.log_info("调试模式运行成功", target_date=result_data['target_date'])
@@ -157,7 +152,7 @@ class ArxivRecommenderService(BaseService):
                     'summary_content': result_data['summary'],
                     'detailed_analysis': result_data['detailed_analysis'],
                     'brief_analysis': result_data['brief_analysis'],
-                    'html_content': None,  # CLI模块生成HTML文件
+                    'html_content': None,  # 调试工作流生成HTML文件
                     'html_filepath': result_data.get('html_file'),
                     'filename': f"arxiv_recommendation_{result_data['target_date']}_debug.md",
                     'target_date': result_data['target_date'],
@@ -227,13 +222,12 @@ class ArxivRecommenderService(BaseService):
                     progress_manager.fail_task(task_id, result['error'])
                     return self.error_response(result['error'], result)
             
-            if self.cli_app is None:
-                self.cli_app = ArxivRecommenderCLI()
+            if self.recommendation_workflow is None:
+                self.recommendation_workflow = RecommendationWorkflow()
             
-            # 传递 task_id 给 CLI，让它能更新进度
-            self.cli_app.set_task_id(task_id)
+            self.recommendation_workflow.set_task_id(task_id)
             
-            # 调用CLI的完整推荐流程
+            # 调用公共推荐工作流
             progress_manager.update_progress(
                 task_id,
                 step="开始推荐流程...",
@@ -241,7 +235,7 @@ class ArxivRecommenderService(BaseService):
                 log_message="调用推荐引擎"
             )
             
-            success, result_data, error_msg = self.cli_app.run_full_recommendation(target_date)
+            success, result_data, error_msg = self.recommendation_workflow.run_full_recommendation(target_date)
             
             if success:
                 self.log_info("推荐系统运行成功", target_date=result_data['target_date'])
@@ -308,7 +302,7 @@ class ArxivRecommenderService(BaseService):
         debug_mode: bool = False,
         target_date: Optional[str] = None,
     ) -> ServiceResponse:
-        """运行推荐系统（调用CLI核心逻辑）- 兼容旧接口
+        """运行推荐系统（调用公共推荐工作流）- 兼容旧接口
         
         Args:
             profile_name: 用户配置名称
@@ -336,14 +330,14 @@ class ArxivRecommenderService(BaseService):
         """
         self.log_info("开始获取最近的报告文件", limit=limit, username=username)
         try:
-            cli_app = ArxivRecommenderCLI()
+            recommendation_workflow = RecommendationWorkflow()
             # 如果提供了用户名，需要先 sanitize 以匹配文件名中的格式
             username_filter = None
             if username:
                 from core.common_utils import sanitize_username
                 username_filter = sanitize_username(username)
             
-            reports = cli_app.get_recent_reports(limit, username_filter=username_filter)
+            reports = recommendation_workflow.get_recent_reports(limit, username_filter=username_filter)
             self.log_info("获取报告文件成功", count=len(reports))
             return self.success_response(reports, f"获取到 {len(reports)} 个报告文件")
         except Exception as e:
@@ -355,10 +349,10 @@ class ArxivRecommenderService(BaseService):
         self.log_info("开始更新研究兴趣", count=len(interests), negative_count=len(negative_interests) if negative_interests else 0)
         try:
             self.research_interests = interests
-            # 注意：CLI 应用的 update_research_interests 方法目前只接受 interests 列表
+            # 注意：推荐工作流的 update_research_interests 方法目前只接受 interests 列表
             # 负面偏好会在推荐引擎初始化时通过 description 字典传递
-            if self.cli_app:
-                self.cli_app.update_research_interests(interests)
+            if self.recommendation_workflow:
+                self.recommendation_workflow.update_research_interests(interests)
             self.log_info("研究兴趣更新成功")
             result = {"interests": interests}
             if negative_interests is not None:

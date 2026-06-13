@@ -4,21 +4,16 @@
 FastAPI应用程序 - ArXiv推荐系统
 """
 
-from fastapi import FastAPI, Depends, HTTPException, Query, BackgroundTasks
+from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from pathlib import Path
 import os
-import sys
-import logging
-import asyncio
 from loguru import logger
-from typing import List, Optional
+from typing import Optional
 
 from .models import (
-    UserProfile, 
     RecommendationRequest, 
-    RecommendationResult,
     ResearchInterestsRequest,
     InitializeRequest,
     OptimizeRequest,
@@ -27,6 +22,7 @@ from .models import (
     BatchDeleteRequest,
     SaveEnvRequest,
 )
+from core.logging_config import setup_fastapi_logging
 from .service_container import (
     get_arxiv_service,
     get_category_matcher_service,
@@ -34,7 +30,9 @@ from .service_container import (
     get_prompt_service,
 )
 from .main_dashboard_service import ArxivRecommenderService
+from .category_matcher_service import CategoryMatcherService
 from .environment_config_service import EnvConfigService
+from .prompt_service import PromptService
 from .progress_manager import get_progress_manager
 from .category_browser_service import CategoryService
 
@@ -154,116 +152,11 @@ def _decorate_error_detail(detail: dict) -> dict:
 # 日志配置标志，确保只配置一次
 _logging_configured = False
 
-def cleanup_old_logs_by_size(files: list, max_size_mb: int = 500):
-    """清理旧日志文件，确保总大小不超过指定值（MB）
-    
-    Args:
-        files: 日志文件路径列表（loguru传入的）
-        max_size_mb: 最大总大小（MB），默认500MB
-    """
-    if not files:
-        return
-    
-    max_size_bytes = max_size_mb * 1024 * 1024  # 转换为字节
-    
-    # 将文件路径转换为Path对象，并按修改时间排序（最旧的在前）
-    file_paths = [Path(f) for f in files if Path(f).exists()]
-    file_paths.sort(key=lambda f: f.stat().st_mtime)
-    
-    # 计算当前总大小
-    total_size = sum(f.stat().st_size for f in file_paths)
-    
-    # 如果总大小超过限制，删除最旧的文件
-    while total_size > max_size_bytes and len(file_paths) > 1:
-        oldest_file = file_paths.pop(0)
-        file_size = oldest_file.stat().st_size
-        try:
-            oldest_file.unlink()
-            total_size -= file_size
-        except Exception:
-            # 如果删除失败，跳过这个文件
-            pass
-
-def cleanup_old_logs(logs_dir: Path, max_size_mb: int = 500):
-    """清理旧日志文件，确保日志目录总大小不超过指定值（MB）
-    用于启动时的初始清理
-    """
-    # 获取所有日志文件（包括轮转的文件）
-    log_files = list(logs_dir.glob("fastapi.log*"))
-    if log_files:
-        cleanup_old_logs_by_size([str(f) for f in log_files], max_size_mb)
-
 def setup_logging():
     """配置日志记录到文件"""
     global _logging_configured
-    if _logging_configured:
-        return
-    
-    # 创建logs目录
     project_root = Path(__file__).parent.parent
-    logs_dir = project_root / "logs"
-    logs_dir.mkdir(exist_ok=True)
-    
-    # 日志文件路径
-    log_file = logs_dir / "fastapi.log"
-    
-    # 移除默认的loguru处理器
-    logger.remove()
-    
-    # 添加控制台输出（保持原有格式）
-    logger.add(
-        sys.stdout,
-        format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
-        level="DEBUG"
-    )
-    
-    # 自定义retention函数，确保总大小不超过500MB
-    def retention_function(files):
-        """在日志轮转时调用，清理旧日志确保总大小不超过500MB
-        files: loguru传入的日志文件路径列表
-        """
-        cleanup_old_logs_by_size(files, max_size_mb=500)
-    
-    # 添加文件输出（纯文本格式，便于查看）
-    logger.add(
-        log_file,
-        format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} - {message}",
-        level="DEBUG",
-        rotation="10 MB",  # 文件大小达到10MB时轮转
-        retention=retention_function,  # 自定义清理函数，确保总大小不超过500MB
-        encoding="utf-8",
-        enqueue=True  # 异步写入，提高性能
-    )
-    
-    # 启动时也执行一次清理
-    cleanup_old_logs(logs_dir, max_size_mb=500)
-    
-    # 拦截uvicorn和uvicorn.access的日志，使其也写入文件
-    class InterceptHandler(logging.Handler):
-        def emit(self, record):
-            # 获取对应的loguru级别
-            try:
-                level = logger.level(record.levelname).name
-            except ValueError:
-                # 如果级别名称不存在，根据级别号映射
-                level_map = {
-                    logging.DEBUG: "DEBUG",
-                    logging.INFO: "INFO",
-                    logging.WARNING: "WARNING",
-                    logging.ERROR: "ERROR",
-                    logging.CRITICAL: "CRITICAL",
-                }
-                level = level_map.get(record.levelno, "INFO")
-
-            # 使用loguru记录日志
-            logger.opt(depth=6, exception=record.exc_info).log(level, record.getMessage())
-
-    # 拦截uvicorn的日志
-    logging.getLogger("uvicorn").handlers = [InterceptHandler()]
-    logging.getLogger("uvicorn.access").handlers = [InterceptHandler()]
-    logging.getLogger("uvicorn.error").handlers = [InterceptHandler()]
-    
-    _logging_configured = True
+    _logging_configured = setup_fastapi_logging(project_root, _logging_configured)
 
 @app.on_event("startup")
 async def startup_event():
@@ -413,7 +306,6 @@ def _run_recommendation_task(
 @app.post("/api/run-recommendation")
 async def run_recommendation(
     request: RecommendationRequest,
-    background_tasks: BackgroundTasks,
     service: ArxivRecommenderService = Depends(get_arxiv_service)
 ):
     """运行推荐系统（异步模式，立即返回task_id）"""
@@ -533,7 +425,7 @@ async def restore_default_env_config(service: EnvConfigService = Depends(get_env
 # =====================
 
 @app.get("/api/prompts")
-async def list_prompts(service = Depends(get_prompt_service)):
+async def list_prompts(service: PromptService = Depends(get_prompt_service)):
     """获取所有提示词列表"""
     logger.info("API调用: 获取提示词列表")
     try:
@@ -544,7 +436,7 @@ async def list_prompts(service = Depends(get_prompt_service)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/prompts/{prompt_id}")
-async def get_prompt(prompt_id: str, service = Depends(get_prompt_service)):
+async def get_prompt(prompt_id: str, service: PromptService = Depends(get_prompt_service)):
     """获取单个提示词详情"""
     logger.info(f"API调用: 获取提示词 - {prompt_id}")
     try:
@@ -559,7 +451,7 @@ async def get_prompt(prompt_id: str, service = Depends(get_prompt_service)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.put("/api/prompts/{prompt_id}")
-async def update_prompt(prompt_id: str, request: dict, service = Depends(get_prompt_service)):
+async def update_prompt(prompt_id: str, request: dict, service: PromptService = Depends(get_prompt_service)):
     """更新提示词（允许更新 name/template）"""
     logger.info(f"API调用: 更新提示词 - {prompt_id}")
     try:
@@ -587,7 +479,7 @@ async def update_prompt(prompt_id: str, request: dict, service = Depends(get_pro
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/prompts/{prompt_id}/reset")
-async def reset_prompt(prompt_id: str, service = Depends(get_prompt_service)):
+async def reset_prompt(prompt_id: str, service: PromptService = Depends(get_prompt_service)):
     """重置单个提示词为默认版本"""
     logger.info(f"API调用: 重置提示词 - {prompt_id}")
     try:
@@ -602,7 +494,7 @@ async def reset_prompt(prompt_id: str, service = Depends(get_prompt_service)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/prompts/reset")
-async def reset_all_prompts(service = Depends(get_prompt_service)):
+async def reset_all_prompts(service: PromptService = Depends(get_prompt_service)):
     """重置所有提示词为默认版本"""
     logger.info("API调用: 重置所有提示词")
     try:
@@ -697,7 +589,7 @@ async def delete_report(
 
 @app.get("/api/matcher/provider")
 async def get_matcher_provider_config(
-    service = Depends(get_category_matcher_service)
+    service: CategoryMatcherService = Depends(get_category_matcher_service)
 ):
     """获取分类匹配器提供商配置信息"""
     logger.info("API调用: 获取匹配器提供商配置")
@@ -709,7 +601,7 @@ async def get_matcher_provider_config(
 
 @app.get("/api/matcher/data")
 async def get_matcher_data(
-    service = Depends(get_category_matcher_service)
+    service: CategoryMatcherService = Depends(get_category_matcher_service)
 ):
     """获取用户匹配数据及统计"""
     logger.info("API调用: 获取分类匹配数据")
@@ -724,7 +616,7 @@ async def get_matcher_data(
 @app.post("/api/matcher/optimize")
 async def optimize_description(
     request: OptimizeRequest,
-    service = Depends(get_category_matcher_service)
+    service: CategoryMatcherService = Depends(get_category_matcher_service)
 ):
     """使用AI优化研究描述"""
     logger.info("API调用: 优化研究描述")
@@ -785,7 +677,7 @@ def _run_category_matching_task(
 @app.post("/api/matcher/run")
 async def run_category_matching(
     request: MatchRequest,
-    service = Depends(get_category_matcher_service)
+    service: CategoryMatcherService = Depends(get_category_matcher_service)
 ):
     """执行分类匹配（异步模式，立即返回task_id）"""
     logger.info(f"API调用: 执行分类匹配 - 用户: {request.username}, Top {request.top_n}")
@@ -826,7 +718,7 @@ async def run_category_matching(
 @app.put("/api/matcher/record")
 async def update_matcher_record(
     request: UpdateRecordRequest,
-    service = Depends(get_category_matcher_service)
+    service: CategoryMatcherService = Depends(get_category_matcher_service)
 ):
     """更新单条匹配记录"""
     logger.info(f"API调用: 更新匹配记录 - 索引: {request.index}")
@@ -844,7 +736,7 @@ async def update_matcher_record(
 @app.delete("/api/matcher/record")
 async def delete_matcher_record(
     index: int = Query(..., description="记录索引"),
-    service = Depends(get_category_matcher_service)
+    service: CategoryMatcherService = Depends(get_category_matcher_service)
 ):
     """删除单条匹配记录"""
     logger.info(f"API调用: 删除匹配记录 - 索引: {index}")
@@ -862,7 +754,7 @@ async def delete_matcher_record(
 @app.delete("/api/matcher/records")
 async def batch_delete_matcher_records(
     request: BatchDeleteRequest,
-    service = Depends(get_category_matcher_service)
+    service: CategoryMatcherService = Depends(get_category_matcher_service)
 ):
     """批量删除匹配记录"""
     logger.info(f"API调用: 批量删除匹配记录 - {len(request.indices)} 条")
@@ -875,7 +767,7 @@ async def batch_delete_matcher_records(
 
 @app.get("/api/matcher/scores")
 async def list_score_files(
-    service = Depends(get_category_matcher_service)
+    service: CategoryMatcherService = Depends(get_category_matcher_service)
 ):
     """列出详细评分文件"""
     logger.info("API调用: 列出评分文件")
@@ -889,7 +781,7 @@ async def list_score_files(
 @app.get("/api/matcher/scores/content")
 async def read_score_file_content(
     name: str = Query(..., description="评分文件名"),
-    service = Depends(get_category_matcher_service)
+    service: CategoryMatcherService = Depends(get_category_matcher_service)
 ):
     """读取评分文件内容"""
     logger.info(f"API调用: 读取评分文件 - {name}")
@@ -905,7 +797,7 @@ async def read_score_file_content(
 @app.delete("/api/matcher/scores")
 async def delete_score_file_legacy(
     name: str = Query(..., description="评分文件名"),
-    service = Depends(get_category_matcher_service)
+    service: CategoryMatcherService = Depends(get_category_matcher_service)
 ):
     """删除详细评分文件"""
     logger.info(f"API调用: 删除评分文件 - {name}")
@@ -923,7 +815,7 @@ async def delete_score_file_legacy(
 @app.delete("/api/matcher/scores/file")
 async def delete_score_file_by_name(
     name: str = Query(..., description="评分文件名"),
-    service = Depends(get_category_matcher_service)
+    service: CategoryMatcherService = Depends(get_category_matcher_service)
 ):
     """删除评分文件"""
     logger.info(f"API调用: 删除评分文件 - {name}")
